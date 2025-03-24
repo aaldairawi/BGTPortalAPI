@@ -4,8 +4,8 @@ namespace API.Services
 {
     public interface IContainerGeneralRequests
     {
-        Task<ContainerLifeTimeMasterDataDto> GetContainerLifeTimeMasterDataImport(string unitNumber, string unitCategory);
-        Task<ContainerLifeTimeMasterDataDto> GetContainerLifeTimeMasterDataExport(string unitNumber, string unitCategory);
+        Task<ContainerLifeTimeMasterDataDto> GetContainerLifeTimeMasterDataImport(string unitNumber);
+        Task<ContainerLifeTimeMasterDataDto> GetContainerLifeTimeMasterDataExport(string unitNumber);
 
         Task<string> GetVesselATA(string vesselId);
         Task<string> GetVesselATC(string vesselId);

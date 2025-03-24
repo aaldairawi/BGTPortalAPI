@@ -20,7 +20,7 @@ axios.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   //const apiSupportedVersion = config.headers.get("api-supported-versions");
   //console.log(apiSupportedVersion);
-
+  
   return config;
 });
 

@@ -40,7 +40,7 @@ namespace API.Controllers
         public async Task<ActionResult<ContainerImportResultDto>> UnitImportLifeTime(string unitNumber)
         {
 
-            var containerMasterData = await _containerGeneralRequests.GetContainerLifeTimeMasterDataImport(unitNumber, Constants.IMPORT_AS_IMPRT);
+            var containerMasterData = await _containerGeneralRequests.GetContainerLifeTimeMasterDataImport(unitNumber);
             if (containerMasterData is null)
                 return NotFound(new ProblemDetails { Title = $"No results for  unit {unitNumber}" });
 
@@ -53,7 +53,7 @@ namespace API.Controllers
         public async Task<ActionResult<ContainerExportResultDto>> UnitExportLifeTime(string unitNumber)
         {
             WriteLine(unitNumber);
-            var containerMasterData = await _containerGeneralRequests.GetContainerLifeTimeMasterDataExport(unitNumber, Constants.EXPORT_STRGE_AS_EXPRT_STRGE);
+            var containerMasterData = await _containerGeneralRequests.GetContainerLifeTimeMasterDataExport(unitNumber);
             if (containerMasterData is null)
             {
 
