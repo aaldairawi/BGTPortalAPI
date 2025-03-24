@@ -1,0 +1,28 @@
+  
+Client Routing Routes
+    "" HomePage.tsx.
+    "/login" Login.tsx,
+    "/register" Register.tsx,
+    "/sap-int" SapIntegration.tsx,
+    "/admin-control" Admin.tsx,
+    "/not-found" NotFound,
+    "*" Navigate replace to="/not-found"
+
+"NavisSparcs": "Data Source=10.100.6.200;Initial Catalog=BGT_Portal_N4;User ID=awafa;Password=a7561;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False"
+
+ "ConnectionStrings": {
+    "DefaultConnection": "Data Source=172.22.10.200;Initial Catalog=BGT_Portal_N4;user=awafa;password=a7561;Integrated Security=False;Connect Timeout=30;Encrypt=False;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"
+    
+  }
+
+// To Do 12-29-2024
+Work on the Role.tsx and Roles.tsx UI.
+Work on the UnitLife Export category on back end.
+Complete the top and move on to other features
+    SapIntegration
+    Stripping
+    Finance => maybe ill delete this tab as not needed, maybe
+    -- theme I've chosen today is good, looks like Jira alittle.
+    
+    ContainerImportResultDto
+    Unit, Category, Status, Line ? Vessel ? Voyage ? VesselATA ? Discharge ? Stripped ? Received ? Berth ? LoadedOnTruck ? GateOut ? 
