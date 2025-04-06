@@ -17,7 +17,7 @@ const CreateEntityButton: React.FC<Props> = (props: Props) => {
         pt: 1,
         position: "fixed",
         right: 10,
-        width: "7rem",
+        width: "9rem",
         borderRadius: "5px",
         display: "flex",
         flexDirection: "column",

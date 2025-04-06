@@ -10,29 +10,41 @@ import { tableHeadTableCellStyles } from "./tableCssStyles";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { getAllRolesAsync, rolesSelctors } from "./rolesSlice";
 import React, { useEffect } from "react";
+
+import { Role as RoleInterface } from "../../app/models/role/role";
 import Role from "./Role";
 import LoadingComponent from "../../app/components/LoadingComponent";
+import { ExistingUserRoleStatus } from "../../app/models/role/role";
 
 interface Props {
-  editinguser: boolean;
+  editingUser: boolean;
 }
-const Roles: React.FC<Props> = (props: Props) => {
-  const roles = useAppSelector(rolesSelctors.selectAll);
-  const { status, rolesloaded } = useAppSelector((state) => state.roles);
 
+export type RolesToMap = ExistingUserRoleStatus[] | RoleInterface[];
+
+export function Roles({ editingUser }: Props) {
+
+  
   const dispatch = useAppDispatch();
-  const { editinguser } = props;
+
+  const appRoles = useAppSelector(rolesSelctors.selectAll);
+
+  const { status, rolesloaded } = useAppSelector((state) => state.roles);
+  const { existingUserAppInfo } = useAppSelector((state) => state.users);
+
+  const userAppRoles = existingUserAppInfo.roles;
+
+  const roles: RolesToMap = editingUser ? userAppRoles : appRoles;
 
   useEffect(() => {
-    if (!rolesloaded) {
+    if (!rolesloaded && !editingUser) {
       dispatch(getAllRolesAsync());
     }
-  }, [dispatch, rolesloaded]);
+  }, [dispatch, rolesloaded, editingUser]);
 
-  if (status === "pendingGetAllRoles")
-    return <LoadingComponent message="Getting Roles..." />;
-  const adjustMarginTop = editinguser ? 0 : 5;
-  const adjustTableWidth = editinguser ? 500 : 700;
+  if (!editingUser && status === "pendingGetAllRoles")
+    return <LoadingComponent message="Getting App Roles..." />;
+
   return (
     <>
       <TableContainer
@@ -40,16 +52,15 @@ const Roles: React.FC<Props> = (props: Props) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          mt: adjustMarginTop,
+
           maxHeight: 600,
         }}
       >
         <Table
           sx={{
             minWidth: 60,
-            maxWidth: adjustTableWidth,
+            maxWidth: 1100,
             p: 5,
-            mt: adjustMarginTop,
           }}
         >
           <TableHead sx={{ borderBottom: "1px solid white" }}>
@@ -57,10 +68,10 @@ const Roles: React.FC<Props> = (props: Props) => {
               <TableCell sx={tableHeadTableCellStyles}>Id</TableCell>
               <TableCell sx={tableHeadTableCellStyles}>Role</TableCell>
               <TableCell sx={tableHeadTableCellStyles}>Normalized</TableCell>
-              {editinguser && (
+              {editingUser && (
                 <TableCell sx={tableHeadTableCellStyles}>Add</TableCell>
               )}
-              {editinguser && (
+              {editingUser && (
                 <TableCell sx={tableHeadTableCellStyles}>Remove</TableCell>
               )}
             </TableRow>
@@ -68,10 +79,10 @@ const Roles: React.FC<Props> = (props: Props) => {
           <TableBody>
             {roles.map((role, index) => (
               <Role
-                editinguser={editinguser}
                 index={index + 1}
                 role={role}
-                key={index + 1}
+                key={role.name}
+                editingUser={editingUser || undefined}
               />
             ))}
           </TableBody>
@@ -79,6 +90,4 @@ const Roles: React.FC<Props> = (props: Props) => {
       </TableContainer>
     </>
   );
-};
-
-export default Roles;
+}

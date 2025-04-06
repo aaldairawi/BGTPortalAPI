@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { LockOutlined } from "@mui/icons-material";
 
 import {
@@ -9,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Grid2 as Grid } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { FieldValues, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
@@ -17,10 +18,12 @@ import { registerUserAsync } from "./accountSlice";
 import CheckIcon from "@mui/icons-material/Check";
 import ErrorIcon from "@mui/icons-material/Error";
 import React, { useState } from "react";
-import { createUserAsync } from "../admin/usersSlice";
-import CloseFormIcon from "./CloseFormIcon";
+import { createUserAsync } from "../admin/createUserThunk";
+import CloseFormIcon from "../../app/components/CloseFormIcon";
 import { AUTHLOGINBOX, AUTHLOGINTEXTFIELD } from "./AuthTextFieldStyles";
+import { toast } from "react-toastify";
 
+type RegisterThunkAction = "Register" | "Create";
 interface Props {
   showCloseIcon?: boolean;
   onHandleCloseForm?: () => void;
@@ -86,6 +89,7 @@ const Register: React.FC<Props> = (props: Props) => {
       }
     });
   };
+
   const onHandleValidatePassword = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -105,17 +109,36 @@ const Register: React.FC<Props> = (props: Props) => {
     }
   };
 
-  const dispatchAsyncThunk = (): string => {
+  const dispatchAsyncThunk = (): RegisterThunkAction => {
     if (!user) {
-      return "Register";
-    } else if (user && !user.roles.includes("Admin")) {
       return "Register";
     } else {
       return "Create";
     }
   };
+  const onHandleFormSubmit = async (data: FieldValues) => {
+    if (dispatchAsyncThunk() === "Register") {
+      try {
+        await dispatch(registerUserAsync(data)).unwrap();
+      } catch (error: any) {
+        handleApiErrors(error);
+      }
+      if (dispatchAsyncThunk() === "Create") {
+        try {
+          await dispatch(createUserAsync(data)).unwrap();
+        } catch (error: any) {
+          handleApiErrors(error);
+        }
+      }
+      toast.success("Registration successful, please log in.", {
+        autoClose: 1000,
+      });
+      reset();
+    }
+  };
 
   const marginVariable = showCloseIcon ? 3 : 20;
+
   return (
     <Container
       maxWidth="sm"
@@ -139,19 +162,10 @@ const Register: React.FC<Props> = (props: Props) => {
       <Typography component="h1" variant="h5" color="white">
         {showCloseIcon ? "Create" : "Register"}
       </Typography>
+
       <Box
         component="form"
-        onSubmit={handleSubmit((data) =>
-          dispatch(
-            dispatchAsyncThunk() === "Register"
-              ? registerUserAsync(data)
-              : createUserAsync(data)
-          )
-            .then(() => {
-              reset();
-            })
-            .catch((error: string[]) => handleApiErrors(error))
-        )}
+        onSubmit={handleSubmit(onHandleFormSubmit)}
         noValidate
         sx={{ mt: 1 }}
       >
@@ -238,7 +252,7 @@ const Register: React.FC<Props> = (props: Props) => {
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
         >
-          {user?.roles.includes("Admin") ? "Create" : "Register"}
+          {user?.roles?.includes("Admin") ? "Create" : "Register"}
         </LoadingButton>
         {!showCloseIcon && (
           <Grid container spacing={2}>

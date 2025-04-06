@@ -1,4 +1,6 @@
 
+using API.Enums;
+
 namespace API.Dtos.CargoContainer.Import
 {
     public class ContainerImportResultDto : ContainerGeneralProps
@@ -17,7 +19,7 @@ namespace API.Dtos.CargoContainer.Import
         public string? GateOut { get; set; } = string.Empty;
 
 
-        public ContainerImportResultDto(string unitId, string category, string status,
+        public ContainerImportResultDto(string unitId, Category category, string status,
                       string shippingLine, string vesselName, string vesselVoyage, string vesselATA,
                       string containerDischarge, string stripped, string received,
                       string berth, string loadedToTruck, string gateOut) : base(unitId, category, status)

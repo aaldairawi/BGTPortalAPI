@@ -16,10 +16,10 @@ const LoadingComponent: React.FC<Props> = (props: Props) => {
         height="100vh"
         width="100vw"
       >
-        <CircularProgress size={100} sx={{ color: "white" }} />
+        <CircularProgress size={100} sx={{ color: "#393939" }} />
         <Typography
           variant="h4"
-          color="white"
+          color="#393939"
           sx={{ justifyContent: "center", position: "fixed", top: "60%" }}
         >
           {message}

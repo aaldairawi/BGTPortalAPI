@@ -1,61 +1,91 @@
 import EditUserForm from "./EditUserForm";
 import { useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
-import { setUserData, userSelectors } from "./usersSlice";
+import PersonIcon from "@mui/icons-material/Person";
+
 import { Box, Typography } from "@mui/material";
-import { getAllRolesAsync, rolesSelctors } from "./rolesSlice";
+
 import { useEffect } from "react";
 import LoadingComponent from "../../app/components/LoadingComponent";
-import NoUserError from "../../app/router/NoUserError";
-import { IUpdateUserRole } from "../../app/models/role/role";
+import { getUserToUpdateInfoAsync } from "./getUserThunks";
 
-const EditUserPage = () => {
-  const { userid } = useParams();
-  const { status, rolesloaded } = useAppSelector((state) => state.roles);
+export function EditUserPage() {
+  const { userId } = useParams();
+  const { existingUserAppInfo, status, userToEditFetched } = useAppSelector(
+    (state) => state.users
+  );
 
   const dispatch = useAppDispatch();
-  const user = useAppSelector((state) =>
-    userSelectors.selectById(state, parseInt(userid!))
-  );
-  const roles = useAppSelector(rolesSelctors.selectAll);
-
+  
   useEffect(() => {
-    if (!rolesloaded) {
-      dispatch(getAllRolesAsync());
+    if (!userId) return;
+    if (userToEditFetched) return;
+    if (!userToEditFetched) {
+      dispatch(getUserToUpdateInfoAsync(userId));
     }
-  }, [rolesloaded, dispatch]);
+  }, [dispatch, userId, userToEditFetched]);
 
-  useEffect(() => {
-    if (user) {
-      const userRoles: IUpdateUserRole[] = roles.map((role) => {
-        return {
-          role: role.name,
-          status: user.roles.includes(role.name),
-        };
-      });
-      dispatch(
-        setUserData({
-          userId: user.id.toString(),
-          roles: userRoles,
-          password: { newPassword: "" },
-        })
-      );
-    }
-  }, [user, dispatch, roles]);
-  if (status === "pendingGetAllRoles")
-    return <LoadingComponent message="Getting Roles" />;
-  if (!user) return <NoUserError />;
+  if (status === "pendingGettingUserAppInfo")
+    return <LoadingComponent message="Fetching user data" />;
 
   return (
     <>
-      <Box sx={{ ml: 3 }}>
-        <Typography variant="h5" color="info">
-          Updating user @{user.userName}
-        </Typography>
+      <Box
+        sx={{
+          ml: 4,
+          mt: 20,
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "flex-start",
+          gap: 9,
+        }}
+      >
+        <Box
+          sx={{
+            outline: "1px solid white",
+            alignSelf: "flex-start",
+            display: "flex",
+            justifyContent: "flex-start",
+            alignItems: "flex-start",
+            flexDirection: "column",
+            minWidth: "20rem",
+            bgcolor: "#393939",
+            borderRadius: "5px",
+            gap: 3,
+          }}
+        >
+          <Box>
+            <PersonIcon
+              sx={{
+                fontSize: 50,
+                width: "5rem",
+                minHeight: "70px",
+                color: "white",
+              }}
+            />
+          </Box>
+          <Box sx={{ pb: 2, color: "white", ml: 1 }}>
+            <Typography variant="subtitle1">
+              Id: {existingUserAppInfo.userId}
+            </Typography>
+            <Typography variant="subtitle1">
+              Username: {existingUserAppInfo.username}
+            </Typography>
+            <Typography variant="subtitle1">
+              Email: {existingUserAppInfo.email}
+            </Typography>
+            <Typography variant="subtitle1">
+              Registed: {existingUserAppInfo.registered}
+            </Typography>
+            <Typography variant="subtitle1">
+              Last Login Date: {existingUserAppInfo.lastLoggedIn}
+            </Typography>
+          </Box>
+        </Box>
+        <EditUserForm userData={existingUserAppInfo} />
       </Box>
-      <EditUserForm user={user} />
     </>
   );
-};
+}
 
-export default EditUserPage;
+// export default EditUserPage;

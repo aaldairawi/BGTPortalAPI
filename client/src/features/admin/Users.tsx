@@ -1,24 +1,19 @@
-import {
-  Backdrop,
-  Table,
-  TableBody,
-  TableContainer,
-} from "@mui/material";
+import { Backdrop, Table, TableBody, TableContainer } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import User from "./User";
-import { getAllUsersAsync, userSelectors } from "./usersSlice";
+import { userSelectors } from "./usersSlice";
 import LoadingComponent from "../../app/components/LoadingComponent";
 import { useEffect, useState } from "react";
-import { getAllRolesAsync } from "./rolesSlice";
 import Register from "../account/Register";
 import CreateEntityButton from "../../app/components/CreateEntityButton";
 import TableHeadComponent from "../../app/components/TableHeadComponent";
+import { getAllUsersAsync } from "./getUserThunks";
 
-const Users = () => {
+export function Users() {
   const dispatch = useAppDispatch();
   const users = useAppSelector(userSelectors.selectAll);
   const { usersloaded } = useAppSelector((state) => state.users);
-  const { rolesloaded } = useAppSelector((state) => state.roles);
+
   const { status } = useAppSelector((state) => state.users);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -32,12 +27,6 @@ const Users = () => {
     }
   }, [dispatch, usersloaded]);
 
-  useEffect(() => {
-    if (!rolesloaded) {
-      dispatch(getAllRolesAsync());
-    }
-  }, [rolesloaded, dispatch]);
-
   if (!usersloaded) return <LoadingComponent message="Loading Users..." />;
 
   if (status === "pendingDeleteUser")
@@ -50,7 +39,7 @@ const Users = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          mt: 5,
+          mt: 1,
         }}
       >
         <Table
@@ -88,6 +77,4 @@ const Users = () => {
       </TableContainer>
     </>
   );
-};
-
-export default Users;
+}

@@ -1,10 +1,10 @@
 import { TableContainer, Table, TableBody, Paper } from "@mui/material";
 import Invoice from "./Invoice";
-import { IFinalizedInvoiceDto } from "../../app/models/invoice/finalizedinvoice";
+import { FinalizedInvoiceDto } from "../../app/models/invoice/finalizedinvoice.types";
 import TableHeadComponent from "../../app/components/TableHeadComponent";
 
 interface Props {
-  invoices: IFinalizedInvoiceDto[];
+  invoices: FinalizedInvoiceDto[];
 }
 
 const FinalInvoiceTable: React.FC<Props> = (props: Props) => {

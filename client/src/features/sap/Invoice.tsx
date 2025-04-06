@@ -1,11 +1,11 @@
 import { Button, TableCell, TableRow } from "@mui/material";
 import { tableBodyTableCellStyles } from "../admin/tableCssStyles";
-import { IFinalizedInvoiceDto } from "../../app/models/invoice/finalizedinvoice";
+import { FinalizedInvoiceDto } from "../../app/models/invoice/finalizedinvoice.types";
 import { useAppDispatch } from "../../app/store/configureStore";
 import { getInvoiceItemsAsync } from "./cTypeInvoiceItemSlice";
 
 interface Props {
-  invoice: IFinalizedInvoiceDto;
+  invoice: FinalizedInvoiceDto;
   index: number;
 }
 

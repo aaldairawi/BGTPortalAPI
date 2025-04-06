@@ -1,15 +1,8 @@
 import { AppBar, Avatar, Box, Toolbar, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 
-import HeaderNavLink, { ILinks } from "./HeaderNavLink";
+import HeaderNavLink from "./HeaderNavLink";
 import { useAppSelector } from "../store/configureStore";
-
-const rightLinks: ILinks[] = [
-  { path: "/stripping", text: "Stripping" },
-  { path: "/sap-integration", text: "Sap" },
-  { path: "/n4api", text: "Api" },
-  { path: "/admin", text: "Admin" },
-];
 
 const Header = () => {
   const { user } = useAppSelector((state) => state.account);
@@ -21,7 +14,7 @@ const Header = () => {
           display: "flex",
           justifyContent: "space-between",
           pb: 1,
-          bgcolor: "#393939",
+          bgcolor: "white",
         }}
       >
         <Box
@@ -29,7 +22,7 @@ const Header = () => {
             p: 0,
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "center",
           }}
         >
           <Box component={Link} to="/">
@@ -37,17 +30,28 @@ const Header = () => {
               src="/images/bgt_logo.jpg"
               alt="Bgt Logo"
               variant="square"
-              sx={{ width: "15rem", height: "auto" }}
+              sx={{ width: "15rem", height: "auto", pt: 1 }}
             />
           </Box>
 
           {user && (
             <Box sx={{ ml: 3 }}>
-              <Typography sx={{ fontSize: "1.2rem" }} color="white">
+              <Typography sx={{ fontSize: "1rem" }} color="#393939">
                 Hello @{user?.userName}
               </Typography>
             </Box>
           )}
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Typography variant="h5" sx={{ color: "#393939" }}>
+            BGT N4 API
+          </Typography>
         </Box>
         {!user && (
           <Box>
@@ -58,7 +62,7 @@ const Header = () => {
         )}
         {user && (
           <Box>
-            <HeaderNavLink links={rightLinks} />
+            <HeaderNavLink />
           </Box>
         )}
       </Toolbar>

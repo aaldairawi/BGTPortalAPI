@@ -1,47 +1,69 @@
-import { Container, Typography } from "@mui/material";
-import AdminPanel from "./AdminPanel";
-import Users from "./Users";
-// import { useNavigate } from "react-router-dom";
-import { AdminPanelActions } from "./adminActions";
-import { resetDisplay } from "./adminPanelSlice";
-import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
-import Roles from "./Roles";
-import { useEffect } from "react";
+import * as React from "react";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Box from "@mui/material/Box";
 
-const Admin = () => {
-  const { items, activePanel } = useAppSelector((state) => state.adminPanel);
+import {Users} from "./Users";
 
-  const dispatch = useAppDispatch();
+import {Roles} from "./Roles";
 
-  const activeDisplay = items.find((obj) => obj.action.display === true);
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
 
-  useEffect(() => {
-    return () => {
-      dispatch(resetDisplay());
-    };
-  }, [dispatch]);
+const AdminAPICustomPanel = (props: TabPanelProps) => {
+  const { children, value, index, ...other } = props;
 
-  const AdminPanelDefault = (
-    <>
-      <AdminPanel data={items} />
-      <Container sx={{ mt: 33, textAlign: "center" }}>
-        <Typography variant="h2" color="white">
-          Admin Panel
-        </Typography>
-      </Container>
-    </>
-  );
-
-  if (!activeDisplay || activePanel === null) return AdminPanelDefault;
   return (
-    <>
-      <AdminPanel data={items} />
-      {activeDisplay.text === AdminPanelActions.USERS ? <Users /> : null}
-      {activeDisplay.text === AdminPanelActions.ROLES ? (
-        <Roles editinguser={false} />
-      ) : null}
-    </>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
   );
 };
 
-export default Admin;
+const a11yProps = (index: number) => {
+  return {
+    id: `simple-tab-${index}`,
+    "aria-controls": `simple-tabpanel-${index}`,
+  };
+};
+
+const AdminPanel = () => {
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    console.log(event);
+    setValue(newValue);
+  };
+
+  return (
+    <Box sx={{ width: "100%" }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          aria-label="basic tabs example"
+        >
+          <Tab label="App Users" {...a11yProps(0)} />
+          <Tab label="App Roles" {...a11yProps(1)} />
+        </Tabs>
+      </Box>
+      <AdminAPICustomPanel value={value} index={0}>
+        <Users />
+      </AdminAPICustomPanel>
+      <AdminAPICustomPanel value={value} index={1}>
+        <Roles editingUser={false} />
+      </AdminAPICustomPanel>
+    </Box>
+  );
+};
+
+export default AdminPanel;

@@ -1,30 +1,28 @@
 import { CircularProgress, TableCell, TableRow } from "@mui/material";
 import { tableBodyTableCellStyles } from "./tableCssStyles";
 import React from "react";
-import { IRole, IUpdateUserRole } from "../../app/models/role/role";
+
+import {
+  ExistingUserRoleStatus,
+  Role as RoleInterface,
+} from "../../app/models/role/role";
 import { LoadingButton } from "@mui/lab";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
-import { addRoleToUserAsync, removeRoleFromUserAsync } from "./usersSlice";
+import { addRoleToUserAsync, removeRoleFromUserAsync } from "./roleThunks";
+
+type RoleResult = RoleInterface | ExistingUserRoleStatus;
 
 interface Props {
-  role: IRole;
+  role: RoleResult;
   index: number;
-  editinguser: boolean;
+  editingUser?: boolean;
 }
-const filterForTrue = (roles: IUpdateUserRole[], roleName: IRole): boolean => {
-  
-  const findTheRoleInRoles = roles.find((role) => role.role === roleName.name);
-  const indexOfFoundRole = roles.findIndex(
-    (role) => role === findTheRoleInRoles
-  );
-  if (roles[indexOfFoundRole].status === true) return true;
-  return false;
-};
+
 const Role: React.FC<Props> = (props: Props) => {
-  const { role, index, editinguser } = props;
-  const { status, userUpdatedData } = useAppSelector((state) => state.users);
+  const { role, index, editingUser } = props;
+  const { status } = useAppSelector((state) => state.users);
+
   const dispatch = useAppDispatch();
-  
 
   return (
     <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
@@ -33,30 +31,32 @@ const Role: React.FC<Props> = (props: Props) => {
       <TableCell sx={tableBodyTableCellStyles}>
         {role.name.toUpperCase()}
       </TableCell>
-      {editinguser && (
+
+      {editingUser && (
         <TableCell sx={tableBodyTableCellStyles}>
           <LoadingButton
-            disabled={filterForTrue(userUpdatedData.roles, role)}
+            disabled={"status" in role ? role.status : false}
             variant="contained"
             loadingIndicator={
               <CircularProgress sx={{ color: "white" }} size={13} />
             }
             loading={status === "pendingAddingRoleToUser" + role.id}
             onClick={() =>
-              dispatch(addRoleToUserAsync({ roleId: role.id, role: role.name }))
+              dispatch(addRoleToUserAsync({ role: role.name, roleId: role.id }))
             }
           >
             Add
           </LoadingButton>
         </TableCell>
       )}
-      {editinguser && (
+
+      {editingUser && (
         <TableCell sx={tableBodyTableCellStyles}>
           <LoadingButton
-            disabled={!filterForTrue(userUpdatedData.roles, role)}
+            disabled={"status" in role ? !role.status : true}
             variant="outlined"
             loadingIndicator={
-              <CircularProgress sx={{ color: "white" }} size={13} />
+              <CircularProgress sx={{ color: "#393939" }} size={13} />
             }
             loading={status === "pendingRemovingRoleFromUser" + role.id + "rem"}
             onClick={() =>

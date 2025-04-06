@@ -8,7 +8,7 @@ interface Props {
 const TableHeadComponent: React.FC<Props> = (props: Props) => {
   const { tableCellHeadings } = props;
   return (
-    <TableHead sx={{ borderBottom: "1px solid white" }}>
+    <TableHead sx={{ borderBottom: "1px solid white"}}>
       <TableRow>
         {tableCellHeadings.map((headertitle) => (
           <TableCell key={headertitle} sx={tableHeadTableCellStyles}>

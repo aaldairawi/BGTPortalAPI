@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import TableHeadComponent from "../../app/components/TableHeadComponent";
 import InvoiceItem from "./InvoiceItem";
-import { IFinalizedInvoiceItemDto } from "../../app/models/invoice/finalizedinvoice";
+import { FinalizedInvoiceItemDto } from "../../app/models/invoice/finalizedinvoice.types";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAppDispatch } from "../../app/store/configureStore";
 import { onHandleHideInvoiceItemBackdrop } from "./cTypeInvoiceItemSlice";
@@ -27,7 +27,7 @@ const TableHeaderTitles = [
 ];
 
 interface Props {
-  invoiceItems: IFinalizedInvoiceItemDto[];
+  invoiceItems: FinalizedInvoiceItemDto[];
 }
 const InvoiceDetailsBackdrop: React.FC<Props> = (props: Props) => {
   const { invoiceItems } = props;

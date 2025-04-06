@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { ICInvoiceType } from "../../app/models/invoice/cinvoicetype";
+
+import { FinalizedInvoiceDto } from "../../app/models/invoice/finalizedinvoice.types";
+
 import { RootState } from "../../app/store/configureStore";
-import agent from "../../app/agent/agent";
+import Agent from "../../app/agent/agent";
 
 interface IInvoiceTypeState {
-  invoiceTypes: ICInvoiceType[] | null;
+  invoiceTypes: FinalizedInvoiceDto[] | null;
   invoiceTypesLoaded: boolean;
   status: string;
 }
@@ -17,12 +19,12 @@ const initialState: IInvoiceTypeState = {
 };
 
 export const getAllCInvoiceTypesAsync = createAsyncThunk<
-  ICInvoiceType[],
+  FinalizedInvoiceDto[],
   void,
   { state: RootState }
 >("invoiceTypeSlice/getAllCInvoiceTypesAsync", async (_, thunkArgApi) => {
   try {
-    return await agent.SapIntegration.getCTypeInvoiceTypes();
+    return await Agent.SapIntegration.getCTypeInvoiceTypes();
   } catch (error: any) {
     return thunkArgApi.rejectWithValue({ error: error.data });
   }
@@ -42,6 +44,7 @@ export const invoiceTypeSlice = createSlice({
     builder.addCase(getAllCInvoiceTypesAsync.fulfilled, (state, action) => {
       state.status = "idle";
       state.invoiceTypes = action.payload;
+      state.invoiceTypesLoaded = true;
     });
   },
 });

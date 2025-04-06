@@ -15,7 +15,7 @@ namespace API.Data
                     Email = "aaldairawi@ictsiiraq.com",
                     RegisteredDate = DateTime.Now,
                 };
-                await userManager.CreateAsync(user1, "Argo@3135");
+                await userManager.CreateAsync(user1, "IloveProgramming@3135");
                 await userManager.AddToRolesAsync(user1, ["Admin"]);
 
                 var user3 = new User

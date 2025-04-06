@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { IUnitCurrentStatus } from "../../app/models/container/unitCurrentStatus";
-import agent from "../../app/agent/agent";
+import Agent from "../../app/agent/agent";
+
 import {
   IContainerExportDto,
   IContainerImportDto,
@@ -26,7 +27,7 @@ export const getUnitCurrentStatusAsync = createAsyncThunk<
   string
 >("navisApiSlice/getUnitCurrentLocationAsync", async (data, thunkApi) => {
   try {
-    return await agent.NavisUnitApi.getUnitCurrentLocation(data);
+    return await Agent.NavisUnitApi.getUnitCurrentLocation(data);
   } catch (error: any) {
     return thunkApi.rejectWithValue({ error: error.data });
   }
@@ -37,7 +38,7 @@ export const getImportUnitLifeTimeAsync = createAsyncThunk<
   FieldValues
 >("navisApiSlice/getImportUnitLifeTime", async (data, thunkApi) => {
   try {
-    return await agent.NavisUnitApi.getImportUnitLifeTime(data.unitNumber);
+    return await Agent.NavisUnitApi.getImportUnitLifeTime(data.unitNumber);
   } catch (error: any) {
     return thunkApi.rejectWithValue({ error: error.data });
   }
@@ -48,7 +49,7 @@ export const getExportUnitLifeTimeAsync = createAsyncThunk<
   FieldValues
 >("navisApiSlice/getExportUnitLifeTime", async (data, thunkApi) => {
   try {
-    return await agent.NavisUnitApi.getExportUnitLifeTime(data.unitNumber);
+    return await Agent.NavisUnitApi.getExportUnitLifeTime(data.unitNumber);
   } catch (error: any) {
     return thunkApi.rejectWithValue({ error: error.data });
   }

@@ -3,13 +3,15 @@ import App from "../layout/App";
 import Login from "../../features/account/Login";
 import Register from "../../features/account/Register";
 import NotFound from "../errors/NotFound";
-import SapIntegration from "../../features/sap/SapIntegration";
 import ServerError from "../errors/ServerError";
 import Admin from "../../features/admin/Admin";
 import RequireAuth from "./RequireAuth";
-import NavisApi from "../../features/navisunitapi/NavisApi";
 import HomePageLogo from "../../features/home/HomepageLogo";
-import EditUserPage from "../../features/admin/EditUserPage";
+// import EditUserPage from "../../features/admin/EditUserPage";
+
+import SapIntegrationPanel from "../../features/sap/SapIntegrationPanel";
+import NavisContainerAPIPanel from "../../features/navisunitapi/NavisContainerAPIPanel";
+import { EditUserPage } from "../../features/admin/EditUserPage";
 
 const router = createBrowserRouter([
   {
@@ -17,27 +19,25 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        element: <RequireAuth roles={["DubaiBilling"]} />,
-        children: [{ path: "/sap-integration", element: <SapIntegration /> }],
+        element: <RequireAuth roles={["DubaiBilling","Admin"]} />,
+        children: [{ path: "sap-integration", element: <SapIntegrationPanel /> }],
       },
       {
         element: <RequireAuth roles={["Admin"]} />,
         children: [
           {
-            path: "/admin",
+            path: "admin",
             element: <Admin />,
           },
           {
-            path: "/edit/user/:userid",
+            path: "edit/user/:userId",
             element: <EditUserPage />,
           },
 
-          { path: "/n4api", element: <NavisApi /> },
-          { path: "/sap-integration/admin", element: <SapIntegration /> },
-          { path: "/server-error", element: <ServerError /> },
+          { path: "n4api", element: <NavisContainerAPIPanel /> },
+          { path: "server-error", element: <ServerError /> },
         ],
       },
-
       { path: "default-member-page", element: <HomePageLogo /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },

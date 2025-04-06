@@ -1,178 +1,59 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  createAsyncThunk,
   createEntityAdapter,
   createSlice,
-  PayloadAction,
+  //PayloadAction,
 } from "@reduxjs/toolkit";
-import {
-  IUpdateUserDto,
-  IUser,
-  IUserDto,
-  IUserRegister,
-} from "../../app/models/account/user";
-import agent from "../../app/agent/agent";
+import { UserAppInfo, UserDto } from "../../app/models/account/user";
 import { RootState } from "../../app/store/configureStore";
-import { toast } from "react-toastify";
-import { FieldValues } from "react-hook-form";
-import { IUpdateUserRole } from "../../app/models/role/role";
 
-interface IUserState {
+import { getAllUsersAsync, getUserToUpdateInfoAsync } from "./getUserThunks";
+import { createUserAsync } from "./createUserThunk";
+import { deleteUserAsync } from "./deleteUserThunk";
+import { sendUpdatedUserInfoAsync } from "./updateUserThunk";
+
+import { addRoleToUserAsync, removeRoleFromUserAsync } from "./roleThunks";
+
+interface UserState {
   usersloaded: boolean;
   status: string;
-  userUpdatedData: IUpdateUserDto;
-  userUpdateFormTouched: boolean;
+  existingUserAppInfo: UserAppInfo;
+  userToEditFetched: boolean;
 }
 
-const usersAdapter = createEntityAdapter<IUserDto>();
-
-export const getAllUsersAsync = createAsyncThunk<
-  IUserDto[],
-  void,
-  { state: RootState }
->("usersSlice/getAllUsersAsync", async (_, thunkApi) => {
-  try {
-    return await agent.Users.get();
-  } catch (error: any) {
-    return thunkApi.rejectWithValue({ error: error.data });
-  }
-});
-
-export const createUserAsync = createAsyncThunk<IUser, FieldValues>(
-  "usersSlice/createUserAsync",
-  async (data, thunkApi) => {
-    try {
-      return await agent.Users.create(data as IUserRegister);
-    } catch (error: any) {
-      console.log(error);
-      return thunkApi.rejectWithValue({ error: error.data });
-    }
-  }
-);
-
-export const editUserAsync = createAsyncThunk<
-  IUserDto,
-  IUpdateUserDto,
-  { state: RootState }
->("usersSlice/editUserRolesAsync", async (data, thunkApi) => {
-  try {
-    return await agent.Users.edit(data);
-  } catch (error: any) {
-    return thunkApi.rejectWithValue({ error: error.data });
-  }
-});
-
-export const addRoleToUserAsync = createAsyncThunk<
-  void,
-  { roleId: number; role: string },
-  { state: RootState }
->("usersSlice/addRoleToUserAsync", async () => {
-  try {
-    return new Promise((resolve) =>
-      setTimeout(() => {
-        resolve();
-      }, 2000)
-    );
-  } catch (error: any) {
-    console.log(error);
-  }
-});
-
-export const removeRoleFromUserAsync = createAsyncThunk<
-  void,
-  { roleId: number; role: string; name: string },
-  { state: RootState }
->("usersSlice/removeRoleFromUserAsync", async () => {
-  try {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 3000);
-    });
-  } catch (error: any) {
-    console.log(error);
-  }
-});
-
-export const deleteUserAsync = createAsyncThunk<
-  Promise<any>,
-  number,
-  { state: RootState }
->("usersSlice/deleteUserAsync", async (id, thunkApi) => {
-  try {
-    const deleteUserResponse = await agent.Users.delete(id);
-    return deleteUserResponse;
-  } catch (error: any) {
-    thunkApi.rejectWithValue({ error: error.data });
-  }
-});
+const usersAdapter = createEntityAdapter<UserDto>();
 
 export const usersSlice = createSlice({
   name: "usersSlice",
-  initialState: usersAdapter.getInitialState<IUserState>({
+  initialState: usersAdapter.getInitialState<UserState>({
     usersloaded: false,
     status: "idle",
-    userUpdatedData: {
-      userId: "",
-      roles: [
-        { role: "Admin", status: false },
-        { role: "DubaiBilling", status: false },
-        { role: "Stripping", status: false },
-        { role: "Billing", status: false },
-        { role: "BillingSupervisor", status: false },
-      ],
-      password: { newPassword: "" },
+    userToEditFetched: false,
+    existingUserAppInfo: {
+      userId: 0,
+      roles: [],
+      passwordPlaceHolder: "",
+      username: "",
+      email: "",
+      registered: "",
+      lastLoggedIn: "",
     },
-    userUpdateFormTouched: false,
   }),
   reducers: {
     removeUserById: usersAdapter.removeOne,
     createUser: usersAdapter.addOne,
-    setUserData: (state, action: PayloadAction<IUpdateUserDto>) => {
-      let roleName: string = "";
-      let finalUpdatedArray: IUpdateUserRole[] = [];
-      let rolesThatAreFalseFiltered: IUpdateUserRole[] = [];
 
-      const rolesThatAreAssignedToUser = action.payload.roles.filter(
-        (role) => role.status === true
-      );
-
-      if (rolesThatAreAssignedToUser.length > 0) {
-        for (
-          let index = 0;
-          index < rolesThatAreAssignedToUser.length;
-          index++
-        ) {
-          roleName = rolesThatAreAssignedToUser[index].role;
-          rolesThatAreFalseFiltered = state.userUpdatedData.roles.filter(
-            (role) => role.role !== roleName
-          );
-        }
-        finalUpdatedArray = [
-          ...rolesThatAreAssignedToUser,
-          ...rolesThatAreFalseFiltered!,
-        ];
-      } else if (rolesThatAreAssignedToUser.length <= 0) {
-        finalUpdatedArray = state.userUpdatedData.roles;
-      }
-
-      state.userUpdatedData.userId = action.payload.userId;
-      state.userUpdatedData.roles = finalUpdatedArray;
-      state.userUpdatedData.password = action.payload.password;
-    },
     cancelEditingUser: (state) => {
-      state.userUpdatedData = {
-        userId: "",
-        roles: [
-          { role: "Admin", status: false },
-          { role: "DubaiBilling", status: false },
-          { role: "Stripping", status: false },
-          { role: "Billing", status: false },
-          { role: "BillingSupervisor", status: false },
-        ],
-        password: { newPassword: "" },
+      state.existingUserAppInfo = {
+        userId: 0,
+        roles: [],
+        passwordPlaceHolder: "",
+        username: "",
+        email: "",
+        lastLoggedIn: "",
+        registered: "",
       };
-      state.userUpdateFormTouched = false;
+      state.userToEditFetched = false;
     },
   },
   extraReducers: (builder) => {
@@ -187,9 +68,6 @@ export const usersSlice = createSlice({
       usersAdapter.setAll(state, action.payload);
       state.status = "idle";
       state.usersloaded = true;
-      toast.success("Retrieved all users.", {
-        autoClose: 1500,
-      });
     });
     builder.addCase(deleteUserAsync.pending, (state) => {
       state.status = "pendingDeleteUser";
@@ -200,11 +78,9 @@ export const usersSlice = createSlice({
     });
     builder.addCase(deleteUserAsync.fulfilled, (state) => {
       state.status = "idle";
-      toast.success("Deleted user successfully!", { autoClose: 1500 });
     });
     builder.addCase(createUserAsync.rejected, (state) => {
       state.status = "idle";
-      console.log("Creating user rejected");
     });
     builder.addCase(createUserAsync.pending, (state) => {
       state.status = "pendingCreateUserAsync";
@@ -212,54 +88,57 @@ export const usersSlice = createSlice({
     builder.addCase(createUserAsync.fulfilled, (state, action) => {
       usersAdapter.setOne(state, action.payload);
       state.status = "idle";
-      toast.success("User created successfully.", { autoClose: 1500 });
     });
-    builder.addCase(editUserAsync.rejected, (state, action) => {
+    builder.addCase(getUserToUpdateInfoAsync.pending, (state) => {
+      state.status = "pendingGettingUserAppInfo";
+    });
+
+    builder.addCase(getUserToUpdateInfoAsync.rejected, (state, action) => {
+      state.status = "idle";
+      console.log(action);
+    });
+
+    builder.addCase(getUserToUpdateInfoAsync.fulfilled, (state, action) => {
+      state.existingUserAppInfo.roles = [...action.payload.roles];
+      state.existingUserAppInfo.userId = action.payload.userId;
+      state.existingUserAppInfo.username = action.payload.username;
+      state.existingUserAppInfo.email = action.payload.email;
+      state.existingUserAppInfo.registered = action.payload.registered;
+      state.existingUserAppInfo.lastLoggedIn = action.payload.lastLoggedIn;
+      state.existingUserAppInfo.passwordPlaceHolder =
+        action.payload.passwordPlaceHolder;
+      state.userToEditFetched = true;
+      state.status = "idle";
+    });
+
+    builder.addCase(sendUpdatedUserInfoAsync.rejected, (state, action) => {
       state.status = "idle";
       console.log(action.payload);
     });
-    builder.addCase(editUserAsync.pending, (state) => {
-      state.status = "pendingEditUserAsync";
+    builder.addCase(sendUpdatedUserInfoAsync.pending, (state) => {
+      state.status = "pendingsendUpdatedUserInfoAsync";
     });
-    builder.addCase(editUserAsync.fulfilled, (state, action) => {
-      usersAdapter.updateOne(state, {
-        id: action.payload.id,
-        changes: action.payload,
-      });
-      state.userUpdatedData = state.userUpdatedData = {
-        userId: "",
-        roles: [
-          { role: "Admin", status: false },
-          { role: "DubaiBilling", status: false },
-          { role: "Stripping", status: false },
-          { role: "Billing", status: false },
-          { role: "BillingSupervisor", status: false },
-        ],
-        password: { newPassword: "" },
-      };
-      state.userUpdateFormTouched = false;
+    builder.addCase(sendUpdatedUserInfoAsync.fulfilled, (state) => {
       state.status = "idle";
-      toast.success("User updated successfully!", { autoClose: 1200 });
     });
     builder.addCase(addRoleToUserAsync.rejected, (state) => {
       state.status = "idle";
-      console.log("rejected addRoleToUserAsync");
     });
     builder.addCase(addRoleToUserAsync.pending, (state, action) => {
       state.status = "pendingAddingRoleToUser" + action.meta.arg.roleId;
     });
+
     builder.addCase(addRoleToUserAsync.fulfilled, (state, action) => {
-      const roleToAdjust = state.userUpdatedData.roles.find(
-        (role) => role.role === action.meta.arg.role
+      const indexOfRoleToAdd = state.existingUserAppInfo.roles.findIndex(
+        (role) => role.name === action.meta.arg.role
       );
-      const indexOfRoleToAdjust = state.userUpdatedData.roles.findIndex(
-        (role) => role === roleToAdjust
-      );
-      state.userUpdatedData.roles[indexOfRoleToAdjust].status = true;
-      state.userUpdateFormTouched = true;
+      if (indexOfRoleToAdd === -1) return;
+
+      state.existingUserAppInfo.roles[indexOfRoleToAdd].status = true;
 
       state.status = "idle";
     });
+
     builder.addCase(removeRoleFromUserAsync.rejected, (state) => {
       state.status = "idle";
     });
@@ -270,14 +149,10 @@ export const usersSlice = createSlice({
         action.meta.arg.name;
     });
     builder.addCase(removeRoleFromUserAsync.fulfilled, (state, action) => {
-      const roleClickedInList = state.userUpdatedData.roles.find(
-        (role) => role.role === action.meta.arg.role
+      const indexOfRemovedRole = state.existingUserAppInfo.roles.findIndex(
+        (role) => role.name === action.meta.arg.role
       );
-      const indexOfClickedRole = state.userUpdatedData.roles.findIndex(
-        (role) => role === roleClickedInList
-      );
-      state.userUpdatedData.roles[indexOfClickedRole].status = false;
-      state.userUpdateFormTouched = true;
+      state.existingUserAppInfo.roles[indexOfRemovedRole].status = false;
       state.status = "idle";
     });
   },
@@ -287,5 +162,5 @@ export const userSelectors = usersAdapter.getSelectors(
   (state: RootState) => state.users
 );
 
-export const { cancelEditingUser, setUserData, createUser, removeUserById } =
+export const { cancelEditingUser, createUser, removeUserById } =
   usersSlice.actions;

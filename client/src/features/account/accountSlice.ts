@@ -1,31 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAsyncThunk, createSlice, isAnyOf } from "@reduxjs/toolkit";
-import agent from "../../app/agent/agent";
+import Agent from "../../app/agent/agent";
 import { FieldValues } from "react-hook-form";
 import {
-  ILoggedInUser,
-  IUser,
-  IUserRegister,
+  LoggedInUser,
+  UserRegister,
 } from "../../app/models/account/user";
+
 import router from "../../app/router/Routes";
-import { toast } from "react-toastify";
 
 interface AccountState {
-  user: IUser | null;
+  user: LoggedInUser | null;
 }
 const initialState: AccountState = {
   user: null,
 };
 
-export const signInUserAsync = createAsyncThunk<IUser, FieldValues>(
+export const signInUserAsync = createAsyncThunk<LoggedInUser, FieldValues>(
   "account/signInUserAsync",
   async (data, thunkApi) => {
     try {
-      const loginUserDto = await agent.Account.login(data);
+      const loginUserDto = await Agent.Account.login(data);
       if (loginUserDto) {
         localStorage.setItem("user", JSON.stringify(loginUserDto));
       }
-
       return loginUserDto;
     } catch (error: any) {
       return thunkApi.rejectWithValue({ error: error.data });
@@ -33,23 +31,26 @@ export const signInUserAsync = createAsyncThunk<IUser, FieldValues>(
   }
 );
 
-export const registerUserAsync = createAsyncThunk<IUser, FieldValues>(
+export const registerUserAsync = createAsyncThunk<void, FieldValues>(
   "account/registerUserAsync",
   async (data, thunkApi) => {
     try {
-      return await agent.Account.register(data as IUserRegister);
+      return await Agent.Account.register(data as UserRegister);
     } catch (error: any) {
       return thunkApi.rejectWithValue({ error: error.data });
     }
   }
 );
 
-export const fetchCurrentUserAsync = createAsyncThunk<ILoggedInUser>(
+/**
+ * Fetches the current loggedin user from the API.
+ */
+export const fetchCurrentUserAsync = createAsyncThunk<LoggedInUser>(
   "account/fetchCurrentUserAsync",
   async (_, thunkApi) => {
     thunkApi.dispatch(setUser(JSON.parse(localStorage.getItem("user")!)));
     try {
-      const loginUserDto = await agent.Account.getCurrentUser();
+      const loginUserDto = await Agent.Account.getCurrentUser();
       localStorage.setItem("user", JSON.stringify(loginUserDto));
       return loginUserDto;
     } catch (error: any) {
@@ -77,35 +78,37 @@ export const accountSlice = createSlice({
       const claims = JSON.parse(atob(action.payload.token.split(".")[1]));
       const roles =
         claims["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-
+      console.log(roles);
       state.user = {
         ...action.payload,
         roles: typeof roles === "string" ? [roles] : roles,
       };
     },
+
   },
   extraReducers: (builder) => {
     builder.addCase(registerUserAsync.fulfilled, () => {
-      toast.success("Registration successful, please log in.", {
-        autoClose: 1200,
-      });
+
       router.navigate("/login");
     });
+
     builder.addCase(registerUserAsync.rejected, (_, action) => {
       console.log(action.payload);
-      toast.error("Something went wrong registering.", { autoClose: 1200 });
+    
     });
+
     builder.addCase(fetchCurrentUserAsync.rejected, (state) => {
       state.user = null;
       localStorage.removeItem("user");
-      toast.error("Session expired  - please log in again");
+      
       router.navigate("/");
     });
+
     builder.addMatcher(
       isAnyOf(signInUserAsync.fulfilled, fetchCurrentUserAsync.fulfilled),
       (state, action) => {
         const claims = JSON.parse(atob(action.payload.token.split(".")[1]));
-        const roles =
+        const roles  =
           claims[
             "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
           ];
@@ -114,10 +117,6 @@ export const accountSlice = createSlice({
           ...action.payload,
           roles: typeof roles === "string" ? [roles] : roles,
         };
-        
-        toast.success(`Welcome ${state.user.userName}`, {
-          autoClose: 1200,
-        });
       }
     );
     builder.addMatcher(

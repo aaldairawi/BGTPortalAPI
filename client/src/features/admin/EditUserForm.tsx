@@ -1,29 +1,32 @@
 import { Box, Button, CircularProgress, TextField } from "@mui/material";
-import { IUserDto } from "../../app/models/account/user";
+import { UserAppInfo } from "../../app/models/account/user";
 import { LoadingButton } from "@mui/lab";
 import { FormEvent, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
-import { cancelEditingUser, editUserAsync } from "./usersSlice";
-import { Link } from "react-router-dom";
-import Roles from "./Roles";
+import { cancelEditingUser } from "./usersSlice";
+import { Link, useNavigate } from "react-router-dom";
+import { Roles } from "./Roles";
+
+import { toast } from "react-toastify";
+import { sendUpdatedUserInfoAsync } from "./updateUserThunk";
+
 interface Props {
-  user: IUserDto;
+  userData: UserAppInfo;
 }
 
 const EditUserForm: React.FC<Props> = (props: Props) => {
-  const { user } = props;
-
+  const { userData } = props;
+  const navigate = useNavigate();
   const [password, setPassword] = useState("");
-  const [isPasswordTouched, setIsPasswordTouched] = useState(false);
+
   const dispatch = useAppDispatch();
-  const { status, userUpdatedData, userUpdateFormTouched } = useAppSelector(
+  const { status, existingUserAppInfo: userUpdatedData } = useAppSelector(
     (state) => state.users
   );
 
   const onHandleChangePassword = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setIsPasswordTouched(true);
     setPassword(event.target.value);
   };
 
@@ -36,19 +39,31 @@ const EditUserForm: React.FC<Props> = (props: Props) => {
 
     if (password.length > 0 && !passwordCorrect) {
       alert(
-        "Your password doesn't meet the criteria, either delete it or try again"
+        "Password entered doesn't meet the criteria (8-10) characters, either delete it or try again"
       );
       return;
     }
+
     dispatch(
-      editUserAsync({
-        userId: user.id.toString(),
-        roles: [...userUpdatedData.roles],
-        password: { newPassword: password },
+      sendUpdatedUserInfoAsync({
+        userId: userData.userId.toString(),
+        roles: userUpdatedData.roles.map((element) => ({
+          role: element.name,
+          status: element.status,
+        })),
+        password: password,
       })
     )
-      .then(() => setPassword(""))
-      .catch((error) => console.log(error));
+      .unwrap()
+      .then(() => {
+        setPassword("");
+        toast.success("User successfully updated.", { autoClose: 1000 });
+        navigate("/admin");
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.error("Something went wrong updating the user.");
+      });
   };
 
   return (
@@ -56,7 +71,8 @@ const EditUserForm: React.FC<Props> = (props: Props) => {
       component="form"
       onSubmit={handleSubmitForm}
       sx={{
-        mt: 4,
+        outline: "1px solid black",
+
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "center",
@@ -65,7 +81,7 @@ const EditUserForm: React.FC<Props> = (props: Props) => {
         maxWidth: 1000,
       }}
     >
-      <Roles editinguser={true} />
+      <Roles editingUser={true} />
       <Box
         sx={{
           mt: 6,
@@ -84,8 +100,8 @@ const EditUserForm: React.FC<Props> = (props: Props) => {
           label="Password"
           sx={{ maxWidth: 200 }}
           slotProps={{
-            input: { style: { color: "white" } },
-            inputLabel: { style: { color: "white" } },
+            input: { style: { color: "#393939" } },
+            inputLabel: { style: { color: "#393939" } },
           }}
         />
         <Box
@@ -99,7 +115,7 @@ const EditUserForm: React.FC<Props> = (props: Props) => {
           }}
         >
           <LoadingButton
-            disabled={!userUpdateFormTouched && !isPasswordTouched}
+            disabled={password.length <= 0}
             variant="contained"
             type="submit"
             color="success"

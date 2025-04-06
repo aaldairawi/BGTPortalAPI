@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using API.Dtos.CargoContainer;
 
 namespace API.Services
@@ -9,7 +5,7 @@ namespace API.Services
     public interface IContainerCurrentStatus
     {
 
-                Task<ContainerCurrentStatusDto> GetContainerCurrentStatus(string id);
-        
+        Task<ContainerCurrentStatusDto> GetContainerCurrentStatus(string id);
+
     }
 }

@@ -1,9 +1,9 @@
-import { IFinalizedInvoiceItemDto } from "../../app/models/invoice/finalizedinvoice";
+import { FinalizedInvoiceItemDto } from "../../app/models/invoice/finalizedinvoice.types";
 import React from "react";
 import TableRowComponent from "../../app/components/TableRowComponent";
 
 interface Props {
-  invoiceItem: IFinalizedInvoiceItemDto;
+  invoiceItem: FinalizedInvoiceItemDto;
   index: number;
 }
 

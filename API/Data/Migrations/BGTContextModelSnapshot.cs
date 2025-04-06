@@ -72,15 +72,9 @@ namespace API.Data.Migrations
                         },
                         new
                         {
-                            Id = 5,
+                            Id = 4,
                             Name = "Billing",
                             NormalizedName = "BILLING"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "BillingSupervisor",
-                            NormalizedName = "BILLINGSUPERVISOR"
                         });
                 });
 
@@ -132,7 +126,7 @@ namespace API.Data.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("RegisteredDate")
+                    b.Property<DateTime>("RegisteredDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")

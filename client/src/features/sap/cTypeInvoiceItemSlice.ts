@@ -4,19 +4,19 @@ import {
   createEntityAdapter,
   createSlice,
 } from "@reduxjs/toolkit";
-import { IFinalizedInvoiceItemDto } from "../../app/models/invoice/finalizedinvoice";
+import { FinalizedInvoiceItemDto } from "../../app/models/invoice/finalizedinvoice.types";
 import { RootState } from "../../app/store/configureStore";
-import agent from "../../app/agent/agent";
+import Agent from "../../app/agent/agent";
 
 interface ICtypeFinalizedInvoiceItemsState {
   invoiceItemsLoaded: boolean;
   invoiceItemStatus: string;
   showInvoiceItemBackdrop: boolean;
 }
-const invoiceItemsAdapter = createEntityAdapter<IFinalizedInvoiceItemDto>();
+const invoiceItemsAdapter = createEntityAdapter<FinalizedInvoiceItemDto>();
 
 export const getInvoiceItemsAsync = createAsyncThunk<
-  IFinalizedInvoiceItemDto[],
+  FinalizedInvoiceItemDto[],
   string,
   { state: RootState }
 >(
@@ -24,7 +24,7 @@ export const getInvoiceItemsAsync = createAsyncThunk<
 
   async (data, thunkArgApi) => {
     try {
-      return await agent.SapIntegration.getCTypeFinalizedInvoiceItems(data);
+      return await Agent.SapIntegration.getCTypeFinalizedInvoiceItems(data);
     } catch (error: any) {
       return thunkArgApi.rejectWithValue({ error: error.data });
     }

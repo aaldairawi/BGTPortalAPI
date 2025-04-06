@@ -1,12 +1,13 @@
 import { Button, TableCell, TableRow } from "@mui/material";
-import { IUserDto } from "../../app/models/account/user";
+import { UserDto } from "../../app/models/account/user";
 import { useAppDispatch } from "../../app/store/configureStore";
-import { deleteUserAsync, removeUserById } from "./usersSlice";
+import { removeUserById } from "./usersSlice";
 import { Link } from "react-router-dom";
 import { tableBodyTableCellStyles } from "./tableCssStyles";
+import { deleteUserAsync } from "./deleteUserThunk";
 
 interface Props {
-  user: IUserDto;
+  user: UserDto;
 }
 
 const User: React.FC<Props> = (props: Props) => {
@@ -18,9 +19,6 @@ const User: React.FC<Props> = (props: Props) => {
       sx={{
         border: "none",
         cursor: "pointer",
-        "&:hover": {
-          bgcolor: "grey.800",
-        },
       }}
     >
       <TableCell sx={tableBodyTableCellStyles}>{user.userName}</TableCell>

@@ -29,7 +29,6 @@ namespace API.Controllers
         [HttpGet("unitcurrentstatus/{id}")]
         public async Task<ActionResult<ContainerCurrentStatusDto>> UnitCurrentStatus(string id)
         {
-
             ContainerCurrentStatusDto result = await _containerCurrentStatus.GetContainerCurrentStatus(id);
             if (result == null)
                 return NotFound(new ProblemDetails { Title = $"Unit {id} not found." });

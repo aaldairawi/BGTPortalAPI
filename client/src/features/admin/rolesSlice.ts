@@ -4,8 +4,8 @@ import {
   createEntityAdapter,
   createSlice,
 } from "@reduxjs/toolkit";
-import { IRole } from "../../app/models/role/role";
-import agent from "../../app/agent/agent";
+import { Role } from "../../app/models/role/role";
+import Agent from "../../app/agent/agent";
 import { RootState } from "../../app/store/configureStore";
 
 interface IRoleState {
@@ -13,15 +13,15 @@ interface IRoleState {
   status: string;
 }
 
-const rolesAdapter = createEntityAdapter<IRole>();
+const rolesAdapter = createEntityAdapter<Role>();
 
 export const getAllRolesAsync = createAsyncThunk<
-  IRole[],
+  Role[],
   void,
   { state: RootState }
 >("rolesSlice/getAllRolesAsync", async (_, thunkApi) => {
   try {
-    return await agent.Roles.get();
+    return await Agent.Roles.get();
   } catch (error: any) {
     return thunkApi.rejectWithValue({ error: error.data });
   }

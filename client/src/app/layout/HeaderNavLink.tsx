@@ -2,88 +2,62 @@ import { Button, List, ListItem, Typography } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/configureStore";
 
-import { navStyles } from "./navStyles";
 import { signOut } from "../../features/account/accountSlice";
 
-type ADMIN_LINKS = "Api" | "Admin";
-type NORMAL_USER_LINKS = "Sap" | "Stripping";
-type Links = ADMIN_LINKS | NORMAL_USER_LINKS;
-export interface ILinks {
-  path: string;
-  text: ADMIN_LINKS | NORMAL_USER_LINKS;
-}
+import { ILinks, Links, rightLinks } from "./links";
 
-interface Props {
-  links: ILinks[];
-}
-
-const LinksRendered = (path: string, text: Links, key: string) => (
-  <ListItem sx={navStyles} component={NavLink} to={path} key={key}>
-    {text.toUpperCase()}
+const renderLink = (path: string, text: string, key: string): JSX.Element => (
+  <ListItem
+    sx={{
+      color: "rgba(0,0,0)",
+      fontSize: "14px",
+      "&.active": { textDecoration: "underline" },
+      "&:hover": { bgcolor: "rgba(0,0,0,0.1)" },
+    }}
+    component={NavLink}
+    to={path}
+    key={key}
+  >
+    {text}
   </ListItem>
 );
-const HeaderNavLink: React.FC<Props> = (props: Props) => {
-  const { links } = props;
+
+const filterLinks = (links: ILinks[], exclude: Links[]): ILinks[] =>
+  links.filter(({ text }) => !exclude.includes(text));
+
+const HeaderNavLink = () => {
   const { user } = useAppSelector((state) => state.account);
 
   const dispatch = useAppDispatch();
-  const signedInDubaiBillingLinks = (cb: () => boolean) => {
-    if (cb()) {
-      return links.map(({ path, text }) =>
-        text === "Admin" || text === "Api" || text === "Stripping"
-          ? null
-          : LinksRendered(path, text, text)
-      );
-    }
-  };
-  const signedInStrippingTeamLinks = (cb: () => boolean) => {
-    if (cb()) {
-      return links.map(({ path, text }) =>
-        text === "Admin" || text === "Sap" || text === "Api"
-          ? null
-          : LinksRendered(path, text, text)
-      );
-    }
-  };
-  const signedInAdminLinks = (cb: () => boolean) => {
-    if (cb()) {
-      return links.map(({ path, text }) =>
-        LinksRendered(
-          path === "/sap-integration" ? "/sap-integration/admin" : path,
-          text,
-          text
-        )
-      );
-    }
-  };
 
-  if (user && !user.roles) {
-    return (
-      <Typography
-        component={Button}
-        size="medium"
-        sx={navStyles}
-        onClick={() => dispatch(signOut())}
-      >
-        Logout
-      </Typography>
-    );
-  }
+  if (!user) return null;
 
   return (
     <List sx={{ display: "flex" }}>
-      {user ? signedInAdminLinks(() => user.roles.includes("Admin")) : null}
-      {user
-        ? signedInDubaiBillingLinks(() => user.roles.includes("DubaiBilling"))
-        : null}
-      {user
-        ? signedInStrippingTeamLinks(() => user.roles.includes("Stripping"))
-        : null}
+      {user &&
+        user.roles?.includes("Admin") &&
+        filterLinks(rightLinks, []).map(({ path, text }, index) =>
+          renderLink(path, text, index.toString())
+        )}
+      {user &&
+        user.roles?.includes("DubaiBilling") &&
+        filterLinks(rightLinks, ["ADMIN", "STRIPPING", "API"]).map(
+          ({ path, text }, index) => renderLink(path, text, index.toString())
+        )}
+      {user &&
+        user.roles?.includes("Stripping") &&
+        filterLinks(rightLinks, ["ADMIN", "SAP", "API"]).map(
+          ({ path, text }, index) => renderLink(path, text, index.toString())
+        )}
       {user && (
         <Typography
+          variant="caption"
           component={Button}
-          size="medium"
-          sx={navStyles}
+          sx={{
+            color: "rgba(0,0,0)",
+            fontWeight: "600",
+            "&:hover": { bgcolor: "#e82d26" },
+          }}
           onClick={() => dispatch(signOut())}
         >
           Logout

@@ -1,6 +1,6 @@
+global using static System.Console;
 using System.Text;
 using API.Data;
-using API.Data.ExistingViews;
 using API.Entities;
 using API.Helper;
 using API.Middleware;
@@ -29,7 +29,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
         Scheme = JwtBearerDefaults.AuthenticationScheme,
-        Description = "Place your bearer token here: Bearer + token",
+        Description = "Place your bearer token here buddy: Bearer + token",
         Reference = new OpenApiReference
         {
             Id = JwtBearerDefaults.AuthenticationScheme,
@@ -48,10 +48,7 @@ builder.Services.AddDbContext<BGTContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-builder.Services.AddDbContext<NavisContainerContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+
 builder.Services.AddCors();
 builder.Services.AddIdentityCore<User>(opt =>
 {
@@ -89,8 +86,11 @@ builder.Services.AddScoped<IContainerImportLifeTime, ContainerImportLifeTimeRepo
 builder.Services.AddScoped<IContainerExportLifeTime, ContainerExportLifeTimeRepository>();
 builder.Services.AddScoped<IContainerGeneralRequests, ContainerGeneralRequestsRepository>();
 builder.Services.AddScoped<IContainerCurrentStatus, ContainerCurrentStatusRepository>();
-builder.Services.AddScoped<ICInvoiceType, CInvoiceTypeRepository>();
-builder.Services.AddScoped<ICFinalInvoices, CFinalInvoicesRepository>();
+builder.Services.AddScoped<IFinalInvoice, FinalInvoiceRepository>();
+
+builder.Services.AddScoped<IDatabase, IDataBaseRepository>();
+
+
 
 var app = builder.Build();
 
@@ -105,13 +105,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCors(opt => { opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3001", "http://localhost:3000"); });
+app.UseCors(opt => { opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000"); });
 
 // app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
-
-
 app.MapControllers();
 
 var scope = app.Services.CreateScope();

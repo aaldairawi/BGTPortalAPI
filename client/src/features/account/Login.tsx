@@ -49,15 +49,16 @@ const Login = () => {
   } = useForm({ mode: "onTouched" });
 
   useEffect(() => {
-    if (user && user.roles !== undefined) {
-      if (user && user?.roles.includes("DubaiBilling")) {
-        navigate("/sap-integration");
-      }
-      if (user && user?.roles.includes("Admin")) {
-        navigate("/admin");
-      }
+    if (!user) return;
+
+    if (user && user?.roles?.includes("DubaiBilling")) {
+      navigate("/sap-integration");
     }
-    if (user && user.roles === undefined) {
+    if (user && user?.roles?.includes("Admin")) {
+      navigate("/admin");
+    }
+
+    if (user && !user.roles) {
       navigate("/default-member-page");
     }
   }, [user, navigate]);
@@ -69,9 +70,8 @@ const Login = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        p: 2,
+        p: 1,
         bgcolor: "lightgrey",
-        mt: 20,
         background: "#393939",
         border: "2px solid white",
         gap: 2,
@@ -102,7 +102,7 @@ const Login = () => {
             autoComplete="username"
             {...register("username", {
               required: "Username is required",
-              minLength: { value: 8, message: "" },
+              minLength: { value: 8, message: "username is required" },
             })}
             error={!!errors.username}
           />
@@ -121,8 +121,8 @@ const Login = () => {
               required: "Password is required",
               pattern: {
                 value:
-                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+}{":;'?/.,<>])(?=.{6,10}$).*/,
-                message: "",
+                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+}{":;'?/.,<>])(?=.{6,}$).*/,
+                message: "password is required",
               },
             })}
             error={!!errors.password}

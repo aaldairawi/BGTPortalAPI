@@ -7,14 +7,14 @@ import {
   PayloadAction,
 } from "@reduxjs/toolkit";
 import {
-  IFinalizedInvoiceDto,
-  IFinalizedInvoiceResponse,
-} from "../../app/models/invoice/finalizedinvoice";
+  FinalizedInvoiceDto,
+  FinalizedInvoiceResponseDto,
+} from "../../app/models/invoice/finalizedinvoice.types";
 import { RootState } from "../../app/store/configureStore";
-import agent from "../../app/agent/agent";
+import Agent from "../../app/agent/agent";
 
 interface ICtypeFinalizedSliceState {
-  invoicesResponseDto: IFinalizedInvoiceResponse | null;
+  invoicesResponseDto: FinalizedInvoiceResponseDto | null;
   invoiceTypeClicked: boolean;
   invoiceTypeSelected: string;
   invoiceDateSelected: string;
@@ -22,17 +22,17 @@ interface ICtypeFinalizedSliceState {
   invoicesLoaded: boolean;
 }
 
-const invoicesAdapter = createEntityAdapter<IFinalizedInvoiceDto>();
+const invoicesAdapter = createEntityAdapter<FinalizedInvoiceDto>();
 
 export const getAllCTypeFinalizedInvoicesAsync = createAsyncThunk<
-  IFinalizedInvoiceResponse,
+  FinalizedInvoiceResponseDto,
   { invoiceType: string; finalizedDate: string },
   { state: RootState }
 >(
   "cTypeFinalizedSlice/getAllFinalizedInvoicesAsync",
   async (data, thunkArgApi) => {
     try {
-      return await agent.SapIntegration.getFinalizedCTypeInvoices(data);
+      return await Agent.SapIntegration.getFinalizedCTypeInvoices(data);
     } catch (error: any) {
       return thunkArgApi.rejectWithValue({ error: error.data });
     }

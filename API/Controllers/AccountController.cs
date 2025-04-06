@@ -41,7 +41,7 @@ namespace API.Controllers
             {
                 return BadRequest(new ProblemDetails { Title = "A problem occured with your request" });
             }
-            
+
             LoggedInUserDto result = new(user.Id.ToString(), user.UserName!, user.Email!, await _tokenService.GenerateToken(user));
             return Ok(result);
         }
@@ -63,7 +63,7 @@ namespace API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> Register(RegisterUserDto registerUserDto)
+        public async Task<ActionResult> Register(RegisterUserDto registerUserDto)
         {
 
             if (!ModelState.IsValid)
@@ -73,7 +73,7 @@ namespace API.Controllers
             User? userAlreadyExists = await _userManager.FindByNameAsync(registerUserDto.UserName);
             if (userAlreadyExists != null)
             {
-                
+
                 return BadRequest(new ProblemDetails { Title = $"User with username {registerUserDto.UserName} already exists. Please log in" });
             }
             User user = new()
@@ -82,21 +82,65 @@ namespace API.Controllers
                 Email = registerUserDto.Email,
                 RegisteredDate = DateTime.Now,
             };
-            var createdNewUserResult = await _userManager.CreateAsync(user, registerUserDto.PassWord); // Calls save changes automatically.
+            var createdNewUserResult = await _userManager.CreateAsync(user, registerUserDto.PassWord);
             if (!createdNewUserResult.Succeeded)
             {
-                
+
                 foreach (var error in createdNewUserResult.Errors)
                 {
                     ModelState.AddModelError(error.Code, error.Description);
                 }
                 return ValidationProblem();
             }
-            var registeredDateHasValue = user.RegisteredDate.HasValue;
+            return Ok();
+        }
+
+
+        [HttpPost("create")]
+        public async Task<ActionResult<UserDto>> Create(RegisterUserDto registerUserDto)
+        {
+
+            string userLastLoggedInDate = "TBD";
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new ProblemDetails { Title = "Model State is not valid." });
+            }
+            User? userAlreadyExists = await _userManager.FindByNameAsync(registerUserDto.UserName);
+            if (userAlreadyExists != null)
+            {
+
+                return BadRequest(new ProblemDetails { Title = $"User with username {registerUserDto.UserName} already exists." });
+            }
+            User user = new()
+            {
+                UserName = registerUserDto.UserName,
+                Email = registerUserDto.Email,
+                RegisteredDate = DateTime.Now,
+            };
+            var createdNewUserResult = await _userManager.CreateAsync(user, registerUserDto.PassWord);
+            if (!createdNewUserResult.Succeeded)
+            {
+
+                foreach (var error in createdNewUserResult.Errors)
+                {
+                    ModelState.AddModelError(error.Code, error.Description);
+                }
+                return ValidationProblem();
+            }
+
+
             var lastLoggedInDateHasValue = user.LastLogin.HasValue;
-            UserDto createdUser = new(user.Id, user.UserName, user.Email, registeredDateHasValue ? user.RegisteredDate.ToString()! : "TBD", lastLoggedInDateHasValue ? user.LastLogin.ToString()! : "TBD", []);
+            if (lastLoggedInDateHasValue && user.LastLogin is not null)
+            {
+                userLastLoggedInDate = user.LastLogin.Value.ToString("yyyy-MM-dd");
+            }
+
+            UserDto createdUser = new(user.Id, user.UserName, user.Email, user.RegisteredDate.ToString("yyyy-MM-dd"), userLastLoggedInDate);
             return Ok(createdUser);
         }
+
+
 
 
     }

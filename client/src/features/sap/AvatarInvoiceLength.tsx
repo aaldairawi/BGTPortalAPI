@@ -1,9 +1,9 @@
 import { Avatar, Typography } from "@mui/material";
-import { IFinalizedInvoiceResponse } from "../../app/models/invoice/finalizedinvoice";
+import { FinalizedInvoiceResponseDto } from "../../app/models/invoice/finalizedinvoice.types";
 import React from "react";
 
 interface Props {
-  invoicesResponseDto?: IFinalizedInvoiceResponse | null;
+  invoicesResponseDto?: FinalizedInvoiceResponseDto | null;
 }
 const AvatarInvoiceLength: React.FC<Props> = (props: Props) => {
   const { invoicesResponseDto } = props;

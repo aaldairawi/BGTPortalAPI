@@ -1,4 +1,5 @@
 using API.Data;
+using API.Dtos.Role;
 using API.Dtos.User;
 using API.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -13,11 +14,13 @@ namespace API.Controllers
     {
         private readonly BGTContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly RoleManager<Role> _roleManager;
 
-        public UsersController(BGTContext context, UserManager<User> userManager)
+        public UsersController(BGTContext context, UserManager<User> userManager, RoleManager<Role> roleManager)
         {
             _context = context;
             _userManager = userManager;
+            _roleManager = roleManager;
         }
         [HttpGet("getall")]
         public async Task<ActionResult<List<UserDto>>> GetAll()
@@ -29,30 +32,48 @@ namespace API.Controllers
 
             foreach (User user in users)
             {
+
                 UserDto userDto = new(user.Id, user.UserName!, user.Email!,
-                user.RegisteredDate.HasValue ? user.RegisteredDate.ToString()! : "TBD",
-                user.LastLogin.HasValue ? user.LastLogin.ToString()! : "TBD", await GetUserRolesByUsername(user.UserName!));
+                 user.RegisteredDate.ToString("yyyy-MM-dd"),
+                user.LastLogin.HasValue ? user.LastLogin.Value.ToString("yyyy-MM-dd") : "TBD");
                 result.Add(userDto);
             }
             return Ok(result);
         }
 
-
         [HttpGet("{id}", Name = "GetOne")]
-        public async Task<ActionResult<UserDto>> GetOne(string id)
+        public async Task<ActionResult<ExistingUserAppAuthDto>> GetExistingUserAppAuthDtoAsync(string id)
         {
+            WriteLine("Yep made it here bud" + id);
+            string lastLoggedInDate = "TBD";
+
             User? user = await _userManager.FindByIdAsync(id);
-            if (user == null)
+            if (user is null || user.UserName is null || user.Email is null) return NotFound(new ProblemDetails { Title = $"User with id {id} does not exist." });
+
+            List<CurrentUserRoleStatusDto> userAssignedRoles = [];
+            List<GetRoleDto> appRoles = await GetAppRolesAsync();
+
+            List<string> userAppRoles = await GetUserRolesByUsernameAsync(user.UserName);
+
+            foreach (GetRoleDto appRole in appRoles)
             {
-                return NotFound(new ProblemDetails { Title = $"A problem occured fetching this user with id {id}." });
+                userAssignedRoles.Add(new CurrentUserRoleStatusDto(appRole.Id, appRole.Name, appRole.NormalizedName, userAppRoles.Contains(appRole.Name)));
             }
-            UserDto result = new(user.Id, user.UserName!, user.Email!, user.RegisteredDate.ToString() ?? "", user.LastLogin.ToString() ?? "TBD", await GetUserRolesByUsername(user.UserName!));
+
+
+            if (user.LastLogin is DateTime userLastLoggedInDate)
+                lastLoggedInDate = userLastLoggedInDate.ToString("yyyy-MM-dd");
+
+            ExistingUserAppAuthDto result = new(user.Id, user.UserName, user.Email, user.RegisteredDate.ToString("yyyy-MM-dd"),
+            lastLoggedInDate, userAssignedRoles);
             return Ok(result);
         }
 
+
         [HttpPost]
-        public async Task<ActionResult<UserDto>> CreateUser(RegisterUserDto registerUserDto)
+        public async Task<ActionResult<ExistingUserAppAuthDto>> CreateUser(RegisterUserDto registerUserDto)
         {
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(new ProblemDetails { Title = "Please check your model state." });
@@ -77,17 +98,27 @@ namespace API.Controllers
             {
                 return BadRequest(new ProblemDetails { Title = "A problem occured creating the user in the app." });
             }
-            return CreatedAtRoute("GetOne", new { id = newUser.Id }, new UserDto(newUser.Id, newUser.UserName, newUser.Email, newUser.RegisteredDate.ToString() ?? "",
-            newUser.LastLogin.ToString() ?? "TBD", await GetUserRolesByUsername(newUser.UserName)));
+
+
+            List<GetRoleDto> appRoles = await GetAppRolesAsync();
+
+            List<CurrentUserRoleStatusDto> currentUserRoleStatusList = [];
+            foreach (GetRoleDto role in appRoles)
+            {
+                currentUserRoleStatusList.Add(new(role.Id, role.Name, role.NormalizedName, false));
+            }
+
+            return CreatedAtRoute("GetOne", new { id = newUser.Id }, new ExistingUserAppAuthDto(newUser.Id, newUser.UserName, newUser.Email,
+            newUser.RegisteredDate.ToString("yyyy-MM-dd"), "TBD", currentUserRoleStatusList));
         }
 
-
-        [HttpPut("{id}")] // Make it to x and y,
-        public async Task<ActionResult<UserDto>> UpdateUserAsync(string id, [FromBody] UpdateUserDto updateUserDto)
+        [HttpPut]
+        public async Task<ActionResult> UpdateUserAsync([FromBody] UpdateUserDto updateUserDto)
         {
+            WriteLine("User updating method hit");
             if (!ModelState.IsValid) return BadRequest(new ProblemDetails { Title = "Bad request returned from API" });
-            User? user = await _userManager.FindByIdAsync(id);
-            if (user is null) return NotFound(new ProblemDetails { Title = $"User with id {id} doesn't exist" });
+            User? user = await _userManager.FindByIdAsync(updateUserDto.UserId);
+            if (user is null) return NotFound(new ProblemDetails { Title = $"User with id {updateUserDto.UserId} doesn't exist" });
 
             for (int index = 0; index < updateUserDto.Roles.Count; index++)
             {
@@ -112,20 +143,20 @@ namespace API.Controllers
             var passwordUpdateResult = await UpdateUserPasswordAsync(user, updateUserDto.Password);
             if (passwordUpdateResult != "Success")
                 return BadRequest(new ProblemDetails { Title = $"Error updating password for {user.UserName}" });
-            UserDto result = new(user.Id, user.UserName!, user.Email!, user.RegisteredDate.ToString() ?? "TBD", user.LastLogin.ToString() ?? "TBD", await GetUserRolesByUsername(user.UserName!));
-            return Ok(result);
+
+            return NoContent();
         }
 
-        private async Task<string> UpdateUserPasswordAsync(User user, UpdatePasswordDto updatePasswordDto)
+        private async Task<string> UpdateUserPasswordAsync(User user, string newPassword)
         {
-            if (!string.IsNullOrEmpty(updatePasswordDto.NewPassword))
+            if (!string.IsNullOrEmpty(newPassword))
             {
                 IdentityResult removePasswordResult = await _userManager.RemovePasswordAsync(user);
                 if (!removePasswordResult.Succeeded)
                 {
                     return "Error with removing the password.";
                 }
-                IdentityResult addedNewPasswordResult = await _userManager.AddPasswordAsync(user, updatePasswordDto.NewPassword);
+                IdentityResult addedNewPasswordResult = await _userManager.AddPasswordAsync(user, newPassword);
                 if (!addedNewPasswordResult.Succeeded)
                 {
                     return "Error with assigning the new password.";
@@ -169,17 +200,14 @@ namespace API.Controllers
             }
             return BadRequest("Error occured deleting user.");
         }
-        private async Task<List<string>> GetUserRolesByUsername(string username)
+        private async Task<List<string>> GetUserRolesByUsernameAsync(string username)
         {
-            User? user = await _userManager.FindByNameAsync(username);
-            if (user == null)
-            {
-                throw new Exception($"User with username {username} does not exist, attempting to retrieve roles.");
-            }
+            User? user = await _userManager.FindByNameAsync(username) ?? throw new Exception($"User with username {username} does not exist, attempting to retrieve roles.");
             return (List<string>)await _userManager.GetRolesAsync(user);
-
-
         }
+
+        private async Task<List<GetRoleDto>> GetAppRolesAsync() => await _roleManager.Roles.Select(element => new GetRoleDto(element.Id, element.Name!, element.NormalizedName!)).ToListAsync();
+
 
         private async Task<bool> IsRoleAssigned(User user, string roleName)
         {

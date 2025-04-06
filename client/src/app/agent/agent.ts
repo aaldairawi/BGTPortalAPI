@@ -1,26 +1,25 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import router from "../router/Routes";
-import { IUpdateUserDto, IUser, IUserRegister } from "../models/account/user";
-import { FieldValues } from "react-hook-form";
 import { store } from "../store/configureStore";
-import { IRole } from "../models/role/role";
 import {
   IContainerExportDto,
   IContainerImportDto,
 } from "../models/container/unitLifeTime";
+import { Users } from "./Users";
+import { Account } from "./Account";
+import { Roles } from "./Roles";
 
-const sleep = () => new Promise((resolve) => setTimeout(resolve, 100));
+const sleep = () => new Promise((resolve) => setTimeout(resolve, 1000));
 
 axios.defaults.baseURL = "http://localhost:5000/api/";
 
 const responseBody = (axiosResponse: AxiosResponse) => axiosResponse.data;
 axios.interceptors.request.use((config) => {
+  
   const token = store.getState().account.user?.token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
-  //const apiSupportedVersion = config.headers.get("api-supported-versions");
-  //console.log(apiSupportedVersion);
-  
+
   return config;
 });
 
@@ -68,7 +67,7 @@ axios.interceptors.response.use(
   }
 );
 
-const requests = {
+export const requests = {
   get: (url: string, params?: URLSearchParams) =>
     axios.get(url, { params }).then(responseBody),
   post: (url: string, body: object) => axios.post(url, body).then(responseBody),
@@ -76,33 +75,8 @@ const requests = {
   delete: (url: string) => axios.delete(url).then(responseBody),
 };
 
-const Users = {
-  get: (): Promise<IUser[]> => requests.get("users/getall"),
-  create: (userData: IUserRegister) =>
-    requests.post("account/register", userData),
-  edit: (object: IUpdateUserDto) => {
-    return requests.put(`users/${object.userId}`, {
-      roles: object.roles,
-      password: { newPassword: object.password.newPassword },
-    });
-  },
 
-  delete: (id: number) => requests.delete(`users/${id}`),
-};
 
-const Roles = {
-  get: (): Promise<IRole[]> => {
-    return requests.get("roles/getall");
-  },
-  delete: (roleId: number) => requests.delete(`roles/${roleId}`),
-};
-
-const Account = {
-  login: (userData: FieldValues) => requests.post("account/login", userData),
-  register: (userData: IUserRegister) =>
-    requests.post("account/register", userData),
-  getCurrentUser: () => requests.get("account/currentUser"),
-};
 
 const NavisUnitApi = {
   getUnitCurrentLocation: (unitNbr: string) =>
@@ -137,7 +111,7 @@ const TestErrors = {
   getValidationError: () => requests.get("buggy/validation-error"),
 };
 
-const agent = {
+const Agent = {
   Account,
   Users,
   Roles,
@@ -146,4 +120,4 @@ const agent = {
   TestErrors,
 };
 
-export default agent;
+export default Agent;

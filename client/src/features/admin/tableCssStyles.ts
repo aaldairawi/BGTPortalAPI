@@ -1,10 +1,11 @@
 export const tableHeadTableCellStyles = {
-  color: "white",
-  fontSize: "10px",
+  color: "#393939",
+  fontSize: "14px",
+  fontWeight: "600",
   textAlign: "center",
 };
 export const tableBodyTableCellStyles = {
-  color: "white",
-  fontSize: "10px",
+  color: "#393939",
+  fontSize: "12px",
   textAlign: "center",
 };

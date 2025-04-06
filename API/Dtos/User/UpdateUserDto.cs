@@ -2,15 +2,14 @@ namespace API.Dtos.User
 {
     public class UpdateUserDto
     {
+        public string  UserId {get; set;} = string.Empty; 
         public List<UserRole> Roles { get; set; } = [];
 
-        public required UpdatePasswordDto Password { get; set; }
-        public UpdateUserDto()
-        {
+        public string  Password { get; set; } = string.Empty;
+        
 
-        }
     }
     public record UserRole( string Role, bool Status);
-    public record UpdatePasswordDto(string NewPassword);
+    
 
 }

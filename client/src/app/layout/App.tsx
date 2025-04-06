@@ -3,11 +3,11 @@ import { useCallback, useEffect, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@emotion/react";
 import { Container, createTheme } from "@mui/material";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import Header from "./Header";
-import {  Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/configureStore";
 import { fetchCurrentUserAsync } from "../../features/account/accountSlice";
 import LoadingComponent from "../components/LoadingComponent";
@@ -18,24 +18,24 @@ const App = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   useAppSelector((state) => state.account);
+  
   const initApp = useCallback(async () => {
-    
     try {
       await dispatch(fetchCurrentUserAsync());
     } catch (error) {
+      toast.error("Session Expired, Please login again.", {autoClose: 1000});
       console.log(error);
     }
   }, [dispatch]);
-  
+
   useEffect(() => {
-    
     initApp().then(() => setLoading(false));
   }, [initApp]);
 
   const theme = createTheme({
     palette: {
       background: {
-        default: "var(--default-grey-color)",
+        default: "white",
       },
     },
   });

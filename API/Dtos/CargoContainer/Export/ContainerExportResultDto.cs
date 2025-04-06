@@ -1,28 +1,21 @@
+using API.Enums;
+
 namespace API.Dtos.CargoContainer.Export
 {
-    public class ContainerExportResultDto : ContainerGeneralProps
+    public class ContainerExportResultDto(string unitId, Category category, string status,
+                  string shippingLine, string vesselName, string vesselVoyage,
+                  string receivedEmpty, string containerLoaded, string vesselCompleted,
+                  string berth, string unitStuffed, string receivedFull) : ContainerGeneralProps(unitId, category, status)
     {
 
-        public string? ShippingLine { get; set; } = string.Empty;
-        public string? VesselName { get; set; } = string.Empty;
-        public string? VesselVoyage { get; set; } = string.Empty;
-        public string? ReceivedEmpty { get; set; } = string.Empty;
-        public string? ContainerLoaded { get; set; } = string.Empty;
-        public string? VesselCompleted { get; set; } = string.Empty; 
+        public string? ShippingLine { get; set; } = shippingLine; 
+        public string? VesselName { get; set; } = vesselName; 
+        public string? VesselVoyage { get; set; } = vesselVoyage;
+        public string? ReceivedEmpty { get; set; } = receivedEmpty; 
+        public string? ContainerLoaded { get; set; } = containerLoaded;
+        public string? VesselCompleted { get; set; } = vesselCompleted;
+        public string? Berth { get; set; } = berth; public string? UnitStuffed { get; set; } = unitStuffed;
 
-        public string? Berth { get; set; } = string.Empty;
-        public string? UnitStuffed { get; set; } = string.Empty;
-
-        public string? ReceivedFull { get; set; } = string.Empty;
-        public ContainerExportResultDto(string unitId, string category, string status,
-                      string shippingLine, string vesselName, string vesselVoyage,
-                      string receivedEmpty, string containerLoaded, string vesselCompleted,
-                      string berth, string unitStuffed, string receivedFull) : base(unitId, category, status)
-        {
-            ShippingLine = shippingLine; VesselName = vesselName; VesselVoyage = vesselVoyage;
-            ReceivedEmpty = receivedEmpty; ContainerLoaded = containerLoaded;
-            VesselCompleted = vesselCompleted; Berth = berth; UnitStuffed = unitStuffed;
-            ReceivedFull = receivedFull;
-        }
+        public string? ReceivedFull { get; set; } = receivedFull;
     }
 }
