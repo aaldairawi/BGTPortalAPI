@@ -12,6 +12,7 @@ import { getAllUsersAsync } from "./getUserThunks";
 export function Users() {
   const dispatch = useAppDispatch();
   const users = useAppSelector(userSelectors.selectAll);
+  
   const { usersloaded } = useAppSelector((state) => state.users);
 
   const { status } = useAppSelector((state) => state.users);
@@ -39,10 +40,13 @@ export function Users() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+
           mt: 1,
+          maxHeight: 450,
         }}
       >
         <Table
+          stickyHeader
           sx={{
             minWidth: 650,
             maxWidth: 1100,

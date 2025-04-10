@@ -36,8 +36,8 @@ const UnitCurrentStatus = () => {
   };
 
   return (
-    <Container sx={{ p: 2, mt: 5 }}>
-      <Typography variant="h5" color="white" sx={{ mb: 2 }}>
+    <Container sx={{ p: 2, mt: 5, border: "1px solid #393939" }}>
+      <Typography variant="h5" color="#393939" sx={{ mb: 2 }}>
         Unit Current Status API
       </Typography>
       <Box
@@ -70,9 +70,13 @@ const UnitCurrentStatus = () => {
           autoFocus
           slotProps={{
             inputLabel: {
-              style: { fontSize: "20px", color: "white", marginBottom: "1rem" },
+              style: {
+                fontSize: "20px",
+                color: "#393939",
+                marginBottom: "1rem",
+              },
             },
-            input: { style: { fontSize: "15px", color: "white" } },
+            input: { style: { fontSize: "15px", color: "#393939" } },
           }}
           sx={{ width: "150px", color: "white" }}
           {...register("unitnumber", {

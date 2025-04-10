@@ -16,7 +16,9 @@ namespace API.Data
             new Role { Id = 1, Name = "Admin", NormalizedName = "ADMIN" },
             new Role { Id = 2, Name = "DubaiBilling", NormalizedName = "DUBAIBILLING" },
             new Role { Id = 3, Name = "Stripping", NormalizedName = "STRIPPING" },
-            new Role { Id = 4, Name = "Billing", NormalizedName = "BILLING" });
+            new Role { Id = 4, Name = "Billing", NormalizedName = "BILLING" }
+            , new Role { Id = 5, Name = "Member", NormalizedName = "MEMBER" }
+            );
 
 
         }

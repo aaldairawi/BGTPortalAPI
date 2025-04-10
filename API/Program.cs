@@ -1,5 +1,6 @@
 global using static System.Console;
 using System.Text;
+using API;
 using API.Data;
 using API.Entities;
 using API.Helper;
@@ -87,8 +88,9 @@ builder.Services.AddScoped<IContainerExportLifeTime, ContainerExportLifeTimeRepo
 builder.Services.AddScoped<IContainerGeneralRequests, ContainerGeneralRequestsRepository>();
 builder.Services.AddScoped<IContainerCurrentStatus, ContainerCurrentStatusRepository>();
 builder.Services.AddScoped<IFinalInvoice, FinalInvoiceRepository>();
+builder.Services.AddScoped<IUserRoleHelper, UserRoleHelperRepository>();
 
-builder.Services.AddScoped<IDatabase, IDataBaseRepository>();
+builder.Services.AddScoped<IDatabase, DataBaseRepository>();
 
 
 

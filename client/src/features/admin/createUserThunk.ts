@@ -7,14 +7,14 @@ import { UserDto, UserRegister } from "../../app/models/account/user";
 
 
 export const createUserAsync = createAsyncThunk<UserDto, FieldValues>(
-    "usersSlice/createUserAsync",
-    async (data, thunkApi) => {
-      try {
-        return await Agent.Users.create(data as UserRegister);
-      } catch (error: any) {
-        console.log(error);
-        return thunkApi.rejectWithValue({ error: error.data });
-      }
+  "usersSlice/createUserAsync",
+  async (data, thunkApi) => {
+    try {
+      const response = await Agent.Users.create(data as UserRegister);
+      return response;
+    } catch (error: any) {
+      console.log(error);
+      return thunkApi.rejectWithValue({ error: error.data });
     }
-  );
-  
+  }
+);

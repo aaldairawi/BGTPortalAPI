@@ -1,10 +1,11 @@
 import { Button, List, ListItem, Typography } from "@mui/material";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../store/configureStore";
 
 import { signOut } from "../../features/account/accountSlice";
 
 import { ILinks, Links, rightLinks } from "./links";
+import { clearUsersLoadedFromAdapter } from "../../features/admin/usersSlice";
 
 const renderLink = (path: string, text: string, key: string): JSX.Element => (
   <ListItem
@@ -26,16 +27,25 @@ const filterLinks = (links: ILinks[], exclude: Links[]): ILinks[] =>
   links.filter(({ text }) => !exclude.includes(text));
 
 const HeaderNavLink = () => {
-  const { user } = useAppSelector((state) => state.account);
+  const { user, isUserAnAdmin } = useAppSelector((state) => state.account);
+  const navigate = useNavigate();
 
   const dispatch = useAppDispatch();
 
   if (!user) return null;
 
+  const onHandleSignUserOut = () => {
+    dispatch(signOut());
+    if (isUserAnAdmin) {
+      dispatch(clearUsersLoadedFromAdapter());
+    }
+    navigate("/");
+  };
+
   return (
     <List sx={{ display: "flex" }}>
       {user &&
-        user.roles?.includes("Admin") &&
+        isUserAnAdmin &&
         filterLinks(rightLinks, []).map(({ path, text }, index) =>
           renderLink(path, text, index.toString())
         )}
@@ -58,7 +68,7 @@ const HeaderNavLink = () => {
             fontWeight: "600",
             "&:hover": { bgcolor: "#e82d26" },
           }}
-          onClick={() => dispatch(signOut())}
+          onClick={onHandleSignUserOut}
         >
           Logout
         </Typography>

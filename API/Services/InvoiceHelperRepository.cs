@@ -5,10 +5,10 @@ using Microsoft.Data.SqlClient;
 
 namespace API.Services
 {
-    public class IInvoiceHelperRepository : IInvoiceHelper
+    public class InvoiceHelperRepository : IInvoiceHelper
     {
         private readonly IDatabase _database;
-        public IInvoiceHelperRepository(IDatabase database)
+        public InvoiceHelperRepository(IDatabase database)
         {
             _database = database ?? throw new ArgumentNullException(nameof(database));
         }

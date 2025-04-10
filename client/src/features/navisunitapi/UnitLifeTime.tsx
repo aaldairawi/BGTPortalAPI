@@ -47,8 +47,8 @@ const UnitLifeTime = () => {
   };
 
   return (
-    <Container sx={{ p: 2, mt: 5 }}>
-      <Typography variant="h5" color="white" sx={{ mb: 2 }}>
+    <Container sx={{ p: 2, mt: 5, border: "1px solid #393939" }}>
+      <Typography variant="h5" color="white" sx={{ mb: 2, color: "#393939" }}>
         Unit Current Life Time API
       </Typography>
       <Box
@@ -82,9 +82,13 @@ const UnitLifeTime = () => {
           autoFocus
           slotProps={{
             inputLabel: {
-              style: { fontSize: "20px", color: "white", marginBottom: "1rem" },
+              style: {
+                fontSize: "20px",
+                color: "#393939",
+                marginBottom: "1rem",
+              },
             },
-            input: { style: { fontSize: "15px", color: "white" } },
+            input: { style: { fontSize: "15px", color: "#393939" } },
           }}
           sx={{ width: "150px", color: "white" }}
           {...register("unitNumber", {
@@ -100,12 +104,12 @@ const UnitLifeTime = () => {
           defaultValue="IMPORT"
           variant="standard"
           autoFocus
-          sx={{ width: "150px", color: "white" }}
+          sx={{ width: "150px", color: "#393939" }}
           slotProps={{
             inputLabel: {
-              style: { fontSize: "20px", color: "white", marginBottom: "1rem" },
+              style: { fontSize: "20px", color: "#393939", marginBottom: "1rem" },
             },
-            input: { style: { fontSize: "15px", color: "white" } },
+            input: { style: { fontSize: "15px", color: "#393939" } },
           }}
           {...register("unitCategory", {
             required: true,

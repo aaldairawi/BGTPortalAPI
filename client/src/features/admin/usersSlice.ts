@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   createEntityAdapter,
   createSlice,
@@ -19,6 +18,7 @@ interface UserState {
   status: string;
   existingUserAppInfo: UserAppInfo;
   userToEditFetched: boolean;
+  editUserFormTouched: boolean;
 }
 
 const usersAdapter = createEntityAdapter<UserDto>();
@@ -29,6 +29,7 @@ export const usersSlice = createSlice({
     usersloaded: false,
     status: "idle",
     userToEditFetched: false,
+    editUserFormTouched: false,
     existingUserAppInfo: {
       userId: 0,
       roles: [],
@@ -54,6 +55,17 @@ export const usersSlice = createSlice({
         registered: "",
       };
       state.userToEditFetched = false;
+      state.editUserFormTouched = false;
+    },
+    setEditFormTouched: (state) => {
+      if (!state.editUserFormTouched) {
+        state.editUserFormTouched = true;
+      }
+    },
+    clearUsersLoadedFromAdapter: (state) => {
+      
+      usersAdapter.removeAll(state);
+      state.usersloaded = false;
     },
   },
   extraReducers: (builder) => {
@@ -135,6 +147,9 @@ export const usersSlice = createSlice({
       if (indexOfRoleToAdd === -1) return;
 
       state.existingUserAppInfo.roles[indexOfRoleToAdd].status = true;
+      if (!state.editUserFormTouched) {
+        state.editUserFormTouched = true;
+      }
 
       state.status = "idle";
     });
@@ -154,6 +169,9 @@ export const usersSlice = createSlice({
       );
       state.existingUserAppInfo.roles[indexOfRemovedRole].status = false;
       state.status = "idle";
+      if (!state.editUserFormTouched) {
+        state.editUserFormTouched = true;
+      }
     });
   },
 });
@@ -162,5 +180,10 @@ export const userSelectors = usersAdapter.getSelectors(
   (state: RootState) => state.users
 );
 
-export const { cancelEditingUser, createUser, removeUserById } =
-  usersSlice.actions;
+export const {
+  setEditFormTouched,
+  cancelEditingUser,
+  createUser,
+  removeUserById,
+  clearUsersLoadedFromAdapter,
+} = usersSlice.actions;

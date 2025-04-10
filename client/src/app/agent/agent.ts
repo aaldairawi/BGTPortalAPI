@@ -10,13 +10,12 @@ import { Users } from "./Users";
 import { Account } from "./Account";
 import { Roles } from "./Roles";
 
-const sleep = () => new Promise((resolve) => setTimeout(resolve, 1000));
+const sleep = () => new Promise((resolve) => setTimeout(resolve, 500));
 
 axios.defaults.baseURL = "http://localhost:5000/api/";
 
 const responseBody = (axiosResponse: AxiosResponse) => axiosResponse.data;
 axios.interceptors.request.use((config) => {
-  
   const token = store.getState().account.user?.token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
 
@@ -28,6 +27,7 @@ axios.interceptors.response.use(
     if (import.meta.env.DEV) {
       await sleep();
     }
+
     return response;
   },
   (error: AxiosError) => {
@@ -37,7 +37,6 @@ axios.interceptors.response.use(
         if (data.errors) {
           const modelStateErrors: string[] = [];
           for (const key in data.errors) {
-            console.log(key);
             if (data.errors[key]) {
               modelStateErrors.push(data.errors[key]);
             }
@@ -74,9 +73,6 @@ export const requests = {
   put: (url: string, body: object) => axios.put(url, body).then(responseBody),
   delete: (url: string) => axios.delete(url).then(responseBody),
 };
-
-
-
 
 const NavisUnitApi = {
   getUnitCurrentLocation: (unitNbr: string) =>

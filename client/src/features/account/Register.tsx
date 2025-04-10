@@ -23,7 +23,6 @@ import CloseFormIcon from "../../app/components/CloseFormIcon";
 import { AUTHLOGINBOX, AUTHLOGINTEXTFIELD } from "./AuthTextFieldStyles";
 import { toast } from "react-toastify";
 
-type RegisterThunkAction = "Register" | "Create";
 interface Props {
   showCloseIcon?: boolean;
   onHandleCloseForm?: () => void;
@@ -32,7 +31,7 @@ interface Props {
 const Register: React.FC<Props> = (props: Props) => {
   const { showCloseIcon, onHandleCloseForm } = props;
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.account);
+  const { isUserAnAdmin } = useAppSelector((state) => state.account);
   const [isValidUserName, setIsValidUserName] = useState(false);
   const [isValidEmail, setIsValidEmail] = useState(false);
   const [isValidPassword, setIsValidPassword] = useState(false);
@@ -109,32 +108,31 @@ const Register: React.FC<Props> = (props: Props) => {
     }
   };
 
-  const dispatchAsyncThunk = (): RegisterThunkAction => {
-    if (!user) {
-      return "Register";
-    } else {
-      return "Create";
-    }
-  };
   const onHandleFormSubmit = async (data: FieldValues) => {
-    if (dispatchAsyncThunk() === "Register") {
+    if (!isUserAnAdmin) {
       try {
         await dispatch(registerUserAsync(data)).unwrap();
       } catch (error: any) {
+        if (Array.isArray(error)) {
+          error.forEach((err: string) => console.log(err));
+        }
         handleApiErrors(error);
       }
-      if (dispatchAsyncThunk() === "Create") {
-        try {
-          await dispatch(createUserAsync(data)).unwrap();
-        } catch (error: any) {
-          handleApiErrors(error);
-        }
-      }
-      toast.success("Registration successful, please log in.", {
-        autoClose: 1000,
-      });
-      reset();
     }
+
+    if (isUserAnAdmin) {
+      try {
+        await dispatch(createUserAsync(data)).unwrap();
+      } catch (error: any) {
+        handleApiErrors(error);
+      }
+    }
+
+    toast.success("Registration successful, please log in.", {
+      autoClose: 1000,
+    });
+
+    reset();
   };
 
   const marginVariable = showCloseIcon ? 3 : 20;
@@ -195,11 +193,11 @@ const Register: React.FC<Props> = (props: Props) => {
         </Box>
         <Box sx={AUTHLOGINBOX}>
           <Typography variant="subtitle1" color="white">
-            BGTEmail
+            Email
           </Typography>
           <TextField
             placeholder="Enter a valid email"
-            sx={AUTHLOGINTEXTFIELD}
+            sx={{ ...AUTHLOGINTEXTFIELD, ml: 4 }}
             margin="normal"
             {...register("email", {
               onChange: onHandleValidateEmail,
@@ -252,7 +250,7 @@ const Register: React.FC<Props> = (props: Props) => {
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
         >
-          {user?.roles?.includes("Admin") ? "Create" : "Register"}
+          {isUserAnAdmin ? "Create" : "Register"}
         </LoadingButton>
         {!showCloseIcon && (
           <Grid container spacing={2}>

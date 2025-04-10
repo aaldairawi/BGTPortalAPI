@@ -2,18 +2,17 @@
 import { createAsyncThunk, createSlice, isAnyOf } from "@reduxjs/toolkit";
 import Agent from "../../app/agent/agent";
 import { FieldValues } from "react-hook-form";
-import {
-  LoggedInUser,
-  UserRegister,
-} from "../../app/models/account/user";
+import { LoggedInUser, UserRegister } from "../../app/models/account/user";
 
 import router from "../../app/router/Routes";
 
 interface AccountState {
   user: LoggedInUser | null;
+  isUserAnAdmin: boolean;
 }
 const initialState: AccountState = {
   user: null,
+  isUserAnAdmin: false,
 };
 
 export const signInUserAsync = createAsyncThunk<LoggedInUser, FieldValues>(
@@ -71,36 +70,38 @@ export const accountSlice = createSlice({
   reducers: {
     signOut: (state) => {
       state.user = null;
+      state.isUserAnAdmin = false; 
       localStorage.removeItem("user");
-      router.navigate("/");
     },
     setUser: (state, action) => {
       const claims = JSON.parse(atob(action.payload.token.split(".")[1]));
       const roles =
         claims["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-      console.log(roles);
+
       state.user = {
         ...action.payload,
         roles: typeof roles === "string" ? [roles] : roles,
       };
+      if (state.user && state.user.roles?.includes("Admin")) {
+        state.isUserAnAdmin = true;
+      } else {
+        console.log("No user fonund for data");
+      }
     },
-
   },
   extraReducers: (builder) => {
     builder.addCase(registerUserAsync.fulfilled, () => {
-
       router.navigate("/login");
     });
 
     builder.addCase(registerUserAsync.rejected, (_, action) => {
       console.log(action.payload);
-    
     });
 
     builder.addCase(fetchCurrentUserAsync.rejected, (state) => {
       state.user = null;
       localStorage.removeItem("user");
-      
+
       router.navigate("/");
     });
 
@@ -108,7 +109,7 @@ export const accountSlice = createSlice({
       isAnyOf(signInUserAsync.fulfilled, fetchCurrentUserAsync.fulfilled),
       (state, action) => {
         const claims = JSON.parse(atob(action.payload.token.split(".")[1]));
-        const roles  =
+        const roles =
           claims[
             "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
           ];
@@ -117,6 +118,9 @@ export const accountSlice = createSlice({
           ...action.payload,
           roles: typeof roles === "string" ? [roles] : roles,
         };
+        if (state.user && state.user.roles?.includes("Admin")) {
+          state.isUserAnAdmin = true;
+        }
       }
     );
     builder.addMatcher(

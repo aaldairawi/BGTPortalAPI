@@ -5,6 +5,7 @@ import { removeUserById } from "./usersSlice";
 import { Link } from "react-router-dom";
 import { tableBodyTableCellStyles } from "./tableCssStyles";
 import { deleteUserAsync } from "./deleteUserThunk";
+import { toast } from "react-toastify";
 
 interface Props {
   user: UserDto;
@@ -13,6 +14,18 @@ interface Props {
 const User: React.FC<Props> = (props: Props) => {
   const { user } = props;
   const dispatch = useAppDispatch();
+
+  const onHandleDeleteUser = async (id: number) => {
+    try {
+      if (!window.confirm("Are you sure you want to delete the user?")) return;
+      await dispatch(deleteUserAsync(id)).unwrap();
+      dispatch(removeUserById(id));
+      toast.success("User successfully deleted", { autoClose: 500 });
+    } catch (error) {
+      toast.error("An error occured deleting the user");
+      console.log(error);
+    }
+  };
 
   return (
     <TableRow
@@ -43,11 +56,7 @@ const User: React.FC<Props> = (props: Props) => {
           variant="contained"
           color="error"
           sx={{ fontSize: "13px" }}
-          onClick={() =>
-            dispatch(deleteUserAsync(user.id)).then(() =>
-              dispatch(removeUserById(user.id))
-            )
-          }
+          onClick={() => onHandleDeleteUser(user.id)}
         >
           DELETE
         </Button>

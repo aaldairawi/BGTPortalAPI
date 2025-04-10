@@ -51,7 +51,6 @@ namespace API.Controllers
         [HttpGet("unitlifetimeexport")]
         public async Task<ActionResult<ContainerExportResultDto>> UnitExportLifeTime(string unitNumber)
         {
-            WriteLine(unitNumber);
             var containerMasterData = await _containerGeneralRequests.GetContainerLifeTimeMasterDataExport(unitNumber);
             if (containerMasterData is null)
             {

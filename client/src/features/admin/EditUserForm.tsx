@@ -3,8 +3,9 @@ import { UserAppInfo } from "../../app/models/account/user";
 import { LoadingButton } from "@mui/lab";
 import { FormEvent, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
-import { cancelEditingUser } from "./usersSlice";
-import { Link, useNavigate } from "react-router-dom";
+import { cancelEditingUser, setEditFormTouched } from "./usersSlice";
+import { Link } from "react-router-dom";
+
 import { Roles } from "./Roles";
 
 import { toast } from "react-toastify";
@@ -16,11 +17,11 @@ interface Props {
 
 const EditUserForm: React.FC<Props> = (props: Props) => {
   const { userData } = props;
-  const navigate = useNavigate();
+
   const [password, setPassword] = useState("");
 
   const dispatch = useAppDispatch();
-  const { status, existingUserAppInfo: userUpdatedData } = useAppSelector(
+  const { editUserFormTouched, status, existingUserAppInfo } = useAppSelector(
     (state) => state.users
   );
 
@@ -28,6 +29,7 @@ const EditUserForm: React.FC<Props> = (props: Props) => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setPassword(event.target.value);
+    dispatch(setEditFormTouched());
   };
 
   const handleSubmitForm = (event: FormEvent<HTMLFormElement>) => {
@@ -47,7 +49,7 @@ const EditUserForm: React.FC<Props> = (props: Props) => {
     dispatch(
       sendUpdatedUserInfoAsync({
         userId: userData.userId.toString(),
-        roles: userUpdatedData.roles.map((element) => ({
+        roles: existingUserAppInfo.roles.map((element) => ({
           role: element.name,
           status: element.status,
         })),
@@ -58,7 +60,6 @@ const EditUserForm: React.FC<Props> = (props: Props) => {
       .then(() => {
         setPassword("");
         toast.success("User successfully updated.", { autoClose: 1000 });
-        navigate("/admin");
       })
       .catch((error) => {
         console.log(error);
@@ -115,17 +116,17 @@ const EditUserForm: React.FC<Props> = (props: Props) => {
           }}
         >
           <LoadingButton
-            disabled={password.length <= 0}
+            disabled={!editUserFormTouched}
             variant="contained"
             type="submit"
             color="success"
             loadingIndicator={<CircularProgress color="info" size={13} />}
-            loading={status === "pendingEditUserAsync"}
+            loading={status === "pendingsendUpdatedUserInfoAsync"}
           >
             Save
           </LoadingButton>
           <Button
-            disabled={status === "pendingEditUserAsync"}
+            disabled={status === "pendingsendUpdatedUserInfoAsync"}
             component={Link}
             onClick={() => dispatch(cancelEditingUser())}
             to={`/admin`}

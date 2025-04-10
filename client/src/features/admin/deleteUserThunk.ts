@@ -9,6 +9,7 @@ export const deleteUserAsync = createAsyncThunk<void, number>(
     async (id, thunkApi) => {
       try {
         return await Agent.Users.delete(id);
+        
       } catch (error: any) {
         thunkApi.rejectWithValue({ error: error.data });
       }

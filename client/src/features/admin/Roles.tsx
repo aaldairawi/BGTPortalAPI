@@ -9,7 +9,7 @@ import {
 import { tableHeadTableCellStyles } from "./tableCssStyles";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { getAllRolesAsync, rolesSelctors } from "./rolesSlice";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import { Role as RoleInterface } from "../../app/models/role/role";
 import Role from "./Role";
@@ -23,8 +23,6 @@ interface Props {
 export type RolesToMap = ExistingUserRoleStatus[] | RoleInterface[];
 
 export function Roles({ editingUser }: Props) {
-
-  
   const dispatch = useAppDispatch();
 
   const appRoles = useAppSelector(rolesSelctors.selectAll);
@@ -53,10 +51,11 @@ export function Roles({ editingUser }: Props) {
           alignItems: "center",
           justifyContent: "center",
 
-          maxHeight: 600,
+          maxHeight: 450,
         }}
       >
         <Table
+          stickyHeader
           sx={{
             minWidth: 60,
             maxWidth: 1100,

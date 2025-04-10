@@ -23,6 +23,8 @@ const Role: React.FC<Props> = (props: Props) => {
   const { status } = useAppSelector((state) => state.users);
 
   const dispatch = useAppDispatch();
+  const isRoleAssignedAlready: boolean = "status" in role ? role.status : false;
+  const isRoleNotAssignedAlready : boolean = "status" in role ? !role.status : true;
 
   return (
     <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
@@ -35,7 +37,9 @@ const Role: React.FC<Props> = (props: Props) => {
       {editingUser && (
         <TableCell sx={tableBodyTableCellStyles}>
           <LoadingButton
-            disabled={"status" in role ? role.status : false}
+            disabled={
+              isRoleAssignedAlready || status === "pendingsendUpdatedUserInfoAsync"
+            }
             variant="contained"
             loadingIndicator={
               <CircularProgress sx={{ color: "white" }} size={13} />
@@ -53,7 +57,7 @@ const Role: React.FC<Props> = (props: Props) => {
       {editingUser && (
         <TableCell sx={tableBodyTableCellStyles}>
           <LoadingButton
-            disabled={"status" in role ? !role.status : true}
+            disabled={isRoleNotAssignedAlready || status === "pendingsendUpdatedUserInfoAsync"}
             variant="outlined"
             loadingIndicator={
               <CircularProgress sx={{ color: "#393939" }} size={13} />

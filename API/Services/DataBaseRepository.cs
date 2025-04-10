@@ -3,10 +3,10 @@ using Microsoft.Data.SqlClient;
 
 namespace API.Services
 {
-    public class IDataBaseRepository : IDatabase
+    public class DataBaseRepository : IDatabase
     {
         private readonly IConfiguration _configuration;
-        public IDataBaseRepository(IConfiguration configuration)
+        public DataBaseRepository(IConfiguration configuration)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }

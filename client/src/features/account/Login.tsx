@@ -76,6 +76,7 @@ const Login = () => {
         border: "2px solid white",
         gap: 2,
         borderRadius: "5px",
+        mt: 20,
       }}
     >
       <Avatar sx={{ bgcolor: "white" }}>
