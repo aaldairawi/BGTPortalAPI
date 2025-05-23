@@ -18,12 +18,12 @@ const App = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   useAppSelector((state) => state.account);
-  
+
   const initApp = useCallback(async () => {
     try {
       await dispatch(fetchCurrentUserAsync());
     } catch (error) {
-      toast.error("Session Expired, Please login again.", {autoClose: 1000});
+      toast.error("Session Expired, Please login again.", { autoClose: 500 });
       console.log(error);
     }
   }, [dispatch]);

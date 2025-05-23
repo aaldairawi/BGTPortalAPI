@@ -6,12 +6,12 @@ namespace API.Dtos.User
     public record RegisterUserDto
     (
 
-        [Required(ErrorMessage ="The Username is required to register.")]
+        [Required(ErrorMessage ="Username is required.")]
         [MinLength(8, ErrorMessage ="Username must be atleast 8 characters.")]
         string UserName,
-        [Required(ErrorMessage = "The email is required to register.")]
+        [Required(ErrorMessage = "Email is required.")]
         string Email,
-        [Required(ErrorMessage ="The password is required to register.")]
+        [Required(ErrorMessage ="Password is required.")]
         [MinLength(8, ErrorMessage ="Password must be atleast 8 characters.")]
         string PassWord
     );

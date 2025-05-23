@@ -4,7 +4,7 @@ import Login from "../../features/account/Login";
 import Register from "../../features/account/Register";
 import NotFound from "../errors/NotFound";
 import ServerError from "../errors/ServerError";
-import Admin from "../../features/admin/Admin";
+import Admin from "../../features/admin/AdminPanel";
 import RequireAuth from "./RequireAuth";
 import HomePageLogo from "../../features/home/HomepageLogo";
 // import EditUserPage from "../../features/admin/EditUserPage";
@@ -12,6 +12,7 @@ import HomePageLogo from "../../features/home/HomepageLogo";
 import SapIntegrationPanel from "../../features/sap/SapIntegrationPanel";
 import NavisContainerAPIPanel from "../../features/navisunitapi/NavisContainerAPIPanel";
 import { EditUserPage } from "../../features/admin/EditUserPage";
+import { StrippingUnitsPanel } from "../../features/stripping/StrippingUnitsPanel";
 
 const router = createBrowserRouter([
   {
@@ -19,30 +20,35 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        element: <RequireAuth roles={["DubaiBilling","Admin"]} />,
-        children: [{ path: "sap-integration", element: <SapIntegrationPanel /> }],
+        element: (
+          <RequireAuth roles={["DubaiFinance", "Admin", "IraqFinance"]} />
+        ),
+        children: [
+          { path: "v1/sap-integration", element: <SapIntegrationPanel /> },
+        ],
       },
       {
         element: <RequireAuth roles={["Admin"]} />,
         children: [
-          {
-            path: "admin",
-            element: <Admin />,
-          },
-          {
-            path: "edit/user/:userId",
-            element: <EditUserPage />,
-          },
-
-          { path: "n4api", element: <NavisContainerAPIPanel /> },
-          { path: "server-error", element: <ServerError /> },
+          { path: "v1/admin", element: <Admin /> },
+          { path: "v1/edit/user/:userId", element: <EditUserPage /> },
+          { path: "v1/n4api", element: <NavisContainerAPIPanel /> },
+          { path: "v1/server-error", element: <ServerError /> },
         ],
       },
-      { path: "default-member-page", element: <HomePageLogo /> },
-      { path: "login", element: <Login /> },
-      { path: "register", element: <Register /> },
-      { path: "not-found", element: <NotFound /> },
-      { path: "*", element: <Navigate to="/not-found" replace={true} /> },
+      {
+        element: <RequireAuth roles={["Admin", "Operations"]} />,
+        children: [
+          { path: "v1/stripping-units", element: <StrippingUnitsPanel /> },
+        ],
+      },
+      { path: "v1/default-member-page", element: <HomePageLogo /> },
+      { path: "v1/login", element: <Login /> },
+      { path: "v1/register", element: <Register /> },
+
+      { path: "v1/not-found", element: <NotFound /> },
+
+      { path: "*", element: <Navigate to="/v1/not-found" replace={true} /> },
     ],
   },
 ]);

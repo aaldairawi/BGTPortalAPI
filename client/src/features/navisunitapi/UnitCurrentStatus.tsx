@@ -8,14 +8,14 @@ import {
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { useForm } from "react-hook-form";
 import { LoadingButton } from "@mui/lab";
-import { getUnitCurrentStatusAsync } from "./navisApiSlice";
+import { getUnitCurrentStatusAsync } from "./n4ContainerSlice";
 import UnitCurrentStatusResult from "./UnitCurrentStatusResult";
 import { toast } from "react-toastify";
 
 const UnitCurrentStatus = () => {
   const dispatch = useAppDispatch();
 
-  const { unitCurrentStatus } = useAppSelector((state) => state.navisApiSlice);
+  const { unitCurrentStatus } = useAppSelector((state) => state.n4Containers);
 
   const {
     register,
@@ -67,7 +67,6 @@ const UnitCurrentStatus = () => {
       >
         <TextField
           variant="standard"
-          autoFocus
           slotProps={{
             inputLabel: {
               style: {

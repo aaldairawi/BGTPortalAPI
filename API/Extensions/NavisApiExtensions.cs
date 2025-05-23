@@ -1,6 +1,6 @@
-using API.Dtos.CargoContainer;
-using API.Dtos.CargoContainer.Export;
-using API.Dtos.CargoContainer.Import;
+using API.Dtos.Container;
+using API.Dtos.Container.Export;
+using API.Dtos.Container.Import;
 using API.Enums;
 
 namespace API.Extensions
@@ -15,7 +15,7 @@ namespace API.Extensions
         string loadedToTruck, string gateOut)
         {
             return new ContainerImportResultDto(
-                input.ContainerId, Category.IMPORT,
+                input.ContainerId, Category.IMPORT.ToString(),
                 input.FreightKind == "FCL" ? "FULL" : "EMPTY", input.LineName ?? string.Empty, vesselName, input.ArrivePositionLocId ?? string.Empty,
                 vesselATA, containerDischargeDate, stripped, receivedBackEmpty, input.Berth ?? string.Empty, loadedToTruck, gateOut);
 
@@ -26,7 +26,7 @@ namespace API.Extensions
         {
             
             var unitStatus = input.FreightKind == "FCL" ? "Full" : "Empty";
-            return new ContainerExportResultDto(input.ContainerId, Category.EXPORT, unitStatus,
+            return new ContainerExportResultDto(input.ContainerId, Category.EXPORT.ToString(), unitStatus,
             input.LineName ?? string.Empty, vesselName ?? string.Empty, input.LastPositionLocId ?? string.Empty, receivedEmpty ?? string.Empty,
             containerLoaded ?? string.Empty, vesselATC ?? string.Empty, input.Berth ?? string.Empty, unitStuffed ?? string.Empty, receivedFull ?? string.Empty);
 

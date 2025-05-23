@@ -1,5 +1,4 @@
 import { TableRow, TableCell, TableHead } from "@mui/material";
-import { tableHeadTableCellStyles } from "../../features/admin/tableCssStyles";
 
 interface Props {
   tableCellHeadings: string[];
@@ -8,10 +7,10 @@ interface Props {
 const TableHeadComponent: React.FC<Props> = (props: Props) => {
   const { tableCellHeadings } = props;
   return (
-    <TableHead sx={{ borderBottom: "1px solid white"}}>
-      <TableRow>
+    <TableHead >
+      <TableRow >
         {tableCellHeadings.map((headertitle) => (
-          <TableCell key={headertitle} sx={tableHeadTableCellStyles}>
+          <TableCell sx={{ textAlign: "center", backgroundColor: "#fafafa" }} key={headertitle}>
             {headertitle}
           </TableCell>
         ))}

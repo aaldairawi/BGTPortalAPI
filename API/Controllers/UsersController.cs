@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using API.Services.AppUser;
 
 namespace API.Controllers
 {
@@ -96,7 +97,7 @@ namespace API.Controllers
             };
 
             await _userManager.CreateAsync(newUser, registerUserDto.PassWord);
-            await _userManager.AddToRoleAsync(newUser, "Member");
+            await _userManager.AddToRoleAsync(newUser, "Guest");
 
             var result = await _context.SaveChangesAsync();
             if (result < 0)
@@ -150,7 +151,6 @@ namespace API.Controllers
 
             if (!passwordUpdateResult)
                 return BadRequest(new ProblemDetails { Title = $"Error updating password for {user.UserName}" });
-
             return NoContent();
         }
 

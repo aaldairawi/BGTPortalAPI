@@ -2,14 +2,21 @@
 import { createAsyncThunk, createSlice, isAnyOf } from "@reduxjs/toolkit";
 import Agent from "../../app/agent/agent";
 import { FieldValues } from "react-hook-form";
-import { LoggedInUser, UserRegister } from "../../app/models/account/user";
+
+import {
+  LoggedInUser,
+  UserRegister,
+} from "../../app/models/account/user.types";
 
 import router from "../../app/router/Routes";
+import { RootState } from "../../app/store/configureStore";
+import { clearUsersLoadedFromAdapter } from "../admin/usersSlice";
 
 interface AccountState {
   user: LoggedInUser | null;
   isUserAnAdmin: boolean;
 }
+
 const initialState: AccountState = {
   user: null,
   isUserAnAdmin: false,
@@ -19,7 +26,7 @@ export const signInUserAsync = createAsyncThunk<LoggedInUser, FieldValues>(
   "account/signInUserAsync",
   async (data, thunkApi) => {
     try {
-      const loginUserDto = await Agent.Account.login(data);
+      const loginUserDto = await Agent.AccountAPIRequests.login(data);
       if (loginUserDto) {
         localStorage.setItem("user", JSON.stringify(loginUserDto));
       }
@@ -30,26 +37,31 @@ export const signInUserAsync = createAsyncThunk<LoggedInUser, FieldValues>(
   }
 );
 
-export const registerUserAsync = createAsyncThunk<void, FieldValues>(
-  "account/registerUserAsync",
-  async (data, thunkApi) => {
-    try {
-      return await Agent.Account.register(data as UserRegister);
-    } catch (error: any) {
-      return thunkApi.rejectWithValue({ error: error.data });
+export const registerUserAsync = createAsyncThunk<
+  void,
+  FieldValues,
+  { state: RootState }
+>("account/registerUserAsync", async (data, thunkApi) => {
+  try {
+    const result = await Agent.AccountAPIRequests.register(
+      data as UserRegister
+    );
+    const state = thunkApi.getState();
+    if (state.account.isUserAnAdmin) {
+      thunkApi.dispatch(clearUsersLoadedFromAdapter());
     }
+    return result;
+  } catch (error: any) {
+    return thunkApi.rejectWithValue({ error: error.data });
   }
-);
+});
 
-/**
- * Fetches the current loggedin user from the API.
- */
 export const fetchCurrentUserAsync = createAsyncThunk<LoggedInUser>(
   "account/fetchCurrentUserAsync",
   async (_, thunkApi) => {
     thunkApi.dispatch(setUser(JSON.parse(localStorage.getItem("user")!)));
     try {
-      const loginUserDto = await Agent.Account.getCurrentUser();
+      const loginUserDto = await Agent.AccountAPIRequests.getCurrentUser();
       localStorage.setItem("user", JSON.stringify(loginUserDto));
       return loginUserDto;
     } catch (error: any) {
@@ -70,7 +82,7 @@ export const accountSlice = createSlice({
   reducers: {
     signOut: (state) => {
       state.user = null;
-      state.isUserAnAdmin = false; 
+      state.isUserAnAdmin = false;
       localStorage.removeItem("user");
     },
     setUser: (state, action) => {
@@ -84,16 +96,10 @@ export const accountSlice = createSlice({
       };
       if (state.user && state.user.roles?.includes("Admin")) {
         state.isUserAnAdmin = true;
-      } else {
-        console.log("No user fonund for data");
       }
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(registerUserAsync.fulfilled, () => {
-      router.navigate("/login");
-    });
-
     builder.addCase(registerUserAsync.rejected, (_, action) => {
       console.log(action.payload);
     });
@@ -101,7 +107,6 @@ export const accountSlice = createSlice({
     builder.addCase(fetchCurrentUserAsync.rejected, (state) => {
       state.user = null;
       localStorage.removeItem("user");
-
       router.navigate("/");
     });
 
@@ -113,7 +118,6 @@ export const accountSlice = createSlice({
           claims[
             "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
           ];
-
         state.user = {
           ...action.payload,
           roles: typeof roles === "string" ? [roles] : roles,
@@ -121,6 +125,8 @@ export const accountSlice = createSlice({
         if (state.user && state.user.roles?.includes("Admin")) {
           state.isUserAnAdmin = true;
         }
+
+        console.log(state.user.roles);
       }
     );
     builder.addMatcher(

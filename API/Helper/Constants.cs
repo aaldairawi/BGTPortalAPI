@@ -18,7 +18,9 @@ namespace API.Helper
         public const string TRUCK = "TRUCK";
         public const string YARD = "YARD";
         public const string EXPORT = "EXPRT";
+
         public const string VESSEL = "VESSEL";
+        
         public const string UNIT_LOAD = "UNIT_LOAD";
         public const string UNIT_STUFF = "UNIT_STUFF";
         public const string UNIT_DISCH = "UNIT_DISCH";

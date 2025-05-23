@@ -1,8 +1,7 @@
-import { Button, TableCell, TableRow } from "@mui/material";
+import { TableCell, TableRow } from "@mui/material";
 import { tableBodyTableCellStyles } from "../admin/tableCssStyles";
-import { FinalizedInvoiceDto } from "../../app/models/invoice/finalizedinvoice.types";
-import { useAppDispatch } from "../../app/store/configureStore";
-import { getInvoiceItemsAsync } from "./cTypeInvoiceItemSlice";
+import { FinalizedInvoiceDto } from "../../app/models/invoice/invoice.types";
+import { formatInvoiceTotal } from "../../app/helper/invoice";
 
 interface Props {
   invoice: FinalizedInvoiceDto;
@@ -12,37 +11,28 @@ interface Props {
 const Invoice: React.FC<Props> = (props: Props) => {
   const { invoice, index } = props;
 
-  const dispatch = useAppDispatch();
-
   return (
     <TableRow
       sx={{
         border: "none",
-        cursor: "pointer",
-        "&:hover": {
-          bgcolor: "grey.800",
-        },
+        "&:hover": { bgcolor: "lightgray" },
       }}
     >
-      <TableCell sx={tableBodyTableCellStyles}>{index + 1}</TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>{invoice.draft}</TableCell>
+      <TableCell sx={{ fontWeight: "bold", ...tableBodyTableCellStyles }}>
+        {index + 1}
+      </TableCell>
       <TableCell sx={tableBodyTableCellStyles}>{invoice.final}</TableCell>
       <TableCell sx={tableBodyTableCellStyles}>
         {invoice.finalizedDate}
       </TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>{invoice.customer}</TableCell>
+      <TableCell sx={tableBodyTableCellStyles}>{invoice.creator}</TableCell>
+      <TableCell sx={tableBodyTableCellStyles}>{invoice.paid}</TableCell>
+      <TableCell sx={tableBodyTableCellStyles}>
+        {invoice.customer.slice(0, 15)}
+      </TableCell>
       <TableCell sx={tableBodyTableCellStyles}>{invoice.currency}</TableCell>
       <TableCell sx={tableBodyTableCellStyles}>
-        <Button
-          onClick={() =>
-            dispatch(getInvoiceItemsAsync(invoice.invoiceGkey.toString()))
-          }
-          variant="contained"
-          sx={{ fontSize: "10px" }}
-          color="success"
-        >
-          Inspect
-        </Button>
+        {formatInvoiceTotal(parseFloat(invoice.total))}
       </TableCell>
     </TableRow>
   );

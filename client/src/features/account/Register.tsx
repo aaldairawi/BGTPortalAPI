@@ -7,6 +7,7 @@ import {
   CircularProgress,
   Container,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { Grid2 as Grid } from "@mui/material";
@@ -18,18 +19,17 @@ import { registerUserAsync } from "./accountSlice";
 import CheckIcon from "@mui/icons-material/Check";
 import ErrorIcon from "@mui/icons-material/Error";
 import React, { useState } from "react";
-import { createUserAsync } from "../admin/createUserThunk";
-import CloseFormIcon from "../../app/components/CloseFormIcon";
+
 import { AUTHLOGINBOX, AUTHLOGINTEXTFIELD } from "./AuthTextFieldStyles";
 import { toast } from "react-toastify";
 
 interface Props {
   showCloseIcon?: boolean;
-  onHandleCloseForm?: () => void;
 }
 
 const Register: React.FC<Props> = (props: Props) => {
-  const { showCloseIcon, onHandleCloseForm } = props;
+  const { showCloseIcon } = props;
+
   const dispatch = useAppDispatch();
   const { isUserAnAdmin } = useAppSelector((state) => state.account);
   const [isValidUserName, setIsValidUserName] = useState(false);
@@ -61,7 +61,7 @@ const Register: React.FC<Props> = (props: Props) => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setIsValidUserName(() => {
-      if (event.target.value.length >= 8) {
+      if (event.target.value.length >= 3) {
         return true;
       } else {
         return false;
@@ -93,7 +93,7 @@ const Register: React.FC<Props> = (props: Props) => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const regexPattern = new RegExp(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+}{":;'?/.,<>])(?=.{8,10}$).*/
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+}{":;'?/.,<>])(?=.{8,100}$).*/
     );
     const passwordCorrect = regexPattern.test(event.target.value);
     if (passwordCorrect) {
@@ -102,36 +102,23 @@ const Register: React.FC<Props> = (props: Props) => {
       setIsValidPassword(false);
     }
   };
-  const onHandleCloseCreateUserForm = () => {
-    if (onHandleCloseForm) {
-      onHandleCloseForm();
-    }
-  };
 
   const onHandleFormSubmit = async (data: FieldValues) => {
-    if (!isUserAnAdmin) {
-      try {
-        await dispatch(registerUserAsync(data)).unwrap();
-      } catch (error: any) {
-        if (Array.isArray(error)) {
-          error.forEach((err: string) => console.log(err));
-        }
-        handleApiErrors(error);
+    try {
+      await dispatch(registerUserAsync(data)).unwrap();
+    } catch (error: any) {
+      if (Array.isArray(error)) {
+        error.forEach((err: string) => console.log(err));
       }
+      handleApiErrors(error);
     }
-
     if (isUserAnAdmin) {
-      try {
-        await dispatch(createUserAsync(data)).unwrap();
-      } catch (error: any) {
-        handleApiErrors(error);
-      }
+      toast.success("User created successfully.", { autoClose: 1000 });
+    } else {
+      toast.success("Registration successful, please log in.", {
+        autoClose: 1000,
+      });
     }
-
-    toast.success("Registration successful, please log in.", {
-      autoClose: 1000,
-    });
-
     reset();
   };
 
@@ -151,9 +138,6 @@ const Register: React.FC<Props> = (props: Props) => {
         borderRadius: "5px",
       }}
     >
-      {showCloseIcon && (
-        <CloseFormIcon onHandleClick={onHandleCloseCreateUserForm} />
-      )}
       <Avatar sx={{ m: 1, bgcolor: "white" }}>
         <LockOutlined sx={{ color: "orange" }} />
       </Avatar>
@@ -172,14 +156,13 @@ const Register: React.FC<Props> = (props: Props) => {
             Username
           </Typography>
           <TextField
-            placeholder="Atleast 6 characters"
             sx={AUTHLOGINTEXTFIELD}
             margin="normal"
             {...register("username", {
               onChange: onHandleValidateUsername,
               required: "Username is required",
               minLength: {
-                value: 8,
+                value: 3,
                 message: "Username is incorrect",
               },
             })}
@@ -188,7 +171,9 @@ const Register: React.FC<Props> = (props: Props) => {
           {isValidUserName ? (
             <CheckIcon sx={{ color: "green" }} />
           ) : (
-            <ErrorIcon sx={{ color: "orange" }} />
+            <Tooltip title="Username must be atleast 3 characters to be valid. ">
+              <ErrorIcon sx={{ color: "orange" }} />
+            </Tooltip>
           )}
         </Box>
         <Box sx={AUTHLOGINBOX}>
@@ -196,7 +181,6 @@ const Register: React.FC<Props> = (props: Props) => {
             Email
           </Typography>
           <TextField
-            placeholder="Enter a valid email"
             sx={{ ...AUTHLOGINTEXTFIELD, ml: 4 }}
             margin="normal"
             {...register("email", {
@@ -212,7 +196,9 @@ const Register: React.FC<Props> = (props: Props) => {
           {isValidEmail ? (
             <CheckIcon sx={{ color: "green" }} />
           ) : (
-            <ErrorIcon sx={{ color: "orange" }} />
+            <Tooltip title="Your email must be a valid ICTSI email. No personal emails are accepted.">
+              <ErrorIcon sx={{ color: "orange" }} />
+            </Tooltip>
           )}
         </Box>
         <Box sx={AUTHLOGINBOX}>
@@ -222,13 +208,12 @@ const Register: React.FC<Props> = (props: Props) => {
           <TextField
             sx={AUTHLOGINTEXTFIELD}
             margin="normal"
-            placeholder="8-10,1 Uppercase,1 Number,1 Special"
             {...register("password", {
               onChange: onHandleValidatePassword,
               required: "Password is incorrect",
               pattern: {
                 value:
-                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+}{":;'?/.,<>])(?=.{8,10}$).*/,
+                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+}{":;'?/.,<>])(?=.{8,100}$).*/,
                 message: "",
               },
             })}
@@ -237,7 +222,9 @@ const Register: React.FC<Props> = (props: Props) => {
           {isValidPassword ? (
             <CheckIcon sx={{ color: "green" }} />
           ) : (
-            <ErrorIcon sx={{ color: "orange" }} />
+            <Tooltip title="Your password must be atleast 8 characters. This follows the standard password rules, e.g: 1 uppercase, 1 lowercase, 1 special character">
+              <ErrorIcon sx={{ color: "orange" }} />
+            </Tooltip>
           )}
         </Box>
 
@@ -255,7 +242,7 @@ const Register: React.FC<Props> = (props: Props) => {
         {!showCloseIcon && (
           <Grid container spacing={2}>
             <Grid size={12} sx={{ textAlign: "center" }}>
-              <Link to="/login" style={{ color: "white" }}>
+              <Link to="/v1/login" style={{ color: "white" }}>
                 {"Already have an account? Sign In"}
               </Link>
             </Grid>

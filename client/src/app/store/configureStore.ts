@@ -4,23 +4,19 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { accountSlice } from "../../features/account/accountSlice";
 
 import { rolesSlice } from "../../features/admin/rolesSlice";
-import { navisApiSlice } from "../../features/navisunitapi/navisApiSlice";
+import { n4ContainerSlice } from "../../features/navisunitapi/n4ContainerSlice";
 
-import { cTypeFinalizedSlice } from "../../features/sap/cTypeFinalizedSlice";
-import { invoiceTypeSlice } from "../../features/sap/invoiceTypeSlice";
-import { cTypeInvoiceItemSlice } from "../../features/sap/cTypeInvoiceItemSlice";
+import { finalizedInvoicesSlice } from "../../features/sap/finalizedInvoicesSlice";
+import { uploadInvoicesSlice } from "../../features/sap/uploadInvoicesSlice";
 
 export const store = configureStore({
   reducer: {
     account: accountSlice.reducer,
-
     roles: rolesSlice.reducer,
     users: usersSlice.reducer,
- 
-    navisApiSlice: navisApiSlice.reducer,
-    cFinalizedInvoicesSlice: cTypeFinalizedSlice.reducer,
-    cInvoiceTypeSlice: invoiceTypeSlice.reducer,
-    cInvoiceItemsSlice: cTypeInvoiceItemSlice.reducer,
+    n4Containers: n4ContainerSlice.reducer,
+    finalizedInvoices: finalizedInvoicesSlice.reducer,
+    uploadInvoices: uploadInvoicesSlice.reducer,
   },
 });
 

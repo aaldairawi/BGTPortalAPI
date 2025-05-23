@@ -10,10 +10,6 @@ const TableRowComponent: React.FC<Props> = (props: Props) => {
     <TableRow
       sx={{
         border: "none",
-        cursor: "pointer",
-        "&:hover": {
-          bgcolor: "grey.800",
-        },
       }}
     >
       {tableRowCellHeadings.map((tableCellHeading, index) => (

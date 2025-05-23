@@ -12,6 +12,7 @@ export const addRoleToUserAsync = createAsyncThunk<
       }, 1000)
     );
   } catch (error: any) {
+    
     console.log(error);
   }
 });

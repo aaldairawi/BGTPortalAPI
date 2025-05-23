@@ -1,13 +1,11 @@
-using System.ComponentModel.DataAnnotations;
 
 namespace API.Dtos.Invoice
 {
-    public class InvoiceTypeDto(
-        [StringLength(10, ErrorMessage = "InvoiceId cannot be longer than 200 characters.")]
-        [Required]
-        string invoiceId
-    )
-    {
-        public string InvoiceId { get; set; } = invoiceId;
+    public class InvoiceTypeDto{
+        public string Value { get; set; } = string.Empty;
+        public InvoiceTypeDto(string value)
+        {
+            Value = value;
+        }
     }
 }

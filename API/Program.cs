@@ -1,24 +1,27 @@
 global using static System.Console;
 using System.Text;
-using API;
 using API.Data;
 using API.Entities;
 using API.Helper;
 using API.Middleware;
 using API.Services;
+using API.Services.AppUser;
+using API.Services.Invoices;
+using API.Services.N4ContainerHistory;
+using API.Services.Token;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -51,22 +54,24 @@ builder.Services.AddDbContext<BGTContext>(options =>
 });
 
 builder.Services.AddCors();
+
 builder.Services.AddIdentityCore<User>(opt =>
 {
-
     opt.User.RequireUniqueEmail = true;
     opt.Password.RequiredLength = 8;
     opt.Password.RequireDigit = true;
-    opt.User.RequireUniqueEmail = true;
 })
     .AddRoles<Role>()
     .AddEntityFrameworkStores<BGTContext>();
-// builder.Services.AddApiVersioning(options => {
-//     options.AssumeDefaultVersionWhenUnspecified = true;
-//     options.DefaultApiVersion = ApiVersion.Default;
-//     options.ApiVersionReader = new HeaderApiVersionReader("NAVISAPI-VERSION");
-//     options.ReportApiVersions = true; 
-// });
+builder.Services.AddApiVersioning(options =>
+{
+
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+    options.ReportApiVersions = true;
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(opt =>
 {
@@ -89,15 +94,22 @@ builder.Services.AddScoped<IContainerGeneralRequests, ContainerGeneralRequestsRe
 builder.Services.AddScoped<IContainerCurrentStatus, ContainerCurrentStatusRepository>();
 builder.Services.AddScoped<IFinalInvoice, FinalInvoiceRepository>();
 builder.Services.AddScoped<IUserRoleHelper, UserRoleHelperRepository>();
+builder.Services.AddScoped<IInvoiceHelper, InvoiceHelperRepository>();
+
 
 builder.Services.AddScoped<IDatabase, DataBaseRepository>();
+builder.Services.AddScoped<IUploadInvoices, UploadInvoicesRepository>();
 
 
 
 var app = builder.Build();
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.MapFallbackToFile("index.html");
 
 // Configure the HTTP request pipeline.
-app.UseMiddleware<ExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -107,7 +119,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseCors(opt => { opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000"); });
+app.UseCors(opt => { opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000", "http://localhost:3001"); });
 
 // app.UseHttpsRedirection();
 app.UseAuthentication();

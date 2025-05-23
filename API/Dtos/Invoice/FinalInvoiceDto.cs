@@ -1,34 +1,53 @@
 using System.ComponentModel.DataAnnotations;
-using API.Enums;
+
 
 namespace API.Dtos.Invoice
 {
-    public class FinalInvoiceDto(
-        int invoiceGkey,
-        int draft,
+    public class FinalInvoiceDto
+    {
+        public long InvoiceGkey { get; init; }
+        public string Id { get; init; } = string.Empty;
+
+        
         [StringLength(6, ErrorMessage = "Final must be 6 characters long.")]
         [Required]
-        string final,
-        
-        [StringLength(50, ErrorMessage = "FinalizedDate must be 50 characters long.")]
+
+        public string Final { get; init; } = string.Empty;
+
+        [StringLength(50, ErrorMessage = "FinalizedDate must be no more than 50 characters long.")]
         [Required]
-        string finalizedDate,
+
+        public string FinalizedDate { get; init; } = string.Empty;
+
+        [StringLength(50, ErrorMessage = "Creator must be no more than 50 characters long.")]
+        [Required]
+        public string Creator { get; init; } = string.Empty;
+
+        [StringLength(50, ErrorMessage = "Paid must be no more than 50 characters long.")]
+        [Required]
+        public string Paid { get; init; } = string.Empty;
 
         [StringLength(100, ErrorMessage = "Customer must be 100 characters long.")]
         [Required]
-        string customer,
 
+        public string Customer { get; init; } = string.Empty;
         [StringLength(3, ErrorMessage = "Currency must be 3 characters long.")]
         [Required]
-        Currency currency
-    )
-    {
-        public int InvoiceGkey { get; set; } = invoiceGkey;
-        public int Id { get; set; } = draft;
-        public int Draft { get; set; } = draft;
-        public string Final { get; set; } = final;
-        public string FinalizedDate { get; set; } = finalizedDate;
-        public string Customer { get; set; } = customer;
-        public Currency Currency { get; set; } = currency;
+
+        public string Currency { get; init; } = string.Empty;
+        public string Total { get; set; }
+
+        public FinalInvoiceDto(long invoiceGkey,  string final, string finalizedDate, string creator,
+        string paid, string customer, string currency, string total)
+        {
+            InvoiceGkey = invoiceGkey;
+            Id = final.ToString();
+            Final = final; FinalizedDate = finalizedDate;
+            Creator = creator;
+            Paid = paid;
+            Customer = customer; Currency = currency;
+            Total = total;
+        }
+
     }
 }

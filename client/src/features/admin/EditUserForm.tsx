@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, TextField } from "@mui/material";
-import { UserAppInfo } from "../../app/models/account/user";
+import { UserAppInfo } from "../../app/models/account/user.types";
 import { LoadingButton } from "@mui/lab";
 import { FormEvent, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
@@ -35,13 +35,13 @@ const EditUserForm: React.FC<Props> = (props: Props) => {
   const handleSubmitForm = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const regexPattern = new RegExp(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+}{":;'?/.,<>])(?=.{8,10}$).*/
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+}{":;'?/.,<>])(?=.{8,100}$).*/
     );
     const passwordCorrect = regexPattern.test(password);
 
     if (password.length > 0 && !passwordCorrect) {
       alert(
-        "Password entered doesn't meet the criteria (8-10) characters, either delete it or try again"
+        "Password entered doesn't meet the criteria (8-25) characters, either delete it or try again"
       );
       return;
     }

@@ -11,10 +11,10 @@ import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { getAllRolesAsync, rolesSelctors } from "./rolesSlice";
 import { useEffect } from "react";
 
-import { Role as RoleInterface } from "../../app/models/role/role";
+import { Role as RoleInterface } from "../../app/models/role/role.types";
 import Role from "./Role";
 import LoadingComponent from "../../app/components/LoadingComponent";
-import { ExistingUserRoleStatus } from "../../app/models/role/role";
+import { ExistingUserRoleStatus } from "../../app/models/role/role.types";
 
 interface Props {
   editingUser: boolean;
@@ -50,7 +50,6 @@ export function Roles({ editingUser }: Props) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-
           maxHeight: 450,
         }}
       >
@@ -58,11 +57,11 @@ export function Roles({ editingUser }: Props) {
           stickyHeader
           sx={{
             minWidth: 60,
-            maxWidth: 1100,
+            maxWidth: 600,
             p: 5,
           }}
         >
-          <TableHead sx={{ borderBottom: "1px solid white" }}>
+          <TableHead>
             <TableRow>
               <TableCell sx={tableHeadTableCellStyles}>Id</TableCell>
               <TableCell sx={tableHeadTableCellStyles}>Role</TableCell>

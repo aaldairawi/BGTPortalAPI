@@ -6,14 +6,17 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { IUnitCurrentStatus } from "../../app/models/container/unitCurrentStatus";
+
+
+
 import {
   tableHeadTableCellStyles,
   tableBodyTableCellStyles,
 } from "../admin/tableCssStyles";
+import { UnitCurrentStatus } from "../../app/models/container/container.types";
 
 interface Props {
-  unitCurrentStatus: IUnitCurrentStatus;
+  unitCurrentStatus: UnitCurrentStatus;
 }
 
 const UnitCurrentStatusResult: React.FC<Props> = (props: Props) => {

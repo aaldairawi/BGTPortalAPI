@@ -2,23 +2,26 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import router from "../router/Routes";
 import { store } from "../store/configureStore";
-import {
-  IContainerExportDto,
-  IContainerImportDto,
-} from "../models/container/unitLifeTime";
-import { Users } from "./Users";
-import { Account } from "./Account";
-import { Roles } from "./Roles";
+import {} from "../models/container/unitLifeTime.types";
 
-const sleep = () => new Promise((resolve) => setTimeout(resolve, 500));
+import { UsersAPIRequests } from "./usersAPIRequests";
 
-axios.defaults.baseURL = "http://localhost:5000/api/";
+import { AccountAPIRequests } from "./accountAPIRequests";
+import { RolesAPIRequests } from "./rolesAPIRequests";
+import { InvoicesAPIRequest } from "./invoicesAPIRequests";
+import { NavisUnitApi } from "./n4ContainerAPIRequests";
+import { UploadInovicesAPIRequests } from "./uploadInvoicesAPIRequests";
+
+const sleep = () => new Promise((resolve) => setTimeout(resolve, 10));
+
+axios.defaults.baseURL = "http://localhost:5000/api/v1/";
+
+// axios.defaults.baseURL = "/api/v1/";
 
 const responseBody = (axiosResponse: AxiosResponse) => axiosResponse.data;
 axios.interceptors.request.use((config) => {
   const token = store.getState().account.user?.token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
-
   return config;
 });
 
@@ -74,30 +77,6 @@ export const requests = {
   delete: (url: string) => axios.delete(url).then(responseBody),
 };
 
-const NavisUnitApi = {
-  getUnitCurrentLocation: (unitNbr: string) =>
-    requests.get(`containerlifetime/unitcurrentstatus/${unitNbr}`),
-  getImportUnitLifeTime: (unitNumber: string): Promise<IContainerImportDto> =>
-    requests.get(
-      `containerlifetime/unitlifetimeimport?unitNumber=${unitNumber}&unitCategory=IMPORT`
-    ),
-  getExportUnitLifeTime: (unitNumber: string): Promise<IContainerExportDto> =>
-    requests.get(
-      `containerlifetime/unitlifetimeexport?unitNumber=${unitNumber}&unitCategory=EXPORT`
-    ),
-};
-const SapIntegration = {
-  getCTypeInvoiceTypes: () => requests.get("cTypeInvoices/getallcinvoicetypes"),
-  getFinalizedCTypeInvoices: (object: {
-    invoiceType: string;
-    finalizedDate: string;
-  }) =>
-    requests.get(
-      `cTypeInvoices/finalizedinvoices?invoiceType=${object.invoiceType}&finalizedDate=${object.finalizedDate}`
-    ),
-  getCTypeFinalizedInvoiceItems: (invoiceGkey: string) =>
-    requests.get(`cTypeInvoices/invoiceitems?invoiceGkey=${invoiceGkey}`),
-};
 /*Test errors object to  validate error handling*/
 const TestErrors = {
   get400Error: () => requests.get("buggy/bad-request"),
@@ -108,12 +87,13 @@ const TestErrors = {
 };
 
 const Agent = {
-  Account,
-  Users,
-  Roles,
+  AccountAPIRequests,
+  UsersAPIRequests,
+  RolesAPIRequests,
   NavisUnitApi,
-  SapIntegration,
+  InvoicesAPIRequest,
   TestErrors,
+  UploadInovicesAPIRequests,
 };
 
 export default Agent;

@@ -5,7 +5,7 @@ namespace API.Dtos.CtypeInvoice
         string description,
         int quantity,
         double quantityBilled,
-        double total,
+        string total,
         string glCode,
         string invoiceFinalNumber,
         string customerName,
@@ -20,7 +20,7 @@ namespace API.Dtos.CtypeInvoice
         public string Description { get; init; } = description;
         public int Quantity { get; init; } = quantity;
         public double QuantityBilled { get; init; } = quantityBilled;
-        public double Total { get; init; } = total;
+        public string Total { get; init; } = total;
         public string GlCode { get; init; } = glCode;
         public string InvoiceFinalNumber { get; init; } = invoiceFinalNumber;
         public string CustomerName { get; init; } = customerName;

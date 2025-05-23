@@ -1,18 +1,19 @@
 import { Button, TableCell, TableRow } from "@mui/material";
-import { UserDto } from "../../app/models/account/user";
+import { UserDto } from "../../app/models/account/user.types";
 import { useAppDispatch } from "../../app/store/configureStore";
 import { removeUserById } from "./usersSlice";
 import { Link } from "react-router-dom";
-import { tableBodyTableCellStyles } from "./tableCssStyles";
+import { userTableBodyTableCellStyles } from "./tableCssStyles";
 import { deleteUserAsync } from "./deleteUserThunk";
 import { toast } from "react-toastify";
 
 interface Props {
   user: UserDto;
+  index: number;
 }
 
 const User: React.FC<Props> = (props: Props) => {
-  const { user } = props;
+  const { user, index } = props;
   const dispatch = useAppDispatch();
 
   const onHandleDeleteUser = async (id: number) => {
@@ -34,11 +35,14 @@ const User: React.FC<Props> = (props: Props) => {
         cursor: "pointer",
       }}
     >
-      <TableCell sx={tableBodyTableCellStyles}>{user.userName}</TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>{user.email}</TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>{user.registered}</TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>{user.lastLoggedIn}</TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>
+      <TableCell sx={userTableBodyTableCellStyles}>{index + 1}</TableCell>
+      <TableCell sx={userTableBodyTableCellStyles}>{user.userName}</TableCell>
+      <TableCell sx={userTableBodyTableCellStyles}>{user.email}</TableCell>
+      <TableCell sx={userTableBodyTableCellStyles}>{user.registered}</TableCell>
+      <TableCell sx={userTableBodyTableCellStyles}>
+        {user.lastLoggedIn}
+      </TableCell>
+      <TableCell sx={userTableBodyTableCellStyles}>
         <Button
           component={Link}
           sx={{ fontSize: "13px" }}
@@ -50,7 +54,7 @@ const User: React.FC<Props> = (props: Props) => {
         </Button>
       </TableCell>
 
-      <TableCell sx={tableBodyTableCellStyles}>
+      <TableCell sx={userTableBodyTableCellStyles}>
         {" "}
         <Button
           variant="contained"

@@ -12,7 +12,7 @@ import { LoadingButton } from "@mui/lab";
 import {
   getExportUnitLifeTimeAsync,
   getImportUnitLifeTimeAsync,
-} from "./navisApiSlice";
+} from "./n4ContainerSlice";
 import { toast } from "react-toastify";
 import UnitImportStatusResult from "./UnitImportStatusResult";
 import UnitExportStatusResult from "./UnitExportStatusResult";
@@ -25,7 +25,7 @@ const UnitLifeTime = () => {
   const dispatch = useAppDispatch();
 
   const { unitImportLifeTime, unitExportLIfeTime } = useAppSelector(
-    (state) => state.navisApiSlice
+    (state) => state.n4Containers
   );
 
   const {

@@ -3,7 +3,7 @@
   --default-grey-color: #393939;
 }
 *::-webkit-scrollbar {
-  width: 0;
+  width: 5;
 }
 
 html {

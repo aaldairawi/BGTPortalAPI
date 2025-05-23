@@ -61,8 +61,8 @@ namespace API.Data.Migrations
                         new
                         {
                             Id = 2,
-                            Name = "DubaiBilling",
-                            NormalizedName = "DUBAIBILLING"
+                            Name = "DubaiFinance",
+                            NormalizedName = "DUBAIFINANCE"
                         },
                         new
                         {
@@ -73,14 +73,20 @@ namespace API.Data.Migrations
                         new
                         {
                             Id = 4,
-                            Name = "Billing",
-                            NormalizedName = "BILLING"
+                            Name = "IraqFinance",
+                            NormalizedName = "IRAQFINANCE"
                         },
                         new
                         {
                             Id = 5,
-                            Name = "Member",
-                            NormalizedName = "MEMBER"
+                            Name = "IraqBilling",
+                            NormalizedName = "IRAQBILLING"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Guest",
+                            NormalizedName = "GUEST"
                         });
                 });
 

@@ -1,11 +1,7 @@
 import { CircularProgress, TableCell, TableRow } from "@mui/material";
 import { tableBodyTableCellStyles } from "./tableCssStyles";
 import React from "react";
-
-import {
-  ExistingUserRoleStatus,
-  Role as RoleInterface,
-} from "../../app/models/role/role";
+import {ExistingUserRoleStatus, Role as RoleInterface} from "../../app/models/role/role.types";
 import { LoadingButton } from "@mui/lab";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { addRoleToUserAsync, removeRoleFromUserAsync } from "./roleThunks";
@@ -23,8 +19,9 @@ const Role: React.FC<Props> = (props: Props) => {
   const { status } = useAppSelector((state) => state.users);
 
   const dispatch = useAppDispatch();
-  const isRoleAssignedAlready: boolean = "status" in role ? role.status : false;
-  const isRoleNotAssignedAlready : boolean = "status" in role ? !role.status : true;
+  const isRoleAssignedAlready: boolean = "status" in role ? role.status : true;
+  const isRoleNotAssignedAlready: boolean =
+    "status" in role ? !role.status : true;
 
   return (
     <TableRow sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
@@ -38,7 +35,8 @@ const Role: React.FC<Props> = (props: Props) => {
         <TableCell sx={tableBodyTableCellStyles}>
           <LoadingButton
             disabled={
-              isRoleAssignedAlready || status === "pendingsendUpdatedUserInfoAsync"
+              isRoleAssignedAlready ||
+              status === "pendingsendUpdatedUserInfoAsync"
             }
             variant="contained"
             loadingIndicator={
@@ -57,7 +55,10 @@ const Role: React.FC<Props> = (props: Props) => {
       {editingUser && (
         <TableCell sx={tableBodyTableCellStyles}>
           <LoadingButton
-            disabled={isRoleNotAssignedAlready || status === "pendingsendUpdatedUserInfoAsync"}
+            disabled={
+              isRoleNotAssignedAlready ||
+              status === "pendingsendUpdatedUserInfoAsync"
+            }
             variant="outlined"
             loadingIndicator={
               <CircularProgress sx={{ color: "#393939" }} size={13} />

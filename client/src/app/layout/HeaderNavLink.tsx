@@ -51,12 +51,12 @@ const HeaderNavLink = () => {
         )}
       {user &&
         user.roles?.includes("DubaiBilling") &&
-        filterLinks(rightLinks, ["ADMIN", "STRIPPING", "API"]).map(
+        filterLinks(rightLinks, ["ADMIN", "STRIPPING", "UNIT"]).map(
           ({ path, text }, index) => renderLink(path, text, index.toString())
         )}
       {user &&
         user.roles?.includes("Stripping") &&
-        filterLinks(rightLinks, ["ADMIN", "SAP", "API"]).map(
+        filterLinks(rightLinks, ["ADMIN", "SAP", "UNIT"]).map(
           ({ path, text }, index) => renderLink(path, text, index.toString())
         )}
       {user && (

@@ -7,14 +7,14 @@ import Agent from "../../app/agent/agent";
 import {
   UserAppInfo,
   UserDto,
-} from "../../app/models/account/user";
+} from "../../app/models/account/user.types";
 
 export const getAllUsersAsync = createAsyncThunk<
   UserDto[],
   void
 >("usersSlice/getAllUsersAsync", async (_, thunkApi) => {
   try {
-    return await Agent.Users.getall();
+    return await Agent.UsersAPIRequests.getall();
   } catch (error: any) {
     return thunkApi.rejectWithValue({ error: error.data });
   }
@@ -29,7 +29,7 @@ export const getUserToUpdateInfoAsync = createAsyncThunk<UserAppInfo, string>(
   "userSlice/getUserToUpdateInfoAsync",
   async (userId, thunkAPI) => {
     try {
-      return await Agent.Users.getUserToUpdate(userId);
+      return await Agent.UsersAPIRequests.getUserToUpdate(userId);
     } catch (error: any) {
       return thunkAPI.rejectWithValue({ erro: error.data });
     }

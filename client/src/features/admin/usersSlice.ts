@@ -3,11 +3,11 @@ import {
   createSlice,
   //PayloadAction,
 } from "@reduxjs/toolkit";
-import { UserAppInfo, UserDto } from "../../app/models/account/user";
+import { UserAppInfo, UserDto } from "../../app/models/account/user.types";
 import { RootState } from "../../app/store/configureStore";
 
 import { getAllUsersAsync, getUserToUpdateInfoAsync } from "./getUserThunks";
-import { createUserAsync } from "./createUserThunk";
+
 import { deleteUserAsync } from "./deleteUserThunk";
 import { sendUpdatedUserInfoAsync } from "./updateUserThunk";
 
@@ -63,7 +63,6 @@ export const usersSlice = createSlice({
       }
     },
     clearUsersLoadedFromAdapter: (state) => {
-      
       usersAdapter.removeAll(state);
       state.usersloaded = false;
     },
@@ -91,16 +90,7 @@ export const usersSlice = createSlice({
     builder.addCase(deleteUserAsync.fulfilled, (state) => {
       state.status = "idle";
     });
-    builder.addCase(createUserAsync.rejected, (state) => {
-      state.status = "idle";
-    });
-    builder.addCase(createUserAsync.pending, (state) => {
-      state.status = "pendingCreateUserAsync";
-    });
-    builder.addCase(createUserAsync.fulfilled, (state, action) => {
-      usersAdapter.setOne(state, action.payload);
-      state.status = "idle";
-    });
+
     builder.addCase(getUserToUpdateInfoAsync.pending, (state) => {
       state.status = "pendingGettingUserAppInfo";
     });
@@ -121,6 +111,7 @@ export const usersSlice = createSlice({
         action.payload.passwordPlaceHolder;
       state.userToEditFetched = true;
       state.status = "idle";
+      
     });
 
     builder.addCase(sendUpdatedUserInfoAsync.rejected, (state, action) => {

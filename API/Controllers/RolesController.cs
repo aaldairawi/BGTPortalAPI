@@ -28,22 +28,21 @@ namespace API.Controllers
         [HttpGet("getall")]
         public async Task<ActionResult<List<GetRoleDto>>> GetAll()
         {
-            WriteLine("Get all roles method hit");
+            
             List<Role> roles = await _roleManager.Roles.ToListAsync();
-
-            List<GetRoleDto> result = roles.Select(role => new GetRoleDto
+            List<GetRoleDto> result = [..roles.Select(role => new GetRoleDto
             (
                 role.Id,
                  role.Name ?? "",
                  role.NormalizedName ?? ""
-            )).ToList();
+            )).ToList()];
+
             return Ok(result);
         }
         [HttpGet("{roleName}", Name = "GetOneRole")]
         public async Task<ActionResult<GetRoleDto>> GetOneRole(string roleName)
         {
             Role? identityRole = await _roleManager.FindByNameAsync(roleName);
-
             GetRoleDto result = _mapper.Map<GetRoleDto>(identityRole);
             return Ok(result);
         }
@@ -56,8 +55,6 @@ namespace API.Controllers
             {
                 return BadRequest(new ProblemDetails { Title = "Please check your Model State." });
             }
-            WriteLine("Create role method hit now!");
-
             List<Role> currentRoles = [.. _roleManager.Roles];
 
 

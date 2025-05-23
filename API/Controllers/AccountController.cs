@@ -1,7 +1,7 @@
 using API.Data;
 using API.Dtos.User;
 using API.Entities;
-using API.Services;
+using API.Services.Token;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,6 @@ namespace API.Controllers
     // [ApiVersion("1.0")]
     public class AccountController : BaseApiController
     {
-
         private readonly TokenService _tokenService;
         private readonly UserManager<User> _userManager;
         private readonly BGTContext _bgtContext;
@@ -31,10 +30,12 @@ namespace API.Controllers
                 return BadRequest(new ProblemDetails { Title = "A problem occured with your request." });
             }
             User? user = await _userManager.FindByNameAsync(loginUserDto.UserName);
-            if (user == null) return Unauthorized();
+            if (user == null) return StatusCode(401, new ProblemDetails { Title = "Please create a valid account to login." });
 
             var passwordOk = await _userManager.CheckPasswordAsync(user, loginUserDto.Password);
+
             if (!passwordOk) return Unauthorized(new ProblemDetails { Title = "Incorrect password, try again." });
+
             user.LastLogin = DateTime.Now;
             var saveChangesResult = await _bgtContext.SaveChangesAsync();
             if (saveChangesResult <= 0)
@@ -65,7 +66,6 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> Register(RegisterUserDto registerUserDto)
         {
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(new ProblemDetails { Title = "Model State is not valid." });
@@ -81,9 +81,14 @@ namespace API.Controllers
                 UserName = registerUserDto.UserName,
                 Email = registerUserDto.Email,
                 RegisteredDate = DateTime.Now,
+                SecurityStamp = Guid.NewGuid().ToString(),
             };
+
+
             var createdNewUserResult = await _userManager.CreateAsync(user, registerUserDto.PassWord);
-            if (!createdNewUserResult.Succeeded)
+            var addNewUserToMemberRoleResult = await _userManager.AddToRoleAsync(user, "Guest");
+
+            if (!createdNewUserResult.Succeeded || !addNewUserToMemberRoleResult.Succeeded)
             {
 
                 foreach (var error in createdNewUserResult.Errors)
@@ -99,9 +104,7 @@ namespace API.Controllers
         [HttpPost("create")]
         public async Task<ActionResult<UserDto>> Create(RegisterUserDto registerUserDto)
         {
-
             string userLastLoggedInDate = "TBD";
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(new ProblemDetails { Title = "Model State is not valid." });

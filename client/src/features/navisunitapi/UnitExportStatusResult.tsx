@@ -10,10 +10,10 @@ import {
   tableHeadTableCellStyles,
   tableBodyTableCellStyles,
 } from "../admin/tableCssStyles";
-import { IContainerExportDto } from "../../app/models/container/unitLifeTime";
+import { ContainerExportDto } from "../../app/models/container/container.types";
 
 interface Props {
-  unitExportLifeTime: IContainerExportDto;
+  unitExportLifeTime: ContainerExportDto;
 }
 
 const UnitExportStatusResult: React.FC<Props> = (props: Props) => {

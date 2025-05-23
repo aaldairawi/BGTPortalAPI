@@ -8,4 +8,12 @@ export const tableBodyTableCellStyles = {
   color: "#393939",
   fontSize: "12px",
   textAlign: "center",
+  p: 1,
+};
+
+export const userTableBodyTableCellStyles = {
+  color: "#393939",
+  fontSize: "12px",
+  textAlign: "center",
+  p: 1,
 };

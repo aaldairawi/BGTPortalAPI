@@ -10,10 +10,11 @@ import {
   tableHeadTableCellStyles,
   tableBodyTableCellStyles,
 } from "../admin/tableCssStyles";
-import { IContainerImportDto } from "../../app/models/container/unitLifeTime";
+import { ContainerImportDto } from "../../app/models/container/container.types";
+
 
 interface Props {
-  unitImportLifeTime: IContainerImportDto;
+  unitImportLifeTime: ContainerImportDto;
 }
 
 const UnitImportStatusResult: React.FC<Props> = (props: Props) => {
@@ -35,7 +36,7 @@ const UnitImportStatusResult: React.FC<Props> = (props: Props) => {
           maxWidth: 1100,
         }}
       >
-        <TableHead sx={{ borderBottom: "1px solid white" }}>
+        <TableHead sx={{ borderBottom: "1px solid black" }}>
           <TableRow>
             <TableCell sx={tableHeadTableCellStyles}>Unit</TableCell>
             <TableCell sx={tableHeadTableCellStyles}>Category</TableCell>
@@ -77,10 +78,6 @@ const UnitImportStatusResult: React.FC<Props> = (props: Props) => {
           <TableRow
             sx={{
               border: "none",
-              cursor: "pointer",
-              "&:hover": {
-                bgcolor: "grey.800",
-              },
             }}
           >
             <TableCell sx={tableBodyTableCellStyles}>
@@ -94,13 +91,15 @@ const UnitImportStatusResult: React.FC<Props> = (props: Props) => {
             </TableCell>
 
             {unitImportLifeTime.shippingLine && (
-              <TableCell sx={tableBodyTableCellStyles}>
-                {unitImportLifeTime.shippingLine}
+              <TableCell
+                sx={{ ...tableBodyTableCellStyles}}
+              >
+                {unitImportLifeTime.shippingLine.slice(0, 10)}
               </TableCell>
             )}
             {unitImportLifeTime.vesselName && (
               <TableCell sx={tableBodyTableCellStyles}>
-                {unitImportLifeTime.vesselName}
+                {unitImportLifeTime.vesselName.slice(0, 10)}
               </TableCell>
             )}
             {unitImportLifeTime.vesselVoyage && (

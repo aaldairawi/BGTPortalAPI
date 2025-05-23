@@ -11,7 +11,6 @@ import { Grid2 as Grid } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { LoadingButton } from "@mui/lab";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
-// Import the signInUser from accountSlice.
 
 import { useForm } from "react-hook-form";
 
@@ -47,19 +46,23 @@ const Login = () => {
     handleSubmit,
     formState: { isSubmitting, errors, isValid },
   } = useForm({ mode: "onTouched" });
-
+  const apiversion = "/v1";
   useEffect(() => {
     if (!user) return;
 
-    if (user && user?.roles?.includes("DubaiBilling")) {
-      navigate("/sap-integration");
-    }
-    if (user && user?.roles?.includes("Admin")) {
-      navigate("/admin");
+    if (
+      (user && user?.roles?.includes("DubaiFinance")) ||
+      (user && user?.roles?.includes("IraqFinance"))
+    ) {
+      navigate(`${apiversion}/sap-integration`);
     }
 
-    if (user && !user.roles) {
-      navigate("/default-member-page");
+    if (user && user?.roles?.includes("Admin")) {
+      navigate(`${apiversion}/admin`);
+    }
+
+    if (user && user?.roles?.includes("Guest") && user?.roles?.length === 1) {
+      navigate(`${apiversion}/default-member-page`);
     }
   }, [user, navigate]);
 
@@ -116,13 +119,12 @@ const Login = () => {
             sx={AUTHLOGINTEXTFIELD}
             margin="normal"
             autoComplete="current-password"
-            placeholder="6 - 10 characters"
             type="password"
             {...register("password", {
               required: "Password is required",
               pattern: {
                 value:
-                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+}{":;'?/.,<>])(?=.{6,}$).*/,
+                  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+}{":;'?/.,<>])(?=.{6,100}$).*/,
                 message: "password is required",
               },
             })}
@@ -142,7 +144,7 @@ const Login = () => {
         </LoadingButton>
         <Grid container spacing={2}>
           <Grid size={12} sx={{ textAlign: "center" }}>
-            <Link to="/register" style={{ color: "white" }}>
+            <Link to="/v1/register" style={{ color: "white" }}>
               {"Don't have an account sign up"}
             </Link>
           </Grid>

@@ -1,13 +1,16 @@
-using System.ComponentModel.DataAnnotations;
-
 
 namespace API.Dtos.Invoice
 {
-    public class FinalInvoiceResponseDto([Required] string invoiceId, List<FinalInvoiceDto> invoices)
+    public class FinalInvoicesResponseDto
     {
-        public string InvoiceId { get; init; } = invoiceId;
-        public List<FinalInvoiceDto> Invoices { get; init; } = invoices;
+        public string InvoiceId { get; init; } = string.Empty;
+        public List<FinalInvoiceDto> Invoices { get; init; } = [];
         public int InvoicesLength => Invoices.Count;
 
+        public FinalInvoicesResponseDto(string invoiceId, List<FinalInvoiceDto>  invoices)
+        {
+            InvoiceId = invoiceId; Invoices = invoices;
+
+        }
     }
 }

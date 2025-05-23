@@ -1,7 +1,7 @@
 import { AppBar, Avatar, Box, Toolbar, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
-
 import HeaderNavLink from "./HeaderNavLink";
+
 import { useAppSelector } from "../store/configureStore";
 
 const Header = () => {
@@ -14,7 +14,7 @@ const Header = () => {
           display: "flex",
           justifyContent: "space-between",
           pb: 1,
-          bgcolor: "white",
+          bgcolor: "#fafafa",
         }}
       >
         <Box
@@ -33,7 +33,6 @@ const Header = () => {
               sx={{ width: "15rem", height: "auto", pt: 1 }}
             />
           </Box>
-
           {user && (
             <Box sx={{ ml: 3 }}>
               <Typography sx={{ fontSize: "1rem" }} color="#393939">
@@ -41,17 +40,6 @@ const Header = () => {
               </Typography>
             </Box>
           )}
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Typography variant="h5" sx={{ color: "#393939" }}>
-            BGT N4 API
-          </Typography>
         </Box>
         {!user && (
           <Box>
