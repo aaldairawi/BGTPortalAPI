@@ -11,8 +11,8 @@ import HomePageLogo from "../../features/home/HomepageLogo";
 
 import SapIntegrationPanel from "../../features/sap/SapIntegrationPanel";
 import NavisContainerAPIPanel from "../../features/navisunitapi/NavisContainerAPIPanel";
-import { EditUserPage } from "../../features/admin/EditUserPage";
-import { StrippingUnitsPanel } from "../../features/stripping/StrippingUnitsPanel";
+import { EditUserPage } from "../../features/admin/users/EditUserPage";
+import StrippingUnitsPanel from "../../features/stripping/StrippingUnitsPanel";
 
 const router = createBrowserRouter([
   {

@@ -10,7 +10,7 @@ import {
 
 import router from "../../app/router/Routes";
 import { RootState } from "../../app/store/configureStore";
-import { clearUsersLoadedFromAdapter } from "../admin/usersSlice";
+import { clearUsersLoadedFromAdapter } from "../admin/users/usersSlice";
 
 interface AccountState {
   user: LoggedInUser | null;
@@ -32,7 +32,7 @@ export const signInUserAsync = createAsyncThunk<LoggedInUser, FieldValues>(
       }
       return loginUserDto;
     } catch (error: any) {
-      return thunkApi.rejectWithValue({ error: error.data });
+      return thunkApi.rejectWithValue(error.data);
     }
   }
 );
@@ -52,7 +52,7 @@ export const registerUserAsync = createAsyncThunk<
     }
     return result;
   } catch (error: any) {
-    return thunkApi.rejectWithValue({ error: error.data });
+    return thunkApi.rejectWithValue({ error: error });
   }
 });
 
@@ -65,7 +65,7 @@ export const fetchCurrentUserAsync = createAsyncThunk<LoggedInUser>(
       localStorage.setItem("user", JSON.stringify(loginUserDto));
       return loginUserDto;
     } catch (error: any) {
-      return thunkApi.rejectWithValue({ error: error.data });
+      return thunkApi.rejectWithValue(error);
     }
   },
   {
@@ -125,8 +125,6 @@ export const accountSlice = createSlice({
         if (state.user && state.user.roles?.includes("Admin")) {
           state.isUserAnAdmin = true;
         }
-
-        console.log(state.user.roles);
       }
     );
     builder.addMatcher(

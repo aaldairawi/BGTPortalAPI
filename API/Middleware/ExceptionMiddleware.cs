@@ -27,7 +27,7 @@ namespace API.Middleware
             catch (Exception exception)
             {
 
-                _logger.LogError(exception, exception.Message);
+                _logger.LogError(exception, "An unexpected error occured while processing the request");
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = 500;
                 var response = new ProblemDetails { Status = 500, Detail = _env.IsDevelopment() ? exception.StackTrace?.ToString() : null, Title = exception.Message };
@@ -36,6 +36,7 @@ namespace API.Middleware
                 await context.Response.WriteAsync(json);
 
             }
+
         }
 
 

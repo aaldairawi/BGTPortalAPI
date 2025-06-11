@@ -67,8 +67,8 @@ namespace API.Data.Migrations
                         new
                         {
                             Id = 3,
-                            Name = "Stripping",
-                            NormalizedName = "STRIPPING"
+                            Name = "Operations",
+                            NormalizedName = "OPERATIONS"
                         },
                         new
                         {

@@ -24,27 +24,22 @@ namespace API.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
             _userRoleHelper = userRoleHelper;
-
         }
         [HttpGet("getall")]
         public async Task<ActionResult<List<UserDto>>> GetAll()
         {
 
-            IQueryable<User> usersResultList = _context.Users.Where((user) => user.Id >= 0);
-            var users = await usersResultList.ToListAsync();
+            var users = await _context.Users.AsNoTracking().ToListAsync();
 
-            List<UserDto> result = [];
 
-            foreach (User user in users)
-            {
+            var result = users.Select(user => new UserDto(user.Id, user.UserName!, user.Email!, user.RegisteredDate.ToString("yyyy-MM-dd"),
+            user.LastLogin.HasValue ? user.LastLogin.Value.ToString("yyyy-MM-dd HH:mm:ss") : "TBD")).ToList();
 
-                UserDto userDto = new(user.Id, user.UserName!, user.Email!,
-                 user.RegisteredDate.ToString("yyyy-MM-dd"),
-                user.LastLogin.HasValue ? user.LastLogin.Value.ToString("yyyy-MM-dd hh:mm:ss") : "TBD");
-                result.Add(userDto);
-            }
             return Ok(result);
+
+
         }
+
 
         [HttpGet("{id}", Name = "GetOne")]
         public async Task<ActionResult<ExistingUserAppAuthDto>> GetExistingUserAppAuthDtoAsync(string id)
@@ -78,7 +73,6 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<ExistingUserAppAuthDto>> CreateUser(RegisterUserDto registerUserDto)
         {
-            WriteLine("Create Users Method Hit");
             if (!ModelState.IsValid)
             {
                 return BadRequest(new ProblemDetails { Title = "Please check your model state." });
@@ -92,30 +86,31 @@ namespace API.Controllers
             {
                 UserName = registerUserDto.UserName,
                 Email = registerUserDto.Email,
-                RegisteredDate = DateTime.Now,
+                RegisteredDate = DateTime.UtcNow,
                 LastLogin = null,
             };
 
-            await _userManager.CreateAsync(newUser, registerUserDto.PassWord);
-            await _userManager.AddToRoleAsync(newUser, "Guest");
-
-            var result = await _context.SaveChangesAsync();
-            if (result < 0)
+            var createdResult = await _userManager.CreateAsync(newUser, registerUserDto.PassWord);
+            if (!createdResult.Succeeded)
             {
-                return BadRequest(new ProblemDetails { Title = "A problem occured creating the user in the app." });
+                return BadRequest(new ProblemDetails { Title = "Failed to create user." });
+
+            }
+            var roleResult = await _userManager.AddToRoleAsync(newUser, "Guest");
+            if (!roleResult.Succeeded)
+            {
+                return BadRequest(new ProblemDetails { Title = "A problem occured assigning to role." });
+
             }
 
             List<GetRoleDto> appRoles = await GetAppRolesAsync();
 
-            List<CurrentUserRoleStatusDto> currentUserRoleStatusList = [];
-            foreach (GetRoleDto role in appRoles)
-            {
-                currentUserRoleStatusList.Add(new(role.Id, role.Name, role.NormalizedName, false));
-            }
+            var currentUserRoleStatusList = appRoles.Select(role => new CurrentUserRoleStatusDto(role.Id, role.Name, role.NormalizedName, role.Name == "Guest")).ToList();
 
             return new CreatedAtRouteResult("GetOne", new { id = newUser.Id.ToString() }, new ExistingUserAppAuthDto(newUser.Id, newUser.UserName, newUser.Email,
             newUser.RegisteredDate.ToString("yyyy-MM-dd"), "TBD", currentUserRoleStatusList));
         }
+
 
         [HttpPut]
         public async Task<ActionResult> UpdateUserAsync([FromBody] UpdateUserDto updateUserDto)

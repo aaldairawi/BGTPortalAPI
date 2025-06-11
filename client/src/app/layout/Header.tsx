@@ -14,7 +14,7 @@ const Header = () => {
           display: "flex",
           justifyContent: "space-between",
           pb: 1,
-          bgcolor: "#fafafa",
+          bgcolor: "white",
         }}
       >
         <Box

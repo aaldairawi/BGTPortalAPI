@@ -5,7 +5,6 @@ interface Props {
 }
 
 const LoadingComponent: React.FC<Props> = (props: Props) => {
-
   const { message } = props;
   return (
     <Backdrop open={true} invisible={true}>
@@ -16,7 +15,10 @@ const LoadingComponent: React.FC<Props> = (props: Props) => {
         height="100vh"
         width="100vw"
       >
-        <CircularProgress size={100} sx={{ color: "#393939" }} />
+        <CircularProgress
+          size={100}
+          sx={{ color: "#393939", animationDuration: "800ms" }}
+        />
         <Typography
           variant="h4"
           color="#393939"

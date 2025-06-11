@@ -6,12 +6,15 @@ namespace API.Services.Invoices
 {
     public interface IFinalInvoice
     {
-        Task<FinalInvoicesResponseDto> GetFinalizedInvoicesByQueryParams(string invoiceId, string orderBy, string finalizedDate);
+        Task<List<FinalInvoiceDto>> GetFinalizedInvoicesByQueryParams(string invoiceId,  string finalizedDate);
+        Task<List<InvoiceItemDto>> GetFinalizedInvoiceItems(string invoiceGkey);
         
-        Task<FinalInvoicesResponseDto> GetOneFinalizedInvoiceById(string invoiceFinalId);        
-        
-        Task<string> GetInvoiceType(string invoiceFinalId);
+        Task<FinalInvoiceDto?> GetOneFinalizedInvoiceById(string invoiceFinalId);
+        Task<List<SLInvoiceItemDto>> GetSLTypeInvoiceItems(long invoiceGkey);
 
-        Task<List<InvoiceTypeDto>> LoadAllInvoiceTypes();
+        Task<List<InvoiceTypeDto>> LoadAllCTypeInvoices();
+        Task<List<InvoiceTypeDto>> LoadAllSTypeInvoices();
+        
+
     }
 }

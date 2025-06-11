@@ -6,47 +6,28 @@ using API.Helper;
 using API.Middleware;
 using API.Services;
 using API.Services.AppUser;
+using API.Services.Database;
 using API.Services.Invoices;
 using API.Services.N4ContainerHistory;
+using API.Services.Stripping;
 using API.Services.Token;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+
+
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    var jwtSecurityScheme = new OpenApiSecurityScheme
-    {
-        BearerFormat = "JWT",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = JwtBearerDefaults.AuthenticationScheme,
-        Description = "Place your bearer token here buddy: Bearer + token",
-        Reference = new OpenApiReference
-        {
-            Id = JwtBearerDefaults.AuthenticationScheme,
-            Type = ReferenceType.SecurityScheme,
-        }
-    };
-    c.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-        {
-            jwtSecurityScheme,Array.Empty<string>()
-        }
-    });
-});
+
 
 builder.Services.AddDbContext<BGTContext>(options =>
 {
@@ -88,19 +69,26 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<IContainerCurrentStatus, ContainerCurrentStatusRepository>();
+
 builder.Services.AddScoped<IContainerImportLifeTime, ContainerImportLifeTimeRepository>();
 builder.Services.AddScoped<IContainerExportLifeTime, ContainerExportLifeTimeRepository>();
 builder.Services.AddScoped<IContainerGeneralRequests, ContainerGeneralRequestsRepository>();
-builder.Services.AddScoped<IContainerCurrentStatus, ContainerCurrentStatusRepository>();
+builder.Services.AddScoped<IContainerLifeTimeMasterData, ContainerLifeTimeMasterDataRepository>();
+builder.Services.AddScoped<IVesselInformation, VesselInformationRepository>();
+
 builder.Services.AddScoped<IFinalInvoice, FinalInvoiceRepository>();
 builder.Services.AddScoped<IUserRoleHelper, UserRoleHelperRepository>();
 builder.Services.AddScoped<IInvoiceHelper, InvoiceHelperRepository>();
 
 
+builder.Services.AddScoped<IStripping, StrippingRepository>();
+builder.Services.AddScoped<IStrippingHelper, StrippingHelperRepository>();
+
 builder.Services.AddScoped<IDatabase, DataBaseRepository>();
 builder.Services.AddScoped<IUploadInvoices, UploadInvoicesRepository>();
-
-
+builder.Services.AddScoped<IUploadInvoicesHelper, UploadInvoicesHelperRepository>();
+builder.Services.AddScoped<ICsvBuilderService, CsvBuilderServiceRepository>();
 
 var app = builder.Build();
 app.UseMiddleware<ExceptionMiddleware>();
@@ -110,14 +98,6 @@ app.MapFallbackToFile("index.html");
 
 // Configure the HTTP request pipeline.
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.ConfigObject.AdditionalItems.Add("persistAuthorization", "true");
-    });
-}
 
 app.UseCors(opt => { opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000", "http://localhost:3001"); });
 

@@ -1,61 +1,69 @@
 import { Typography, Box, Button, Popover } from "@mui/material";
 import Calendar from "../../app/components/Calendar";
 import { InvoiceFilterMenu } from "../../app/components/InvoiceFilterMenu";
-import { dateObjectOptions } from "../../app/helper/dateOptions";
-import { setInvoiceParams } from "./finalizedInvoicesSlice";
-import { getAllFinalizedInvoicesAsync } from "./getAllFinalizedInvoicesThunk";
+
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 
 import React, { useState } from "react";
-import { InvoiceFilters } from "../../app/models/invoice/invoice.types";
+import { setCTypeInvoiceParams } from "./ctype/cTypeInvoiceSlice";
+import { setSTypeInvoiceParams } from "./stype/sTypeInvoicSlice";
+import { getSTypeInvoicesThunk } from "./stype/getSTypeInvoicesThunk";
+import { getCTypeInvoicesThunk } from "./ctype/getCTypeInvoicesThunk";
+import dayjs from "dayjs";
+import { LoadingButton } from "@mui/lab";
 
-const hideSlInvoiceTypesFromIraqFinance = (
-  input: InvoiceFilters[],
-  isUserDubaiFinanceOrAdmin: boolean
-): InvoiceFilters[] => {
+type InvoiceType = "S" | "C";
 
-  if (isUserDubaiFinanceOrAdmin) {
-    return input;
-  }
-  return input.filter((element) => element.value.charAt(0) !== "S");
+type Props = {
+  invoiceTypeToPass: InvoiceType;
+  invoicesLoading: boolean;
 };
 
-
-const FilterInvoiceBatch = () => {
+export function FilterInvoiceBatch({
+  invoiceTypeToPass,
+  invoicesLoading,
+}: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const { invoiceParams, invoiceTypeFilters, invoiceOrderByFilters } =
-    useAppSelector((state) => state.finalizedInvoices);
+  const { sTypeInvoiceParams } = useAppSelector((state) => state.sTypeInvoices);
+  const { cTypeInvoiceParams } = useAppSelector((state) => state.cTypeInvoices);
 
-  const { user } = useAppSelector((state) => state.account);
-
-  const filteredInvoiceTypes: InvoiceFilters[] =
-    hideSlInvoiceTypesFromIraqFinance(
-      invoiceTypeFilters,
-      user!.roles!.includes("DubaiFinance") || user!.roles!.includes("Admin")
-    );
+  const { cType, sType } = useAppSelector((state) => state.invoiceFilters);
 
   const dispatch = useAppDispatch();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
-    console.log("Anchor set");
   };
 
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  const open = Boolean(anchorEl);
+  const setInvoiceParams =
+    invoiceTypeToPass === "C" ? setCTypeInvoiceParams : setSTypeInvoiceParams;
+
+  const invoiceParams =
+    invoiceTypeToPass === "C" ? cTypeInvoiceParams : sTypeInvoiceParams;
+
+  const getInvoicesThunk =
+    invoiceTypeToPass === "C" ? getCTypeInvoicesThunk : getSTypeInvoicesThunk;
+
+  const open = Boolean(anchorEl && !invoicesLoading); // Invoices loading than hide the menu. invoices loading = true => !true = false.
+  
+  
+
   return (
     <>
-      <Button
+      <LoadingButton
+        fullWidth
+        loading={invoicesLoading} // If invoices are loading than true.
         onClick={(event) => handleClick(event)}
         sx={{ cursor: "pointer" }}
         variant="contained"
       >
         Filter Batch
-      </Button>
+      </LoadingButton>
       <Popover
         anchorEl={anchorEl}
         onClose={handleClose}
@@ -94,33 +102,12 @@ const FilterInvoiceBatch = () => {
               onChange={(event) =>
                 dispatch(setInvoiceParams({ invoiceType: event.target.value }))
               }
-              items={filteredInvoiceTypes}
-              value={invoiceParams.invoiceType}
-            />
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              gap: 2,
-            }}
-          >
-            <Typography
-              variant="subtitle1"
-              sx={{
-                textAlign: "center",
-                width: "100%",
-              }}
-            >
-              Order By
-            </Typography>
-            <InvoiceFilterMenu
-              onChange={(event) =>
-                dispatch(setInvoiceParams({ orderBy: event.target.value }))
+              items={
+                invoiceTypeToPass === "C"
+                  ? cType.invoiceTypeFilters
+                  : sType.invoiceTypeFilters
               }
-              items={invoiceOrderByFilters}
-              value={invoiceParams.orderBy}
+              value={invoiceParams.invoiceType}
             />
           </Box>
           <Box
@@ -138,18 +125,26 @@ const FilterInvoiceBatch = () => {
               gap={2}
             >
               <Calendar
+                value={
+                  invoiceParams.dateFinalized
+                    ? dayjs(invoiceParams.dateFinalized)
+                    : dayjs()
+                }
                 onChange={(dateFinalized) =>
                   dispatch(
                     setInvoiceParams({
-                      dateFinalized: new Date(
-                        dateFinalized.toString()
-                      ).toLocaleString("en-US", dateObjectOptions),
+                      dateFinalized: dateFinalized.format(
+                        "YYYY-MM-DDTHH:mm:ss"
+                      ),
                     })
                   )
                 }
               />
               <Button
-                onClick={() => dispatch(getAllFinalizedInvoicesAsync())}
+                onClick={() => {
+                  dispatch(getInvoicesThunk());
+                  handleClose();
+                }}
                 variant="contained"
                 fullWidth
               >
@@ -161,6 +156,6 @@ const FilterInvoiceBatch = () => {
       </Popover>
     </>
   );
-};
+}
 
 export default FilterInvoiceBatch;

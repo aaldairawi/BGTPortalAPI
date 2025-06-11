@@ -1,7 +1,6 @@
 
 
 using System.Data;
-using System.Runtime.CompilerServices;
 using API.Dtos.Invoice;
 using API.Helper;
 
@@ -19,18 +18,19 @@ namespace API.Services.Invoices
         public async Task<Dictionary<string, string>> GetContainerSize(IEnumerable<string> containerIds)
         {
             var ids = containerIds.Distinct().ToList();
-            if (ids.Count == 0) return new();
+            if (ids.Count == 0) return [];
 
             var quoted = string.Join(",", ids.Select(id => $"'{id.Replace("'", "''")}'"));
-            // var query = $@"SELECT equipment_id AS ContainerNumber, no FROM some_table WHERE equipment_id IN ({quoted})";
+
             var query = @$"SELECT 
                         t.nominal_length AS ContainerSize, 
                         r.id_full AS ContainerNumber  
                         FROM ref_equipment r
                         JOIN ref_equip_type t ON r.eqtyp_gkey = t.gkey
                         WHERE r.id_full IN ({quoted})";
+
             var result = new Dictionary<string, string>();
-            await _database.ExecuteReaderAsync(Database.SparcsN4, query, async reader =>
+            await _database.ExecuteReaderAsync(DatabaseConnectionConstants.SparcsN4, query, async reader =>
             {
                 while (await reader.ReadAsync())
                 {
@@ -45,10 +45,11 @@ namespace API.Services.Invoices
 
 
 
+
         public async Task<string> GetCustomerSapCode(string customerName)
         {
-            var query = InvoiceQueries.GetCustomerSapCodeQuery();
-            return await _database.ExecuteReaderAsync(Database.BGTPortalDb, query, async reader =>
+            var query = InvoiceHelperQueries.GetCustomerSapCodeQuery();
+            return await _database.ExecuteReaderAsync(DatabaseConnectionConstants.BGTPortalDBServerThirteenDatabaseConnection, query, async reader =>
             {
                 if (reader.HasRows)
                 {
@@ -65,8 +66,8 @@ namespace API.Services.Invoices
 
         public async Task<string> RetrieveBerthAssignedToInvoice(string unitFacilityVisitGkey)
         {
-            string query = InvoiceQueries.RetrieveBerthAssignedToInvoice();
-            return await _database.ExecuteReaderAsync(Database.SparcsN4, query, async reader =>
+            string query = InvoiceHelperQueries.RetrieveBerthAssignedToInvoice();
+            return await _database.ExecuteReaderAsync(DatabaseConnectionConstants.SparcsN4, query, async reader =>
             {
                 if (reader.HasRows)
                 {
@@ -80,8 +81,8 @@ namespace API.Services.Invoices
         }
         public async Task<string> GetUnitFacilityVisitGkey(string invoiceGkey)
         {
-            var query = InvoiceQueries.GetUnitFacilityGkeyFromParmValues();
-            return await _database.ExecuteReaderAsync(Database.BillingN4Db, query, async reader =>
+            var query = InvoiceHelperQueries.GetUnitFacilityGkeyFromParmValues();
+            return await _database.ExecuteReaderAsync(DatabaseConnectionConstants.BillingN4Db, query, async reader =>
             {
                 if (reader.HasRows)
                 {
@@ -95,26 +96,12 @@ namespace API.Services.Invoices
 
         }
 
-        public async Task<string> GetRefValue(string refId)
-        {
-            var query = InvoiceQueries.GetRefValueFromBgtReference();
-            return await _database.ExecuteReaderAsync(Database.BGTPortalDb, query, async reader =>
-            {
-                if (reader.HasRows)
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        return reader["RefValue"].ToString() ?? "";
-                    }
-                }
-                return string.Empty;
-            }, new SqlParameter("@refId", refId));
-        }
+
 
         public async Task<string> GetInvoiceGkeyFromBillingInvoices(string invoiceFinalNumber)
         {
-            var query = InvoiceQueries.GetInvoiceGkeyFromBillingInvoices();
-            return await _database.ExecuteReaderAsync(Database.BillingN4Db, query, async reader =>
+            var query = InvoiceHelperQueries.GetInvoiceGkeyFromBillingInvoices();
+            return await _database.ExecuteReaderAsync(DatabaseConnectionConstants.BillingN4Db, query, async reader =>
             {
                 if (reader.HasRows)
                 {
@@ -129,8 +116,8 @@ namespace API.Services.Invoices
 
         public async Task<string> GetCustomerNameBasedOnInvoiceFinalNumber(string invoiceFinalNumber)
         {
-            var query = InvoiceQueries.GetCustomerNameBasedOnInvoiceFinalNumber();
-            return await _database.ExecuteReaderAsync(Database.BillingN4Db, query, async reader =>
+            var query = InvoiceHelperQueries.GetCustomerNameBasedOnInvoiceFinalNumber();
+            return await _database.ExecuteReaderAsync(DatabaseConnectionConstants.BillingN4Db, query, async reader =>
             {
                 if (reader.HasRows)
                 {
@@ -147,8 +134,8 @@ namespace API.Services.Invoices
 
         public async Task<string> GetInvoiceTotalAmount(string invoiceFinalNumber)
         {
-            var query = InvoiceQueries.GetInvoiceTotalAmount();
-            return await _database.ExecuteReaderAsync(Database.BillingN4Db, query, async reader =>
+            var query = InvoiceHelperQueries.GetInvoiceTotalAmount();
+            return await _database.ExecuteReaderAsync(DatabaseConnectionConstants.BillingN4Db, query, async reader =>
             {
                 if (reader.HasRows)
                 {
@@ -164,8 +151,8 @@ namespace API.Services.Invoices
 
         public async Task<string> GetInvoiceFinalizedDate(string invoiceFinalNumber)
         {
-            var query = InvoiceQueries.GetInvoiceFinalizedDate();
-            return await _database.ExecuteReaderAsync(Database.BillingN4Db, query, async reader =>
+            var query = InvoiceHelperQueries.GetInvoiceFinalizedDate();
+            return await _database.ExecuteReaderAsync(DatabaseConnectionConstants.BillingN4Db, query, async reader =>
             {
                 if (reader.HasRows)
                 {
@@ -178,100 +165,53 @@ namespace API.Services.Invoices
             }, new SqlParameter(@"invoiceFinalNbr", invoiceFinalNumber));
         }
 
-        
+
 
         public async Task<List<InvoiceItemDto>> GetInvoiceItems(string invoiceGkey)
         {
-            WriteLine($"The invoice gkey is {invoiceGkey}  - From GetInvoiceItems Helper Repository");
-
-            var query = InvoiceQueries.GetInvoiceItems();
-            var invoiceItems = await _database.ExecuteReaderAsync(Database.BillingN4Db, query, async reader =>
+            var query = GetInvoiceQueries.GetInvoiceItems();
+            var invoiceItems = await _database.ExecuteReaderAsync(DatabaseConnectionConstants.BillingN4Db, query, async reader =>
             {
                 var items = new List<InvoiceItemDto>();
+
+                int gkeyOrdinal = reader.GetOrdinal("InvoiceItemGkey");
+                int finalNbrOrdinal = reader.GetOrdinal("InvoiceFinalNumber");
+                int containerIdOrdinal = reader.GetOrdinal("ContainerId");
+                int eventTypeOrdinal = reader.GetOrdinal("ChargeableUnitEvent");
+
+                int amountOrdinal = reader.GetOrdinal("Total");
+                int quantityOrdinal = reader.GetOrdinal("Quantity");
+                int quantityBilledOrdinal = reader.GetOrdinal("QuantityBilled");
+                int descriptionOrdinal = reader.GetOrdinal("Description");
+
+                int finalizedDateOrdinal = reader.GetOrdinal("InvoiceFinalizedDate");
+                int glCodeOrdinal = reader.GetOrdinal("GlCode");
+                int rate = reader.GetOrdinal("Rate");
 
                 while (await reader.ReadAsync())
                 {
                     items.Add(new InvoiceItemDto
                     {
-                        InvoiceItemGkey = reader["InvoiceItemGkey"].ToString() ?? "",
-                        InvoiceFinalNumber = reader["InvoiceFinalNumber"].ToString() ?? "",
-                        ContainerId = reader["ContainerId"].ToString() ?? "",
-                        EventTypeId = reader["ChargeableUnitEvent"].ToString() ?? "",
-
-                        ItemTotalAmount = reader["Amount"] != DBNull.Value ? Convert.ToDouble(reader["Amount"]).ToString("F0") : "0",
-
-
-                        Quantity = reader["Quantity"] != DBNull.Value ? Convert.ToInt32(reader["Quantity"]) : 0,
-                        QuantityBilled = reader["QuantityBilled"] != DBNull.Value ? Convert.ToInt32(reader["QuantityBilled"]) : 0,
-                        Description = reader["Description"].ToString() ?? "",
-                        FinalizedDate = reader["FinalizedDate"].ToString() ?? "",
-                        GLCode = reader["GlCode"].ToString() ?? ""
+                        InvoiceItemGkey = reader.IsDBNull(gkeyOrdinal) ? "" : reader.GetInt64(gkeyOrdinal).ToString(),
+                        InvoiceFinalNumber = reader.IsDBNull(finalNbrOrdinal) ? "" : reader.GetString(finalNbrOrdinal),
+                        ContainerId = reader.IsDBNull(containerIdOrdinal) ? "" : reader.GetString(containerIdOrdinal),
+                        EventTypeId = reader.IsDBNull(eventTypeOrdinal) ? "" : reader.GetString(eventTypeOrdinal),
+                        ItemTotalAmount = reader.IsDBNull(amountOrdinal) ? 0 : reader.GetDouble(amountOrdinal),
+                        Quantity = reader.IsDBNull(quantityOrdinal) ? 0 : reader.GetDouble(quantityOrdinal),
+                        QuantityBilled = reader.IsDBNull(quantityBilledOrdinal) ? 0 : reader.GetDouble(quantityBilledOrdinal),
+                        Description = reader.IsDBNull(descriptionOrdinal) ? "" : reader.GetString(descriptionOrdinal),
+                        FinalizedDate = reader.IsDBNull(finalizedDateOrdinal) ? DateTime.MinValue : reader.GetDateTime(finalizedDateOrdinal),
+                        GLCode = reader.IsDBNull(glCodeOrdinal) ? "" : reader.GetString(glCodeOrdinal),
+                        Rate = reader.IsDBNull(rate) ? 0 : reader.GetDouble(rate)
                     });
                 }
+
                 return items;
             }, new SqlParameter("@invoiceGkey", invoiceGkey));
 
             return invoiceItems;
         }
 
-        public async Task<InvoiceCurrencyAndNotesDto> GetInvoiceCurrencyAndNotes(string invoiceFinalNbr)
-        {
-            var query = InvoiceQueries.GetInvoiceCurrencyAndNotes();
-            return await _database.ExecuteReaderAsync(Database.BillingN4Db, query, async reader =>
-            {
-
-                while (await reader.ReadAsync())
-                {
-
-                    var currency = reader["Currency"].ToString() ?? "";
-                    var notes = reader["InvoiceNotes"].ToString() ?? "";
-                    return new InvoiceCurrencyAndNotesDto(currency, notes);
-                }
-
-                return null!;
-
-            }, new SqlParameter("@invoiceFinalNumber", invoiceFinalNbr));
-
-        }
-
-        public async Task<List<InvoiceMetaDataDto>> GetInvoiceMetaData(List<string> invoiceFinalNumbers)
-        {
-            if (invoiceFinalNumbers == null || invoiceFinalNumbers.Count == 0)
-                return [];
-
-            var quoted = string.Join(",", invoiceFinalNumbers.Select(n => $"'{n.Replace("'", "''")}'"));
-
-            WriteLine(quoted);
-
-            var query = InvoiceQueries.GetInvoiceMetaData()
-                .Replace("--__INVOICE_FILTER__", $"WHERE i.final_nbr IN ({quoted})");
-
-            return await _database.ExecuteReaderAsync(Database.BillingN4Db, query,
-                async reader =>
-                {
-                    var list = new List<InvoiceMetaDataDto>();
-
-                    while (await reader.ReadAsync())
-                    {
-                        list.Add(new InvoiceMetaDataDto
-                        {
-                            InvoiceFinalNumber = reader["InvoiceFinalNumber"].ToString()!,
-                            InvoiceFinalizedDate = Convert.ToDateTime(reader["InvoiceFinalizedDate"]),
-                            CustomerName = reader["CustomerName"].ToString()!,
-                            CustomerSapCode = reader["CustomerSapCode"].ToString()!,
-                            TotalAmount = reader["TotalAmount"] != DBNull.Value
-                                ? Convert.ToDouble(reader["TotalAmount"]).ToString("F0")
-                                : "0",
-                            UnitFacilityVisitGkey = reader["UnitFacilityVisitGkey"].ToString()!,
-                            ProfitCenter = reader["ProfitCenter"].ToString()!,
-                            InvoiceCurrency = reader["InvoiceCurrency"].ToString()!,
-                            InvoiceNotes = reader["InvoiceNotes"].ToString()!
-                        });
-                    }
-
-                    return list;
-                });
-        }
 
 
     }

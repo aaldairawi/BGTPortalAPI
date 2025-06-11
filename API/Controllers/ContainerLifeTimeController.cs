@@ -9,35 +9,43 @@ namespace API.Controllers
     public class ContainerLifeTimeController : BaseApiController
     {
         private readonly IContainerCurrentStatus _containerCurrentStatus;
-        private readonly IContainerGeneralRequests _containerGeneralRequests;
+
         private readonly IContainerImportLifeTime _containerImportLifeTimeContext;
         private readonly IContainerExportLifeTime _containerExportLifeTimeContext;
-        public ContainerLifeTimeController(IContainerCurrentStatus currentContainerStatus, IContainerImportLifeTime containerImportLifeTimeContext,
-
-         IContainerGeneralRequests containerGeneralRequestsContext, IContainerExportLifeTime containerExportLifeTime)
+        private readonly IContainerLifeTimeMasterData _containerLifeTimeMasterData;
+        public ContainerLifeTimeController(IContainerCurrentStatus containerCurrentStatus, IContainerImportLifeTime containerImportLifeTimeContext,
+                IContainerExportLifeTime containerExportLifeTime, IContainerLifeTimeMasterData containerLifeTimeMasterData)
         {
-            _containerCurrentStatus = currentContainerStatus ?? throw new ArgumentNullException(nameof(currentContainerStatus));
-            _containerGeneralRequests = containerGeneralRequestsContext ?? throw new ArgumentNullException(nameof(containerGeneralRequestsContext));
+            _containerCurrentStatus = containerCurrentStatus ?? throw new ArgumentNullException(nameof(containerCurrentStatus));
+
+
+
             _containerImportLifeTimeContext = containerImportLifeTimeContext ?? throw new ArgumentNullException(nameof(containerImportLifeTimeContext));
             _containerExportLifeTimeContext = containerExportLifeTime ?? throw new ArgumentNullException(nameof(containerExportLifeTime));
+            _containerLifeTimeMasterData = containerLifeTimeMasterData ?? throw new ArgumentNullException(nameof(containerLifeTimeMasterData));
+
         }
 
-        [HttpGet("unitcurrentstatus/{id}")]
-        public async Task<ActionResult<ContainerCurrentStatusDto>> UnitCurrentStatus(string id)
+        [HttpGet("unitcurrentstatus")]
+        public async Task<ActionResult<ContainerCurrentStatusDto>> UnitCurrentStatus([FromQuery] string containerId)
         {
-            ContainerCurrentStatusDto result = await _containerCurrentStatus.GetContainerCurrentStatus(id);
+
+            var result = await _containerCurrentStatus.GetContainerCurrentStatusResult(containerId);
+
             if (result == null)
-                return NotFound(new ProblemDetails { Title = $"Unit {id} not found." });
+                return NotFound(new ProblemDetails { Title = $"Unit {containerId} not found." });
             return Ok(result);
         }
 
+
         [HttpGet("unitlifetimeimport")]
-        public async Task<ActionResult<ContainerImportResultDto>> UnitImportLifeTime(string unitNumber)
+        public async Task<ActionResult<ContainerImportResultDto>> UnitImportLifeTime([FromQuery] string containerId)
         {
 
-            var containerMasterData = await _containerGeneralRequests.GetContainerLifeTimeMasterDataImport(unitNumber);
+            ContainerLifeTimeMasterDataDto? containerMasterData = await _containerLifeTimeMasterData.GetContainerLifeTimeMasterData(containerId, true);
             if (containerMasterData is null)
-                return NotFound(new ProblemDetails { Title = $"No results for  unit {unitNumber}" });
+                return NotFound(new ProblemDetails { Title = $"No results for unit {containerId}" });
+
 
             var result = await _containerImportLifeTimeContext.GetContainerImportResult(containerMasterData);
             if (result == null) return NotFound(new ProblemDetails { Title = "Unit not found" });
@@ -45,16 +53,16 @@ namespace API.Controllers
         }
 
         [HttpGet("unitlifetimeexport")]
-        public async Task<ActionResult<ContainerExportResultDto>> UnitExportLifeTime(string unitNumber)
+        public async Task<ActionResult<ContainerExportResultDto>> UnitExportLifeTime([FromQuery] string containerId)
         {
-            var containerMasterData = await _containerGeneralRequests.GetContainerLifeTimeMasterDataExport(unitNumber);
+            ContainerLifeTimeMasterDataDto? containerMasterData = await _containerLifeTimeMasterData.GetContainerLifeTimeMasterData(containerId, false);
             if (containerMasterData is null)
             {
 
-                return NotFound(new ProblemDetails { Title = $"No results for  unit {unitNumber}" });
+                return NotFound(new ProblemDetails { Title = $"No results for unit {containerId}" });
             }
             var result = await _containerExportLifeTimeContext.GetContainerExportResult(containerMasterData);
-            if (result == null) return NotFound(new ProblemDetails { Title = "Unit not found" });
+            if (result == null) return NotFound(new ProblemDetails { Title = $"Unit {containerId} not found." });
             return Ok(result);
         }
 

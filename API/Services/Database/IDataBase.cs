@@ -9,5 +9,7 @@ namespace API.Services
         Func<SqlDataReader, Task<T>> reader,
          params SqlParameter[] parameters);
 
+        Task<int>  ExecuteSqlQuery(string database, string query, params SqlParameter[] parameters);
+        Task<T> ExecuteScalarAsync<T>(string database, string query, SqlParameter[] parameters);
     }
 }

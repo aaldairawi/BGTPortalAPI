@@ -16,10 +16,12 @@ namespace API.Controllers
         }
 
 
-        [HttpPost]
-        public async Task<ActionResult<bool>> PostAllInvoices(UploadInvoicesDto uploadInvoicesDto)
+        [HttpPost("previewcsv")]
+        public async Task<ActionResult<bool>> PreviewCSVFileUpload([FromBody] UploadInvoicesDto uploadInvoicesDto)
         {
-            var result = await _uploadInovices.UploadInvoices(uploadInvoicesDto);
+            WriteLine(uploadInvoicesDto.InvoiceType);
+
+            var result = await _uploadInovices.UploadToPreviewCSV(uploadInvoicesDto);
 
             if (!result)
             {
@@ -27,6 +29,18 @@ namespace API.Controllers
             }
             return Ok(result);
         }
+        [HttpPost("uploadtosap")]
+        async Task<ActionResult<bool>> UploadToSAP([FromBody] UploadInvoicesDto uploadInvoicesDto)
+        {
+            var result = await _uploadInovices.UploadToSapProduction(uploadInvoicesDto);
+            if (!result)
+            {
+                return BadRequest(new ProblemDetails { Title = "A problem occured while uploading." });
+            }
+            return Ok(result);
+        }
+
+
 
 
     }

@@ -43,9 +43,9 @@ const Register: React.FC<Props> = (props: Props) => {
     formState: { isSubmitting, errors, isValid },
   } = useForm({ mode: "onTouched" });
 
-  const handleApiErrors = (errors: string[]) => {
+  function handleApiErrors(errors: any) {
     if (errors) {
-      errors.forEach((error) => {
+      errors.forEach((error: string) => {
         if (error.includes("Password")) {
           setError("password", { message: error });
         } else if (error.includes("Email")) {
@@ -55,7 +55,7 @@ const Register: React.FC<Props> = (props: Props) => {
         }
       });
     }
-  };
+  }
 
   const onHandleValidateUsername = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -106,20 +106,24 @@ const Register: React.FC<Props> = (props: Props) => {
   const onHandleFormSubmit = async (data: FieldValues) => {
     try {
       await dispatch(registerUserAsync(data)).unwrap();
-    } catch (error: any) {
-      if (Array.isArray(error)) {
-        error.forEach((err: string) => console.log(err));
+
+      if (isUserAnAdmin) {
+        toast.success("User created successfully.", { autoClose: 1000 });
+      } else {
+        toast.success("Registration successful, please log in.", {
+          autoClose: 500,
+        });
       }
-      handleApiErrors(error);
-    }
-    if (isUserAnAdmin) {
-      toast.success("User created successfully.", { autoClose: 1000 });
-    } else {
-      toast.success("Registration successful, please log in.", {
+
+      reset();
+    } catch (error: any) {
+      toast.error("Registration failed. Please check your inputs.", {
         autoClose: 1000,
       });
+      console.log(error);
+
+      handleApiErrors(error);
     }
-    reset();
   };
 
   const marginVariable = showCloseIcon ? 3 : 20;

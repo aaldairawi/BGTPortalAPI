@@ -62,21 +62,26 @@ namespace API.Controllers
             LoggedInUserDto loggedInUserDto = new(user.Id.ToString(), user.UserName!, user.Email!, await _tokenService.GenerateToken(user));
             return Ok(loggedInUserDto);
         }
-
         [HttpPost("register")]
         public async Task<ActionResult> Register(RegisterUserDto registerUserDto)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(new ProblemDetails { Title = "Model State is not valid." });
+                var modelErrors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToArray();
+
+                return BadRequest(modelErrors);
             }
-            User? userAlreadyExists = await _userManager.FindByNameAsync(registerUserDto.UserName);
+
+            var userAlreadyExists = await _userManager.FindByNameAsync(registerUserDto.UserName);
             if (userAlreadyExists != null)
             {
-
-                return BadRequest(new ProblemDetails { Title = $"User with username {registerUserDto.UserName} already exists. Please log in" });
+                return BadRequest(new[] { $"User with username {registerUserDto.UserName} already exists. Please log in." });
             }
-            User user = new()
+
+            var user = new User
             {
                 UserName = registerUserDto.UserName,
                 Email = registerUserDto.Email,
@@ -84,19 +89,18 @@ namespace API.Controllers
                 SecurityStamp = Guid.NewGuid().ToString(),
             };
 
-
             var createdNewUserResult = await _userManager.CreateAsync(user, registerUserDto.PassWord);
-            var addNewUserToMemberRoleResult = await _userManager.AddToRoleAsync(user, "Guest");
+            var roleResult = await _userManager.AddToRoleAsync(user, "Guest");
 
-            if (!createdNewUserResult.Succeeded || !addNewUserToMemberRoleResult.Succeeded)
+            if (!createdNewUserResult.Succeeded || !roleResult.Succeeded)
             {
+                var identityErrors = createdNewUserResult.Errors.Select(e => e.Description);
+                var roleErrors = roleResult.Errors.Select(e => e.Description);
 
-                foreach (var error in createdNewUserResult.Errors)
-                {
-                    ModelState.AddModelError(error.Code, error.Description);
-                }
-                return ValidationProblem();
+                var allErrors = identityErrors.Concat(roleErrors).ToArray();
+                return BadRequest(allErrors);
             }
+
             return Ok();
         }
 

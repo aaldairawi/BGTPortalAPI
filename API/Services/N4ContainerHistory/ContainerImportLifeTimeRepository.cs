@@ -9,27 +9,38 @@ namespace API.Services.N4ContainerHistory
     {
 
         private readonly IContainerGeneralRequests _containerGeneralContext;
-        public ContainerImportLifeTimeRepository(IContainerGeneralRequests context)
+        private readonly IVesselInformation _vesselInformation;
+
+        public ContainerImportLifeTimeRepository(IContainerGeneralRequests context, IVesselInformation vesselInformation)
         {
             _containerGeneralContext = context ?? throw new ArgumentNullException(nameof(context));
+            _vesselInformation = vesselInformation ?? throw new ArgumentNullException(nameof(vesselInformation));
+
         }
 
         public async Task<ContainerImportResultDto> GetContainerImportResult(ContainerLifeTimeMasterDataDto input)
         {
-            var (containerUnitGkey, vesselName, vesselATA) = await _containerGeneralContext.ExtractUnitGkeyVesselNameVesselATA(input);
+            
 
-            var containerDischarge = await _containerGeneralContext.GetEventDateByUnitGkeyAndEventId(containerUnitGkey, Constants.UNIT_DISCH);
+            var vesselInformation = await _vesselInformation.GetVesselActualTimeOfArrivalOrCompletion(input, true);
 
-            var stripped = await _containerGeneralContext.GetEventDateByUnitGkeyAndEventId(containerUnitGkey, Constants.UNIT_STRIP);
+            var containerDischarge = await _containerGeneralContext.GetEventDateByUnitGkeyAndEventId(vesselInformation.ContainerUnitGkey, Constants.UNIT_DISCH);
 
-            var containerLoadedOnTruck = await _containerGeneralContext.GetEventDateByUnitGkeyAndEventId(containerUnitGkey, Constants.UNIT_DELIVER);
+            var stripped = await _containerGeneralContext.GetEventDateByUnitGkeyAndEventId(vesselInformation.ContainerUnitGkey, Constants.UNIT_STRIP);
+
+            var containerLoadedOnTruck = await _containerGeneralContext.GetEventDateByUnitGkeyAndEventId(vesselInformation.ContainerUnitGkey, Constants.UNIT_DELIVER);
             var containerStripped = stripped ?? string.Empty;
 
-            var (gateOut, receivedBackEmpty) = await _containerGeneralContext.ExtractGateOutForUnit(containerUnitGkey, input.ContainerId);
+            var (gateOut, receivedBackEmpty) = await _containerGeneralContext.ExtractGateOutForUnit(vesselInformation.ContainerUnitGkey,
+            input.ContainerId);
+
 
             var containerReceivedData = stripped ?? receivedBackEmpty;
-            return input.MapContainerImportResult(vesselName ?? string.Empty, vesselATA ?? string.Empty,
-            containerDischarge ?? string.Empty, containerStripped, containerReceivedData ?? string.Empty, 
+            var vesselName = vesselInformation.VesselName ?? "";
+            var vesselATA = vesselInformation.VesselATA ?? "";
+
+            return input.MapContainerImportResult(vesselName, vesselATA,
+            containerDischarge ?? string.Empty, containerStripped, containerReceivedData ?? string.Empty,
             containerLoadedOnTruck ?? string.Empty, gateOut ?? string.Empty);
 
         }

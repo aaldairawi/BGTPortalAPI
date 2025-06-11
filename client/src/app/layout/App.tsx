@@ -23,7 +23,7 @@ const App = () => {
     try {
       await dispatch(fetchCurrentUserAsync());
     } catch (error) {
-      toast.error("Session Expired, Please login again.", { autoClose: 500 });
+      toast.error("Session Expired, Please login again.", { autoClose: 1000 });
       console.log(error);
     }
   }, [dispatch]);

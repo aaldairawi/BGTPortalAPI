@@ -1,16 +1,22 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import router from "../router/Routes";
+
 import { store } from "../store/configureStore";
-import {} from "../models/container/unitLifeTime.types";
 
 import { UsersAPIRequests } from "./usersAPIRequests";
 
 import { AccountAPIRequests } from "./accountAPIRequests";
+
 import { RolesAPIRequests } from "./rolesAPIRequests";
+
 import { InvoicesAPIRequest } from "./invoicesAPIRequests";
+
 import { NavisUnitApi } from "./n4ContainerAPIRequests";
+
 import { UploadInovicesAPIRequests } from "./uploadInvoicesAPIRequests";
+
+import { StrippingUnitsAPI } from "./strippingUnitsAPIRequests";
 
 const sleep = () => new Promise((resolve) => setTimeout(resolve, 10));
 
@@ -35,9 +41,10 @@ axios.interceptors.response.use(
   },
   (error: AxiosError) => {
     const { data, status } = error.response as AxiosResponse;
+
     switch (status) {
       case 400:
-        if (data.errors) {
+        if (data) {
           const modelStateErrors: string[] = [];
           for (const key in data.errors) {
             if (data.errors[key]) {
@@ -46,7 +53,7 @@ axios.interceptors.response.use(
           }
           throw modelStateErrors.flat();
         }
-        toast.error(data.title, { autoClose: 1500 });
+        toast.error(data.title);
         break;
       case 404:
         toast.error(data.title, { autoClose: 1200 });
@@ -60,7 +67,7 @@ axios.interceptors.response.use(
         });
         break;
       case 500:
-        router.navigate("/server-error", { state: { error: data } });
+        router.navigate("v1/server-error", { state: { error: data } });
         toast.error("Server error", { autoClose: 1000 });
         break;
       default:
@@ -94,6 +101,7 @@ const Agent = {
   InvoicesAPIRequest,
   TestErrors,
   UploadInovicesAPIRequests,
+  StrippingUnitsAPI,
 };
 
 export default Agent;

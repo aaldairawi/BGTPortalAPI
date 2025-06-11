@@ -4,3 +4,4 @@ export const dateObjectOptions: Intl.DateTimeFormatOptions = {
   year: "numeric",
   weekday: "long",
 };
+

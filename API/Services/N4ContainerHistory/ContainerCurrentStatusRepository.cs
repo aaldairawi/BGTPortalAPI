@@ -1,6 +1,9 @@
+
 using API.Dtos.Container;
+
 using API.Helper;
 using Microsoft.Data.SqlClient;
+
 
 namespace API.Services.N4ContainerHistory
 {
@@ -12,37 +15,66 @@ namespace API.Services.N4ContainerHistory
         {
             _database = databse ?? throw new ArgumentNullException(nameof(databse));
         }
-        public async Task<ContainerCurrentStatusDto> GetContainerCurrentStatus(string containerNumber)
+
+        public async Task<ContainerCurrentStatusDto?> GetContainerCurrentStatusResult(string containerNumber)
         {
             var query = Container_SQL_Queries.GetContainerCurrentStatusQuery();
 
-            var result = await _database.ExecuteReaderAsync(Database.BGTPortalN4Db, query, async reader =>
-            {
-                while (await reader.ReadAsync())
+            return await _database.ExecuteReaderAsync(
+                DatabaseConnectionConstants.BGTPortalN4DatabaseConnection,
+                query,
+                async reader =>
                 {
-                    var containerId = reader["UnitNbr"].ToString() ?? "";
-                    var transitState = reader["TState"].ToString() ?? "";
-                    var category = reader["category"].ToString() ?? "";
-                    var visitState = reader["visit_state"].ToString() ?? "";
-                    var freightKind = reader["freight_kind"].ToString() ?? "";
-                    var lineOperator = reader["Line Operator"].ToString() ?? "";
-                    var operatorName = reader["Operator Name"].ToString() ?? "";
-                    var berth = reader["Berth"].ToString() ?? "";
-                    var categoryString = category switch
+                    int containerIdIndex = reader.GetOrdinal("UnitNbr");
+                    int transitStateIndex = reader.GetOrdinal("TState");
+                    int categoryIndex = reader.GetOrdinal("Category");
+                    int visitStateIndex = reader.GetOrdinal("VisitState");
+                    int freightKindIndex = reader.GetOrdinal("FreightKind");
+                    int lineOperatorIndex = reader.GetOrdinal("LineOperator");
+                    int operatorNameIndex = reader.GetOrdinal("OperatorName");
+                    int berthIndex = reader.GetOrdinal("Berth");
+
+                    while (await reader.ReadAsync())
                     {
-                        "STRGE" => "Storage",
-                        "IMPRT" => "Import",
-                        "EXPRT" => "Export",
-                        "THRGH" => "Through",
-                        _ => ""
-                    };
-                    return new ContainerCurrentStatusDto(containerId, transitState, categoryString, visitState, freightKind == "FCL" ? "FULL" : "EMPTY", 
-                    operatorName, lineOperator, berth);
-                }
-                return null!;
-            }, new SqlParameter("@containerNumber", containerNumber));
-            return result;
+                        string SafeGetString(int index) => reader.IsDBNull(index) ? "" : reader.GetString(index);
+
+                        var containerId = SafeGetString(containerIdIndex);
+                        var transitState = SafeGetString(transitStateIndex);
+                        var category = SafeGetString(categoryIndex);
+                        var visitState = SafeGetString(visitStateIndex);
+                        var freightKind = SafeGetString(freightKindIndex);
+                        var lineOperator = SafeGetString(lineOperatorIndex);
+                        var operatorName = SafeGetString(operatorNameIndex);
+                        var berth = SafeGetString(berthIndex);
+
+                        var categoryString = category switch
+                        {
+                            "STRGE" => "Storage",
+                            "IMPRT" => "Import",
+                            "EXPRT" => "Export",
+                            "THRGH" => "Through",
+                            _ => ""
+                        };
+
+                        var friendlyFreightKind = freightKind == "FCL" ? "FULL" : "EMPTY";
+
+                        return new ContainerCurrentStatusDto(
+                            containerId,
+                            transitState,
+                            categoryString,
+                            visitState,
+                            friendlyFreightKind,
+                            lineOperator,
+                            operatorName,
+                            berth
+                        );
+                    }
+
+                    return null;
+                },
+                new SqlParameter("@containerNumber", containerNumber));
         }
+
 
     }
 }

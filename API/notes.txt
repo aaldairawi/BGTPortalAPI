@@ -12,16 +12,33 @@ Roles
     "DefaultConnection": "Data Source=172.22.10.200;Initial Catalog=BGT_Portal_N4;user=awafa;password=a7561;Integrated Security=False;Connect Timeout=30;Encrypt=False;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"    
   }
 
+Properties for the C Type and S Type 
 
-Logic to upload an invoice.
-    POCOS
-        public struct record InvoiceNumber(string InvoiceNumber);
+Description 
+QTY
+Total
+Gl_Code,
+Draft Number,
+Final Number,
+Notes
+Customer Name,
+Created,
+Finalized Date,
+Equipment_Id,
+Event Type 
 
-    Objects
-        Interfaces
-            IUploadInvoice
-                Methods
-                UploadToFTPTestFolder(List<> invoices);
-                UploadToFTPProdcutionFolder(List<invoices>);
 
-        Classes
+S Type
+Description
+Tariff IDS
+QTY
+Rate
+Rate_Billed
+Total
+Gl_Code
+Draft_Nbr
+Final_Nbr
+Notes
+Customer Name
+Created 
+Finalized

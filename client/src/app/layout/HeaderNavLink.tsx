@@ -5,15 +5,17 @@ import { useAppDispatch, useAppSelector } from "../store/configureStore";
 import { signOut } from "../../features/account/accountSlice";
 
 import { ILinks, Links, rightLinks } from "./links";
-import { clearUsersLoadedFromAdapter } from "../../features/admin/usersSlice";
+import { clearUsersLoadedFromAdapter } from "../../features/admin/users/usersSlice";
 
 const renderLink = (path: string, text: string, key: string): JSX.Element => (
   <ListItem
     sx={{
       color: "rgba(0,0,0)",
+      fontWeight: "500",
       fontSize: "14px",
       "&.active": { textDecoration: "underline" },
       "&:hover": { bgcolor: "rgba(0,0,0,0.1)" },
+    
     }}
     component={NavLink}
     to={path}

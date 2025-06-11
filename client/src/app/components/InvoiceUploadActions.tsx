@@ -1,25 +1,38 @@
-import { Box, Checkbox, FormControlLabel, FormGroup } from "@mui/material";
-import { useEffect, useState, useRef } from "react";
+import { Box, Button } from "@mui/material";
+import { useEffect, useRef } from "react";
 import { useAppSelector, useAppDispatch } from "../store/configureStore";
-import {
-  invoicesSelector,
-  resetInvoicesLoaded,
-} from "../../features/sap/finalizedInvoicesSlice";
-import { uploadInvoicesToSap } from "../../features/sap/uploadInvoicesToSapThunk";
+
+import { uploadInovicesToPreviewCSVThunk } from "../../features/sap/uploadInovicesToPreviewCSVThunk";
+
 import { LoadingButton } from "@mui/lab";
 import { toast } from "react-toastify";
 import { resetUploadState } from "../../features/sap/uploadInvoicesSlice";
+import {
+  FinalizedInvoiceDto,
+  InvoiceParams,
+} from "../models/invoice/invoice.types";
+import { resetCTypeInvoices } from "../../features/sap/ctype/cTypeInvoiceSlice";
+import { resetSTypeInvoices } from "../../features/sap/stype/sTypeInvoicSlice";
 
-export default function InvoiceUploadActions() {
-  const [uploadToProduction, setUploadToProduction] = useState(false);
-  const invoices = useAppSelector(invoicesSelector.selectAll);
-  const { invoiceParams } = useAppSelector((state) => state.finalizedInvoices);
-  const { status, invoicesUploadedSuccessfully, uploadFailed } = useAppSelector(
+type Props = {
+  invoiceParams: InvoiceParams;
+  invoicesToUpload: FinalizedInvoiceDto[];
+  invoicesUploadingStatus?: boolean;
+};
+
+export default function InvoiceUploadActions({
+  invoiceParams,
+  invoicesToUpload,
+  invoicesUploadingStatus,
+}: Props) {
+  const { invoicesUploadedSuccessfully } = useAppSelector(
     (state) => state.uploadInvoices
   );
-  const invoiceFinalNumbers: string[] = invoices.map(
+
+  const invoiceFinalNumbers: string[] = invoicesToUpload.map(
     (element) => element.final
   );
+
   const dispatch = useAppDispatch();
   const hasTriedUpload = useRef(false);
 
@@ -29,24 +42,31 @@ export default function InvoiceUploadActions() {
     if (invoicesUploadedSuccessfully) {
       toast.success("Invoices uploaded successfully", { autoClose: 600 });
       dispatch(resetUploadState());
-    } else if (uploadFailed) {
-      toast.error("Invoice upload failed");
-      dispatch(resetUploadState());
     }
-  }, [invoicesUploadedSuccessfully, uploadFailed, dispatch]);
+    dispatch(resetUploadState());
+  }, [invoicesUploadedSuccessfully, dispatch]);
 
-  const handleUploadClick = async () => {
+  const handlePreviewCSVClick = async () => {
     hasTriedUpload.current = true;
+    console.log(invoiceFinalNumbers);
 
     const result = await dispatch(
-      uploadInvoicesToSap({
+      uploadInovicesToPreviewCSVThunk({
         invoices: invoiceFinalNumbers,
-        uploadToProduction,
         invoiceType: invoiceParams.invoiceType,
       })
     );
-    if (uploadInvoicesToSap.fulfilled.match(result)) {
-      dispatch(resetInvoicesLoaded());
+    if (uploadInovicesToPreviewCSVThunk.fulfilled.match(result)) {
+      console.log("Upload complete");
+    }
+  };
+
+  const handleReset = () => {
+    if (invoiceParams.invoiceType.includes("C")) {
+      dispatch(resetCTypeInvoices());
+    }
+    if (invoiceParams.invoiceType.includes("S")) {
+      dispatch(resetSTypeInvoices());
     }
   };
 
@@ -55,34 +75,33 @@ export default function InvoiceUploadActions() {
       sx={{
         gap: 2,
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
+        justifyContent: "center",
+
+        width: "40rem",
       }}
     >
-      <FormGroup>
-        <FormControlLabel
-          control={
-            <Checkbox
-              disabled={status === "pendingUploadInvoices"}
-              checked={uploadToProduction}
-              onChange={(e) => setUploadToProduction(e.target.checked)}
-            />
-          }
-          label="Upload To Production"
-        />
-      </FormGroup>
-
       <LoadingButton
-        disabled={status === "pendingUploadInvoices"}
-        loading={status === "pendingUploadInvoices"}
-        fullWidth
+        disabled={false}
+        loading={false}
         variant="contained"
         color="primary"
-        sx={{ mt: 2 }}
-        onClick={handleUploadClick}
+        onClick={() => console.log("Uploading to sap...")}
       >
-        Upload
+        Upload To SAP
       </LoadingButton>
+      <LoadingButton
+        disabled={invoicesUploadingStatus}
+        loading={invoicesUploadingStatus}
+        variant="contained"
+        color="primary"
+        onClick={handlePreviewCSVClick}
+      >
+        Preview CSV
+      </LoadingButton>
+      <Button variant="outlined" onClick={handleReset}>
+        Reset
+      </Button>
     </Box>
   );
 }

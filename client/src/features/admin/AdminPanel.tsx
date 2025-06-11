@@ -3,32 +3,12 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 
-import { Users } from "./Users";
+import { Users } from "./users/Users";
 
-import { Roles } from "./Roles";
+import { Roles } from "./roles/Roles";
 import Register from "../account/Register";
+import CustomPanel from "../../app/components/CustomPanel";
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-const AdminAPICustomPanel = (props: TabPanelProps) => {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-};
 
 const a11yProps = (index: number) => {
   return {
@@ -58,15 +38,15 @@ const AdminPanel = () => {
           <Tab label="Create User" {...a11yProps(2)} />
         </Tabs>
       </Box>
-      <AdminAPICustomPanel value={value} index={0}>
+      <CustomPanel value={value} index={0}>
         <Users />
-      </AdminAPICustomPanel>
-      <AdminAPICustomPanel value={value} index={1}>
+      </CustomPanel>
+      <CustomPanel value={value} index={1}>
         <Roles editingUser={false} />
-      </AdminAPICustomPanel>
-      <AdminAPICustomPanel value={value} index={2}>
+      </CustomPanel>
+      <CustomPanel value={value} index={2}>
         <Register showCloseIcon={true} />
-      </AdminAPICustomPanel>
+      </CustomPanel>
     </Box>
   );
 };

@@ -5,7 +5,6 @@ import TableHeadComponent from "../../app/components/TableHeadComponent";
 
 interface Props {
   invoices: FinalizedInvoiceDto[];
-  invoicesLoaded: boolean;
 }
 
 const InvoicesList: React.FC<Props> = (props: Props) => {
@@ -17,16 +16,15 @@ const InvoicesList: React.FC<Props> = (props: Props) => {
       sx={{
         mt: 0,
         maxHeight: 425,
-        maxWidth: 1100,
+        width: "100%",
         overflowY: "auto",
-        
       }}
     >
       <Table
         stickyHeader
         sx={{
           minWidth: 800,
-          maxWidth: 1000,
+
           width: "100%",
         }}
       >
@@ -34,12 +32,16 @@ const InvoicesList: React.FC<Props> = (props: Props) => {
           tableCellHeadings={[
             "No",
             "Final",
+            "Status",
             "Date",
             "Creator",
+            "Changer",
             "Paid",
+            "Notes",
             "Customer",
             "Currency",
             "Total",
+            "Inspect",
           ]}
         />
         <TableBody>

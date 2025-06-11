@@ -4,102 +4,171 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
-import { getInvoiceFiltersAsync } from "./getInvoiceFiltersThunk";
+
 import LoadingComponent from "../../app/components/LoadingComponent";
 
-import { resetInvoicesLoaded } from "./finalizedInvoicesSlice";
-import InvoiceBatchUpload from "./InvoiceBatchUpload";
-import InvoiceSingleUpload from "./InvoiceSingleUpload";
+import { cTypeInvoicesSelector } from "./ctype/cTypeInvoiceSlice";
+import { sTypeInvoicesSelector } from "./stype/sTypeInvoicSlice";
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
+import SearchSingleInvoice from "./SearchSingleInvoice";
+import InvoiceBatchUpload from "./ctype/InvoiceBatchUpload";
+import {
+  getCTypeInvoiceFiltersAsync,
+  getSTypeInvoiceFiltersAsync,
+} from "./invoicefilters/getInvoiceFiltersThunk";
 
-const SapCustomPanel = (props: TabPanelProps) => {
-  const { children, value, index, ...other } = props;
+import InvoiceDetailsBackdrop from "./InvoiceDetailsBackdrop";
+import ShippingLineUpload from "./stype/ShippingLineUpload";
+import {
+  InvoiceParams,
+  InvoicesLoadedDetails,
+  FinalizedInvoiceDto,
+} from "../../app/models/invoice/invoice.types";
+import CustomPanel, { a11yProps } from "../../app/components/CustomPanel";
 
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-};
-
-const a11yProps = (index: number) => {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-};
 
 const SapIntegrationPanel = () => {
   const [value, setValue] = useState(0);
-  const { status, invoiceFiltersLoaded } = useAppSelector(
-    (state) => state.finalizedInvoices
-  );
   const dispatch = useAppDispatch();
+
+  const { invoiceItems, showInvoiceItemBackdrop } = useAppSelector(
+    (state) => state.invoiceItems
+  );
+  const {
+    invoicesLoaded: cTypeInvoicesLoaded,
+    cTypeInvoiceParams,
+    cTypeInvoiceLoadedDetails,
+    status: cTypeLoadingStatus,
+  } = useAppSelector((state) => state.cTypeInvoices);
+
+  const {
+    invoicesLoaded: sTypeInvoicesLoaded,
+    sTypeInvoiceParams,
+    sTypeInvoiceLoadedDetails,
+    status: sTypeLoadingStatus,
+  } = useAppSelector((state) => state.sTypeInvoices);
+
+  const { status: uploadInvoicesStatus } = useAppSelector(
+    (state) => state.uploadInvoices
+  );
+
+  const cTypeInvoices = useAppSelector(cTypeInvoicesSelector.selectAll);
+  const sTypeInvoices = useAppSelector(sTypeInvoicesSelector.selectAll);
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log(event);
+
     setValue(newValue);
   };
+  const { cType, sType } = useAppSelector((state) => state.invoiceFilters);
 
   useEffect(() => {
-    if (!invoiceFiltersLoaded) {
-      dispatch(getInvoiceFiltersAsync());
+    if (cType.status === "idle" && !cType.invoiceFiltersLoaded) {
+      dispatch(getCTypeInvoiceFiltersAsync());
     }
-  }, [dispatch, invoiceFiltersLoaded]);
+    if (sType.status === "idle" && !sType.invoiceFiltersLoaded) {
+      dispatch(getSTypeInvoiceFiltersAsync());
+    }
+  }, [
+    cType.invoiceFiltersLoaded,
+    sType.invoiceFiltersLoaded,
+    dispatch,
+    cType.status,
+    sType.status,
+  ]);
 
-  if (status === "pendingGetInvoiceFiltersAsync")
+  const loadingFilters =
+    cType.status === "getCTypeInvoiceFiltersPending" ||
+    sType.status === "getSTypeInvoiceFiltersPending" ||
+    !cType.invoiceFiltersLoaded ||
+    !sType.invoiceFiltersLoaded;
+
+  if (loadingFilters) {
     return <LoadingComponent message="Loading Filters" />;
-  if (status === "pendingGetAllFinalizedInvoicesAsync")
-    return <LoadingComponent message="Loading Invoices" />;
-  if (status === "pendingGetOneFinalizedInvoiceById")
-    return <LoadingComponent message="Loading Invoice" />;
+  }
 
-  
+  const fetchingCTypeinvoices =
+    cTypeLoadingStatus === "pendingGetAllCTypeInvoicesThunk";
+
+  const fetchingSTypeInvoices =
+    sTypeLoadingStatus === "pendingGetAllSTypeInvoicesThunk";
+
+  const invoicesUploading = uploadInvoicesStatus === "pendingUploadInvoices";
+
+  const renderInvoiceUploadTab = (
+    invoiceTypeToPass: "C" | "S",
+    invoiceStatus: boolean,
+    invoiceParams: InvoiceParams,
+    invoiceLoadedDetails: InvoicesLoadedDetails | null,
+    invoicesLoaded: boolean,
+    invoices: FinalizedInvoiceDto[]
+  ) => (
+    <InvoiceBatchUpload
+      invoiceUploadingStatus={invoicesUploading}
+      invoiceStatus={invoiceStatus}
+      invoiceParams={invoiceParams}
+      invoiceLoadedDetails={invoiceLoadedDetails}
+      invoicesToUpload={invoices}
+      invoiceTypeToPass={invoiceTypeToPass}
+      invoicesLoaded={invoicesLoaded}
+      invoicesToDisplay={invoices}
+    />
+  );
+const tabLabels = [
+  "Consignee Invoices",
+  "Shipping Line Invoices",
+  "Single",
+  "Upload SL Invoices",
+  "Dashboard",
+];
+
   return (
-    <Box sx={{ width: "100%" }}>
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Tabs
-          value={value}
-          onChange={handleChange}
-          aria-label="basic tabs example"
-        >
-          <Tab
-            label="SEARCH BATCH"
-            {...a11yProps(0)}
-            onClick={() => dispatch(resetInvoicesLoaded())}
-          />
-          <Tab
-            label="SEARCH SINGLE"
-            {...a11yProps(1)}
-            onClick={() => dispatch(resetInvoicesLoaded())}
-          />
-          <Tab
-            label="Dashboard"
-            {...a11yProps(2)}
-            onClick={() => dispatch(resetInvoicesLoaded())}
-          />
-        </Tabs>
+    <>
+      <Box sx={{ width: "100%" }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            aria-label="SAP Integration Tabs Panel"
+          >
+            {tabLabels.map((label, index) => (<Tab key={index} label={label} {...a11yProps(index)} />) )}
+          </Tabs>
+        </Box>
+        <CustomPanel value={value} index={0}>
+          {renderInvoiceUploadTab(
+            "C",
+            fetchingCTypeinvoices,
+            cTypeInvoiceParams,
+            cTypeInvoiceLoadedDetails,
+            cTypeInvoicesLoaded,
+            cTypeInvoices
+          )}
+        </CustomPanel>
+        <CustomPanel value={value} index={1}>
+          {renderInvoiceUploadTab(
+            "S",
+            fetchingSTypeInvoices,
+            sTypeInvoiceParams,
+            sTypeInvoiceLoadedDetails,
+            sTypeInvoicesLoaded,
+            sTypeInvoices
+          )}
+        </CustomPanel>
+        <CustomPanel value={value} index={2}>
+          <SearchSingleInvoice />
+        </CustomPanel>
+        <CustomPanel value={value} index={3}>
+          <ShippingLineUpload />
+        </CustomPanel>
+
+        <CustomPanel value={value} index={4}>
+          Dashboard
+        </CustomPanel>
       </Box>
-      <SapCustomPanel value={value} index={0}>
-        <InvoiceBatchUpload />
-      </SapCustomPanel>
-      <SapCustomPanel value={value} index={1}>
-        <InvoiceSingleUpload />
-      </SapCustomPanel>
-      <SapCustomPanel value={value} index={2}>
-        Dashboard
-      </SapCustomPanel>
-    </Box>
+      {showInvoiceItemBackdrop && invoiceItems.length > 0 && (
+        <InvoiceDetailsBackdrop invoiceItems={invoiceItems} />
+      )}
+    </>
   );
 };
 
