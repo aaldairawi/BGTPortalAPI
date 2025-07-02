@@ -5,7 +5,13 @@ export const tableHeadTableCellStyles = {
   textAlign: "center",
 };
 export const tableBodyTableCellStyles = {
-  color: "#393939",
+  color: "black",
+  fontSize: "12px",
+  textAlign: "center",
+  p: 1,
+};
+
+export const strippedUnitTableCellSyles = {
   fontSize: "12px",
   textAlign: "center",
   p: 1,

@@ -1,21 +1,16 @@
 
 using System.Data;
-using API.Dtos.Invoice;
+
 using API.Dtos.InvoiceUpload;
 using API.Helper;
 using Microsoft.Data.SqlClient;
 
-namespace API.Services.Invoices
+namespace API.Services.UploadInvoices
 {
-    public class UploadInvoicesHelperRepository : IUploadInvoicesHelper
+    public class UploadInvoicesHelperRepository(IConfiguration configuration) : IUploadInvoicesHelper
     {
-        private readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
-        public UploadInvoicesHelperRepository(IConfiguration configuration)
-        {
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-
-        }
         public DataTable CreateInvoiceNumberTempTable(List<string> invoices)
         {
             DataTable table = new();
@@ -42,7 +37,6 @@ namespace API.Services.Invoices
             var createTempTableCmd = new SqlCommand(
                 "CREATE TABLE #TempInvoices (final_nbr NVARCHAR(50));", connection, transaction);
 
-
             await createTempTableCmd.ExecuteNonQueryAsync();
 
             // Bulk insert
@@ -53,8 +47,9 @@ namespace API.Services.Invoices
             }
 
             // Run the query
-            var query = InvoiceMetaDataQueries.BillingInvoiceMetaData()
-                .Replace("--__INVOICE_FILTER__", "JOIN #TempInvoices t ON t.final_nbr = i.final_nbr");
+            var query = InvoiceMetaDataQueries.BillingInvoiceMetaData();
+            //.Replace("--__INVOICE_FILTER__", "JOIN #TempInvoices t ON t.final_nbr = i.final_nbr");
+
 
             using var command = new SqlCommand(query, connection, transaction);
             command.CommandTimeout = 180;
@@ -71,8 +66,6 @@ namespace API.Services.Invoices
 
             while (await reader.ReadAsync())
             {
-
-
                 var finalNumber = reader.IsDBNull(ordinalFinalNumber) ? "" : reader.GetString(ordinalFinalNumber);
                 var finalizedDate = reader.IsDBNull(ordinalFinalizedDate) ? default : reader.GetDateTime(ordinalFinalizedDate);
                 var invoiceNotes = reader.IsDBNull(ordinalInvoiceNotes) ? "" : reader.GetString(ordinalInvoiceNotes);
@@ -196,6 +189,169 @@ namespace API.Services.Invoices
         }
 
 
+        public async Task<decimal?> GetIQDtoUSDRateAsync()
+        {
+            const string query = @"
+            SELECT ref_value
+            FROM bgt_reference
+            WHERE ref_id = 'IQDtoUSDrate'";
+
+            var connectionString = _configuration.GetConnectionString(DatabaseConnectionConstants.BGTPortalDBServerThirteenDatabaseConnection);
+
+            using var connection = new SqlConnection(connectionString);
+            using var command = new SqlCommand(query, connection);
+
+            await connection.OpenAsync();
+
+            var result = await command.ExecuteScalarAsync();
+
+            if (result != null && decimal.TryParse(result.ToString(), out var rate))
+            {
+                return rate;
+            }
+
+            return null;
+        }
+
+        public async Task<InvoiceBillingMetaDataDto?> GetShippingLineInvoiceBillingMetaDataDto(string invoiceFinalNumber,
+         string berth)
+        {
+            var query = InvoiceMetaDataQueries.GetBillingInvoiceMetaDataFromNavisIntegrationInvoiceItemView();
+
+            using var connection = new SqlConnection(_configuration.GetConnectionString(DatabaseConnectionConstants.BGTPortalN4DatabaseConnection));
+            await connection.OpenAsync();
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@invoiceFinalNumber", invoiceFinalNumber);
+            command.Parameters.AddWithValue("@berth", berth);
+
+            using var reader = await command.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                var dto = new InvoiceBillingMetaDataDto
+                {
+                    InvoiceFinalNumber = reader["InvoiceFinalNumber"]?.ToString() ?? "",
+                    InvoiceFinalizedDate = reader.IsDBNull(reader.GetOrdinal("InvoiceFinalizedDate"))
+                        ? default
+                        : reader.GetDateTime(reader.GetOrdinal("InvoiceFinalizedDate")),
+                    InvoiceNotes = reader["InvoiceNotes"]?.ToString() ?? "",
+                    CustomerName = reader["CustomerName"]?.ToString() ?? "",
+                    CustomerGkey = reader["CustomerGkey"]?.ToString() ?? "",
+                    InvoiceCurrency = reader["InvoiceCurrency"]?.ToString() ?? "USD",
+                    Berth = reader["Berth"]?.ToString() ?? "",
+                    TotalAmount = reader.IsDBNull(reader.GetOrdinal("TotalAmount"))
+                        ? 0.0
+                        : Convert.ToDouble(reader["TotalAmount"])
+                };
+
+                dto.TrimFields();
+                return dto;
+            }
+
+            return null;
+        }
+
+
+
+        public async Task EnrichShippingLineBillingMetaDto(InvoiceBillingMetaDataDto dto)
+        {
+            if (dto == null) return;
+            var sapCodeQuery = @"
+                SELECT cust_sap_number
+                FROM dbo.customer_SapDetails
+                WHERE cust_gkey = @customerGkey";
+
+
+            using SqlConnection connection = new(
+                _configuration.GetConnectionString(DatabaseConnectionConstants.BGTPortalDBServerThirteenDatabaseConnection));
+            await connection.OpenAsync();
+
+            using SqlCommand command = new(sapCodeQuery, connection);
+            command.Parameters.AddWithValue("@customerGkey", dto.CustomerGkey?.Trim() ?? string.Empty);
+            var sapCode = await command.ExecuteScalarAsync();
+            dto.CustomerSapCode = sapCode?.ToString() ?? "";
+
+
+
+            // --- 2. Profit Center Mapping from Berth ---
+            dto.ProfitCenter = dto.Berth switch
+            {
+                "B27" => "5000",
+                "B20" => "4000",
+                _ => "UNKNOWN"
+            };
+
+        }
+
+
+        public async Task<InvoiceBillingMetaDataSL4Dto?> GetShippingLineInvoiceSL4BillingMetaDataDto(string invoiceFinalNumber,
+         string berth)
+        {
+            var query = InvoiceMetaDataQueries.GetBillingInvoiceMetaDataFromNavisIntegrationInvoiceItemView();
+
+            using var connection = new SqlConnection(_configuration.GetConnectionString(DatabaseConnectionConstants.BGTPortalN4DatabaseConnection));
+            await connection.OpenAsync();
+
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@invoiceFinalNumber", invoiceFinalNumber);
+            command.Parameters.AddWithValue("@berth", berth);
+
+            using var reader = await command.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                var dto = new InvoiceBillingMetaDataSL4Dto
+                {
+                    InvoiceFinalNumber = reader["InvoiceFinalNumber"]?.ToString() ?? "",
+                    InvoiceFinalizedDate = reader.IsDBNull(reader.GetOrdinal("InvoiceFinalizedDate"))
+                        ? default
+                        : reader.GetDateTime(reader.GetOrdinal("InvoiceFinalizedDate")),
+                    InvoiceNotes = reader["InvoiceNotes"]?.ToString() ?? "",
+                    CustomerGkey = reader["CustomerGkey"]?.ToString() ?? "",
+                    InvoiceCurrency = reader["InvoiceCurrency"]?.ToString() ?? "USD",
+                    Berth = reader["Berth"]?.ToString() ?? "",
+                    TotalAmount = reader.IsDBNull(reader.GetOrdinal("TotalAmount"))
+                        ? 0.0
+                        : Convert.ToDouble(reader["TotalAmount"])
+                };
+                dto.TrimFields();
+                return dto;
+            }
+
+            return null;
+        }
+
+
+        public async Task EnrichShippingLineSL4BillingMetaDto(InvoiceBillingMetaDataSL4Dto dto)
+        {
+            if (dto == null) return;
+            var sapCodeQuery = @"
+                SELECT cust_sap_number
+                FROM dbo.customer_SapDetails
+                WHERE cust_gkey = @customerGkey";
+
+
+            using SqlConnection connection = new(
+                _configuration.GetConnectionString(DatabaseConnectionConstants.BGTPortalDBServerThirteenDatabaseConnection));
+            await connection.OpenAsync();
+
+            using SqlCommand command = new(sapCodeQuery, connection);
+            command.Parameters.AddWithValue("@customerGkey", dto.CustomerGkey?.Trim() ?? string.Empty);
+            var sapCode = await command.ExecuteScalarAsync();
+            dto.CustomerSapCode = sapCode?.ToString() ?? "";
+
+
+
+            // --- 2. Profit Center Mapping from Berth ---
+            dto.ProfitCenter = dto.Berth switch
+            {
+                "B27" => "5000",
+                "B20" => "4000",
+                _ => "UNKNOWN"
+            };
+
+        }
 
 
 

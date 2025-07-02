@@ -13,19 +13,24 @@ import { useAppSelector, useAppDispatch } from "../../app/store/configureStore";
 import { strippingDriversSelector } from "./stripping-drivers/strippingDriversSlice";
 import { strippingLaborTypeSelectors } from "./stripping-labor-types/strippingLaborTypeSlice";
 import {
-  resetStrippedContainers,
+  resetLoadedContainers,
+  resetStrippedContainersToBeUpdated,
   updateDriverNameForStrippingContainers,
   updateLaborTypeForStrippingContainers,
 } from "./strippingSlice";
 import { updateRetiredUnitsThunk } from "./updateStrippingUnitsThunk";
 import { toast } from "react-toastify";
 
+import { LoadingButton } from "@mui/lab";
+
 export function StrippingUploadAction() {
   const dispatch = useAppDispatch();
 
   const drivers = useAppSelector(strippingDriversSelector.selectAll);
+
   const laborTypes = useAppSelector(strippingLaborTypeSelectors.selectAll);
-  const { strippingContainersToBeUpdated } = useAppSelector(
+
+  const { strippingContainersToBeUpdated, status } = useAppSelector(
     (state) => state.stripping
   );
 
@@ -69,7 +74,11 @@ export function StrippingUploadAction() {
 
   // inside handleSubmit
   const handleSubmit = async () => {
-    if (!selectedDriver || !selectedLaborType) {
+    if (
+      !selectedDriver ||
+      !selectedLaborType ||
+      strippingContainersToBeUpdated.containers.length <= 0
+    ) {
       alert("Please select both a driver and labor type.");
       return;
     }
@@ -88,13 +97,13 @@ export function StrippingUploadAction() {
 
         if (wasSuccessful) {
           toast.success("Retired containers updated successfully!", {
-            autoClose: 600,
+            autoClose: 2000,
           });
           setSelectedDriverId(undefined);
           setSelectedLaborTypeId(undefined);
           dispatch(updateDriverNameForStrippingContainers(""));
           dispatch(updateLaborTypeForStrippingContainers(""));
-          dispatch(resetStrippedContainers());
+          dispatch(resetStrippedContainersToBeUpdated());
         } else {
           toast.error("Some containers failed to update.");
         }
@@ -149,8 +158,26 @@ export function StrippingUploadAction() {
           ))}
         </Select>
       </FormControl>
-      <Button variant="contained" onClick={handleSubmit} sx={{ minWidth: 180 }}>
-        Submit
+      <LoadingButton
+        loading={status === "pendingRetireUnits"}
+        variant="contained"
+        onClick={handleSubmit}
+        sx={{ minWidth: 120 }}
+      >
+        Save
+      </LoadingButton>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() => {
+          setSelectedDriverId(undefined);
+          setSelectedLaborTypeId(undefined);
+          dispatch(resetStrippedContainersToBeUpdated());
+          dispatch(resetLoadedContainers());
+        }}
+        sx={{ minWidth: 120 }}
+      >
+        Clear
       </Button>
     </Box>
   );

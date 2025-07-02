@@ -9,14 +9,10 @@ public static class Stripping_SQL_Queries
         return @"SELECT IdFDriver AS Id , Name , Creator FROM StrippingBgtFlDrivers";
     }
 
-
-    
-
-        public static string CreateStrippingDriver()
+    public static string CreateStrippingDriver()
     {
         return @"INSERT INTO StrippingBgtFlDrivers (Name, Creator)
         VALUES (@driverName, @creator) SELECT SCOPE_IDENTITY() AS Id;";
-
     }
 
 
@@ -40,15 +36,12 @@ public static class Stripping_SQL_Queries
     }
 
 
-    
+
     public static string CreateStrippingLaborType()
     {
         return @"INSERT INTO StrippingLaborType (LaborName)
         VALUES (@laborType) SELECT SCOPE_IDENTITY() AS Id;";
     }
-
-    
-
 
 
     public static string GetAllContainersStrippedInNavis()
@@ -60,13 +53,20 @@ public static class Stripping_SQL_Queries
                 WHERE DateStripped >= @dateStripped
 				AND DateStripped < DATEADD(Day, 1, @dateStripped) AND Berth = @berth";
     }
+
     public static string GetAllContainersFromStrippedInAppDatabase()
     {
-        return @"SELECT Id , ContainerNumber, LineOperator,  
-                ISO, Size, DateStripped, LaborType, DriverName, Berth , Final
-                FROM StrippedInAppContainers
-                WHERE DateStripped >=  @dateStripped AND DateStripped <  DATEADD(DAY, 1, @dateStripped) AND Berth = @berth;";
+        return @"
+        SELECT 
+            Id, ContainerNumber, LineOperator, ISO, Size, 
+            DateStripped, LaborType, DriverName, Berth, Final
+        FROM StrippedInAppContainers
+        WHERE DateStripped >= @dateStripped 
+          AND DateStripped < DATEADD(DAY, 1, @dateStripped)
+          AND Berth = @berth
+        ORDER BY DateStripped ASC;";
     }
+
 
 
     public static string SaveRetiredConainersFromNavis()
@@ -109,6 +109,36 @@ public static class Stripping_SQL_Queries
              DateStripped >=  @dateStripped AND DateStripped <  DATEADD(DAY, 1, @dateStripped)";
 
     }
+    public static string GetDashboardDataByRange()
+    {
+        return @"
+        SELECT 
+            Berth AS Berth,
+            LaborType AS [LaborType],
+            SUM(CASE WHEN Size = 20 THEN 1 ELSE 0 END) AS Size20,
+            SUM(CASE WHEN Size = 40 THEN 1 ELSE 0 END) AS Size40,
+            SUM(CASE WHEN Size = 45 THEN 1 ELSE 0 END) AS Size45
+        FROM StrippedInAppContainers
+        WHERE DateStripped BETWEEN @from AND @to
+        AND Final = 1
+        GROUP BY Berth, LaborType
+        ORDER BY Berth, LaborType;";
+    }
+
+
+
+    public static string GetDashboardCsvData() => @"
+SELECT
+    Id, ContainerNumber, LineOperator, ISO, Size,
+    DateStripped, LaborType, DriverName, Berth, Final
+FROM StrippedInAppContainers
+WHERE DateStripped >= @from
+  AND DateStripped <  DATEADD(DAY, 1, @to)
+ORDER BY DateStripped;";
+
+
+
+
 
 
 }

@@ -1,4 +1,4 @@
-namespace API.Dtos.CargoContainer.Export
+namespace API.Dtos.Container.Export
 {
     public class ContainerExportGeneralProps
     {

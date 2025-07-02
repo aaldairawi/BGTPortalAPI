@@ -7,8 +7,6 @@ import ServerError from "../errors/ServerError";
 import Admin from "../../features/admin/AdminPanel";
 import RequireAuth from "./RequireAuth";
 import HomePageLogo from "../../features/home/HomepageLogo";
-// import EditUserPage from "../../features/admin/EditUserPage";
-
 import SapIntegrationPanel from "../../features/sap/SapIntegrationPanel";
 import NavisContainerAPIPanel from "../../features/navisunitapi/NavisContainerAPIPanel";
 import { EditUserPage } from "../../features/admin/users/EditUserPage";
@@ -19,6 +17,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
+      // Protected: SAP
       {
         element: (
           <RequireAuth roles={["DubaiFinance", "Admin", "IraqFinance"]} />
@@ -27,6 +26,28 @@ const router = createBrowserRouter([
           { path: "v1/sap-integration", element: <SapIntegrationPanel /> },
         ],
       },
+
+      // Protected: Admin and Finance roles
+      {
+        element: (
+          <RequireAuth
+            roles={[
+              "Admin",
+              "DubaiFinance",
+              "Operations",
+              "IraqFinance",
+              "IraqBilling",
+              "Guest",
+            ]}
+          />
+        ),
+        children: [
+          { path: "v1/not-found", element: <NotFound /> },
+          { path: "*", element: <Navigate to="/v1/not-found" replace /> },
+        ],
+      },
+
+      // Protected: Admin only
       {
         element: <RequireAuth roles={["Admin"]} />,
         children: [
@@ -36,19 +57,19 @@ const router = createBrowserRouter([
           { path: "v1/server-error", element: <ServerError /> },
         ],
       },
+
+      // Protected: Admin and Operations
       {
         element: <RequireAuth roles={["Admin", "Operations"]} />,
         children: [
           { path: "v1/stripping-units", element: <StrippingUnitsPanel /> },
         ],
       },
+
+      // Public routes
       { path: "v1/default-member-page", element: <HomePageLogo /> },
       { path: "v1/login", element: <Login /> },
       { path: "v1/register", element: <Register /> },
-
-      { path: "v1/not-found", element: <NotFound /> },
-
-      { path: "*", element: <Navigate to="/v1/not-found" replace={true} /> },
     ],
   },
 ]);

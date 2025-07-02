@@ -31,7 +31,7 @@ namespace API.Controllers
 
             var users = await _context.Users.AsNoTracking().ToListAsync();
 
-
+            
             var result = users.Select(user => new UserDto(user.Id, user.UserName!, user.Email!, user.RegisteredDate.ToString("yyyy-MM-dd"),
             user.LastLogin.HasValue ? user.LastLogin.Value.ToString("yyyy-MM-dd HH:mm:ss") : "TBD")).ToList();
 
@@ -115,6 +115,7 @@ namespace API.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdateUserAsync([FromBody] UpdateUserDto updateUserDto)
         {
+            
 
             if (!ModelState.IsValid) return BadRequest(new ProblemDetails { Title = "Bad request returned from API" });
             User? user = await _userManager.FindByIdAsync(updateUserDto.UserId);

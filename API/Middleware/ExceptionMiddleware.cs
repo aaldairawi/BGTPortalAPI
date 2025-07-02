@@ -1,44 +1,38 @@
+namespace API.Middleware;
 
-using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
 
-namespace API.Middleware
+public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
 {
-    public class ExceptionMiddleware
+    private readonly RequestDelegate _next = next;
+    private readonly ILogger _logger = logger;
+    private readonly IHostEnvironment _env = env;
+
+    public async Task InvokeAsync(HttpContext context)
     {
-
-        private readonly RequestDelegate _next;
-        private readonly ILogger _logger;
-        private readonly IHostEnvironment _env;
-
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
+        try
         {
-            _env = env;
-            _logger = logger;
-            _next = next;
+            await _next(context);
         }
-
-        public async Task InvokeAsync(HttpContext context)
+        catch (Exception exception)
         {
-            try
+            _logger.LogError(exception, "An error occurred");
+
+            context.Response.ContentType = "application/json";
+
+            var response = new
             {
-                await _next(context);
-            }
-            catch (Exception exception)
+                message = exception.Message
+            };
+
+            context.Response.StatusCode = exception switch
             {
+                InvalidOperationException => 400, 
+                UnauthorizedAccessException => 401,
+                KeyNotFoundException => 404,
+                _ => 500 
+            };
 
-                _logger.LogError(exception, "An unexpected error occured while processing the request");
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = 500;
-                var response = new ProblemDetails { Status = 500, Detail = _env.IsDevelopment() ? exception.StackTrace?.ToString() : null, Title = exception.Message };
-                var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-                var json = JsonSerializer.Serialize(response, jsonOptions);
-                await context.Response.WriteAsync(json);
-
-            }
-
+            await context.Response.WriteAsJsonAsync(response);
         }
-
-
     }
 }

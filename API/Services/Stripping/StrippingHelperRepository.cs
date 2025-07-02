@@ -1,10 +1,10 @@
 
 
 using System.Data;
-using API.Dtos.Stripping;
 using API.Dtos.Stripping.StrippingDriver;
 using API.Dtos.Stripping.StrippingLabor;
 using API.Helper;
+using API.Services.Database;
 using Microsoft.Data.SqlClient;
 
 namespace API.Services.Stripping;
@@ -59,6 +59,7 @@ public class StrippingHelperRepository : IStrippingHelper
         });
 
     }
+    
     public async Task<bool> DeleteStrippingDriver(int driverId)
     {
         var query = Stripping_SQL_Queries.DeleteStrippingDriver();

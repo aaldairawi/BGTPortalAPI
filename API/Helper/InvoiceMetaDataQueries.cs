@@ -41,7 +41,53 @@ namespace API.Helper
         }
 
 
-        
+        public static string GetBillingInvoiceMetaDataFromNavisIntegrationInvoiceItemView()
+        {
+            return @"
+                    SELECT 
+                        final_nbr AS InvoiceFinalNumber,
+                        finalized_date AS InvoiceFinalizedDate,
+                        notes AS InvoiceNotes,
+                        name AS CustomerName,
+                        payee_customer_gkey AS CustomerGkey,
+                        'USD' AS InvoiceCurrency,
+                        SUM(Total) AS TotalAmount,
+                        @berth AS Berth
+                    FROM BGT_Portal_N4.dbo.NavisIntegration_InvoiceItem
+                    WHERE final_nbr = @invoiceFinalNumber
+                    GROUP BY 
+                        final_nbr,
+                        finalized_date,
+                        notes,
+                        name,payee_customer_gkey;";
+
+        }
+
+
+        public static string GetBillingInvoiceMetaDataFromNavisIntegrationInvoiceItemViewSL4()
+        {
+            return @"
+                    SELECT 
+                        final_nbr AS InvoiceFinalNumber,
+                        finalized_date AS InvoiceFinalizedDate,
+                        notes AS InvoiceNotes,
+                        payee_customer_gkey AS CustomerGkey,
+                        'USD' AS InvoiceCurrency,
+                        SUM(Total) AS TotalAmount,
+                        @berth AS Berth
+                    FROM BGT_Portal_N4.dbo.NavisIntegration_InvoiceItem
+                    WHERE final_nbr = @invoiceFinalNumber
+                    GROUP BY 
+                        final_nbr,
+                        finalized_date,
+                        notes,
+                        payee_customer_gkey;";
+
+        }
+
+
+
+
 
 
     }

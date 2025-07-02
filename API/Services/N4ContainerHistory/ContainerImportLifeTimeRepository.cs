@@ -5,18 +5,11 @@ using API.Helper;
 
 namespace API.Services.N4ContainerHistory
 {
-    public class ContainerImportLifeTimeRepository : IContainerImportLifeTime
+    public class ContainerImportLifeTimeRepository(IContainerGeneralRequests context, IVesselInformation vesselInformation) : IContainerImportLifeTime
     {
 
-        private readonly IContainerGeneralRequests _containerGeneralContext;
-        private readonly IVesselInformation _vesselInformation;
-
-        public ContainerImportLifeTimeRepository(IContainerGeneralRequests context, IVesselInformation vesselInformation)
-        {
-            _containerGeneralContext = context ?? throw new ArgumentNullException(nameof(context));
-            _vesselInformation = vesselInformation ?? throw new ArgumentNullException(nameof(vesselInformation));
-
-        }
+        private readonly IContainerGeneralRequests _containerGeneralContext = context ?? throw new ArgumentNullException(nameof(context));
+        private readonly IVesselInformation _vesselInformation = vesselInformation ?? throw new ArgumentNullException(nameof(vesselInformation));
 
         public async Task<ContainerImportResultDto> GetContainerImportResult(ContainerLifeTimeMasterDataDto input)
         {

@@ -15,7 +15,7 @@ export function StrippingDetails({ strippingContainersLoadedDetails }: Props) {
         gap: 4,
         display: "flex",
         alignItems: "center",
-        width: "30rem",
+        width: "25rem",
       }}
     >
       <Box
@@ -34,15 +34,15 @@ export function StrippingDetails({ strippingContainersLoadedDetails }: Props) {
         <Typography variant="subtitle1">
           {strippingContainersLoadedDetails.strippedContainersLength}{" "}
           {strippingContainersLoadedDetails.strippedContainersLength > 1
-            ? "Containers Stripped In App"
-            : "Container Stripped In App"}
+            ? "Units Stripped In App"
+            : "Unit Stripped In App"}
         </Typography>
 
         <Typography variant="subtitle1">
           {strippingContainersLoadedDetails.retiredContainersLength}{" "}
           {strippingContainersLoadedDetails.retiredContainersLength > 1
-            ? "Containers Stripped In N4"
-            : "Container Stripped In N4"}
+            ? "Units Stripped In N4"
+            : "Unit Stripped In N4"}
         </Typography>
       </Box>
     </Box>

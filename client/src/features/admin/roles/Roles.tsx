@@ -7,7 +7,10 @@ import {
   TableBody,
 } from "@mui/material";
 import { tableHeadTableCellStyles } from "../tableCssStyles";
-import { useAppDispatch, useAppSelector } from "../../../app/store/configureStore";
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../../app/store/configureStore";
 import { getAllRolesAsync, rolesSelctors } from "./rolesSlice";
 import { useEffect } from "react";
 
@@ -31,9 +34,12 @@ export function Roles({ editingUser }: Props) {
   const { existingUserAppInfo } = useAppSelector((state) => state.users);
 
   const userAppRoles = existingUserAppInfo.roles;
-
-  const roles: RolesToMap = editingUser ? userAppRoles : appRoles;
-  
+  const roles: ExistingUserRoleStatus[] = editingUser
+    ? userAppRoles
+    : appRoles.map((role) => ({
+        ...role,
+        status: false,
+      }));
 
   useEffect(() => {
     if (!rolesloaded && !editingUser) {

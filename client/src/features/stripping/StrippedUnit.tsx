@@ -1,8 +1,9 @@
 import { TableRow, TableCell, Checkbox } from "@mui/material";
 import { StrippingContainer } from "../../app/models/stripping/stripping.types";
-import { tableBodyTableCellStyles } from "../admin/tableCssStyles";
+import { strippedUnitTableCellSyles } from "../admin/tableCssStyles";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { updateContainerList } from "./strippingSlice";
+import { dateTimeToStringFormatted } from "../../app/helper/dateOptions";
 
 type Props = {
   strippedContainer: StrippingContainer;
@@ -29,37 +30,87 @@ export function StrippedUnit({ strippedContainer, index }: Props) {
         border: "none",
         "&:hover": { bgcolor: "lightgray" },
         bgcolor: strippedContainer.final ? "#757de8" : "white",
-        color: strippedContainer.final ? "white" : "black",
       }}
     >
-      <TableCell sx={{ fontWeight: "bold", ...tableBodyTableCellStyles }}>
+      <TableCell
+        sx={{
+          fontWeight: "bold",
+          color: strippedContainer.final ? "white" : "393939",
+          ...strippedUnitTableCellSyles,
+        }}
+      >
         {index + 1}
       </TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>
+      <TableCell
+        sx={{
+          color: strippedContainer.final ? "white" : "393939",
+          ...strippedUnitTableCellSyles,
+        }}
+      >
         {strippedContainer.containerNumber}
       </TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>
+      <TableCell
+        sx={{
+          color: strippedContainer.final ? "white" : "393939",
+          ...strippedUnitTableCellSyles,
+        }}
+      >
         {strippedContainer.lineOperator}
       </TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>
+      <TableCell
+        sx={{
+          color: strippedContainer.final ? "white" : "393939",
+          ...strippedUnitTableCellSyles,
+        }}
+      >
         {strippedContainer.iso}
       </TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>
+      <TableCell
+        sx={{
+          color: strippedContainer.final ? "white" : "393939",
+          ...strippedUnitTableCellSyles,
+        }}
+      >
         {strippedContainer.size}
       </TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>
-        {strippedContainer.dateStripped}
+      <TableCell
+        sx={{
+          color: strippedContainer.final ? "white" : "393939",
+          ...strippedUnitTableCellSyles,
+        }}
+      >
+        {dateTimeToStringFormatted(strippedContainer.dateStripped)}
       </TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>
+      <TableCell
+        sx={{
+          color: strippedContainer.final ? "white" : "393939",
+          ...strippedUnitTableCellSyles,
+        }}
+      >
         {strippedContainer.laborType}
       </TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>
+      <TableCell
+        sx={{
+          color: strippedContainer.final ? "white" : "393939",
+          ...strippedUnitTableCellSyles,
+        }}
+      >
         {strippedContainer.driverName}
       </TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>
+      <TableCell
+        sx={{
+          color: strippedContainer.final ? "white" : "393939",
+          ...strippedUnitTableCellSyles,
+        }}
+      >
         {strippedContainer.berth}
       </TableCell>
-      <TableCell sx={tableBodyTableCellStyles}>
+      <TableCell
+        sx={{
+          color: strippedContainer.final ? "white" : "393939",
+          ...strippedUnitTableCellSyles,
+        }}
+      >
         <Checkbox onClick={handleCheckboxClick} checked={isChecked} />
       </TableCell>
     </TableRow>

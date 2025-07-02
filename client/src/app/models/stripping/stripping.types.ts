@@ -52,3 +52,20 @@ export type UpdateRetiredContainersDto = {
   containers: string[];
   dateStripped?: string;
 };
+
+export interface StrippingDashboardDto {
+  berth: string;
+  laborType: string;
+  shift20: number;
+  shift40: number;
+  shift45: number;
+  total: number;
+}
+
+export const laborTypeMap: Record<number, string> = {
+  1: "BGT",
+  2: "IPA",
+  3: "Labor",
+  4: "Flat",
+  8: "None",
+};

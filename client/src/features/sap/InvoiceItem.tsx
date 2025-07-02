@@ -1,10 +1,10 @@
 import React from "react";
 import { TableCell, TableRow } from "@mui/material";
-import { InvoiceItemDto } from "../../app/models/invoice/invoice.types";
+import { ConsigneeInvoiceItemDto } from "../../app/models/invoice/invoice.types";
 import { tableBodyTableCellStyles } from "../admin/tableCssStyles";
 
 interface Props {
-  invoiceItem: InvoiceItemDto;
+  invoiceItem: ConsigneeInvoiceItemDto;
   index: number;
 }
 

@@ -1,6 +1,7 @@
 
 using API.Dtos.Container;
 using API.Helper;
+using API.Services.Database;
 using Microsoft.Data.SqlClient;
 
 namespace API.Services.N4ContainerHistory;
@@ -40,41 +41,55 @@ public class VesselInformationRepository : IVesselInformation
         }
     }
 
+
     private async Task<string?> GetVesselATA(string vesselId)
     {
         var query = Container_SQL_Queries.GetVesselATA();
 
         var result = await _database.ExecuteReaderAsync(DatabaseConnectionConstants.SparcsN4, query, async reader =>
         {
+            var ordinal = reader.GetOrdinal("ActualTimeOfArrival");
+
             while (await reader.ReadAsync())
             {
-                return Convert.ToDateTime(reader["ActualTimeOfArrival"]).ToString("M-dd-yyyy hh:mm");
+                if (!reader.IsDBNull(ordinal))
+                {
+                    var ata = reader.GetDateTime(ordinal);
+                    return ata.ToString("M-dd-yyyy hh:mm");
+                }
             }
+
             return null;
-
         }, new SqlParameter("@vesselId", vesselId));
-        return result;
 
+        return result;
     }
+
+
 
     private async Task<string?> GetVesselATC(string vesselId)
     {
-
         var query = Container_SQL_Queries.GetVesselATC();
 
         var result = await _database.ExecuteReaderAsync(DatabaseConnectionConstants.SparcsN4, query, async reader =>
         {
+            var ordinal = reader.GetOrdinal("EndWork");
+
             while (await reader.ReadAsync())
             {
-                return Convert.ToDateTime(reader["EndWork"]).ToString("M-dd-yyyy hh:mm");
+                if (!reader.IsDBNull(ordinal))
+                {
+                    var atc = reader.GetDateTime(ordinal);
+                    return atc.ToString("M-dd-yyyy hh:mm");
+                }
             }
 
             return null;
         }, new SqlParameter("@vesselId", vesselId));
 
         return result;
-
     }
+
 
 
     private async Task<string?> GetVesselName(string visitId)

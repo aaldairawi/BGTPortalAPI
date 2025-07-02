@@ -5,30 +5,24 @@ import { InvoiceFilterMenu } from "../../app/components/InvoiceFilterMenu";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 
 import React, { useState } from "react";
-import { setCTypeInvoiceParams } from "./ctype/cTypeInvoiceSlice";
-import { setSTypeInvoiceParams } from "./stype/sTypeInvoicSlice";
-import { getSTypeInvoicesThunk } from "./stype/getSTypeInvoicesThunk";
-import { getCTypeInvoicesThunk } from "./ctype/getCTypeInvoicesThunk";
+import { setCTypeInvoiceParams } from "./consigneeInvoices/consigneeInvoiceSlice";
+
+import { getConsigneeInvoicesThunk } from "./consigneeInvoices/getConsigneeInvoicesThunk";
 import dayjs from "dayjs";
 import { LoadingButton } from "@mui/lab";
 
-type InvoiceType = "S" | "C";
-
 type Props = {
-  invoiceTypeToPass: InvoiceType;
   invoicesLoading: boolean;
 };
 
-export function FilterInvoiceBatch({
-  invoiceTypeToPass,
-  invoicesLoading,
-}: Props) {
+export function FilterInvoiceBatch({ invoicesLoading }: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const { sTypeInvoiceParams } = useAppSelector((state) => state.sTypeInvoices);
-  const { cTypeInvoiceParams } = useAppSelector((state) => state.cTypeInvoices);
+  const { cTypeInvoiceParams } = useAppSelector(
+    (state) => state.consigneeInvoices
+  );
 
-  const { cType, sType } = useAppSelector((state) => state.invoiceFilters);
+  const { cType } = useAppSelector((state) => state.invoiceFilters);
 
   const dispatch = useAppDispatch();
 
@@ -40,120 +34,109 @@ export function FilterInvoiceBatch({
     setAnchorEl(null);
   };
 
-  const setInvoiceParams =
-    invoiceTypeToPass === "C" ? setCTypeInvoiceParams : setSTypeInvoiceParams;
-
-  const invoiceParams =
-    invoiceTypeToPass === "C" ? cTypeInvoiceParams : sTypeInvoiceParams;
-
-  const getInvoicesThunk =
-    invoiceTypeToPass === "C" ? getCTypeInvoicesThunk : getSTypeInvoicesThunk;
-
-  const open = Boolean(anchorEl && !invoicesLoading); // Invoices loading than hide the menu. invoices loading = true => !true = false.
-  
-  
+  const open = Boolean(anchorEl && !invoicesLoading);
 
   return (
     <>
       <LoadingButton
         fullWidth
-        loading={invoicesLoading} // If invoices are loading than true.
+        loading={invoicesLoading}
         onClick={(event) => handleClick(event)}
         sx={{ cursor: "pointer" }}
         variant="contained"
       >
-        Filter Batch
+        Filter By Finalized Date
       </LoadingButton>
-      <Popover
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        open={open}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            flexDirection: "row",
-            gap: 2,
-            pb: 1,
-          }}
+      {open && (
+        <Popover
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          open={open}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         >
           <Box
             sx={{
               display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              alignItems: "flex-start",
               justifyContent: "center",
+              flexDirection: "row",
               gap: 2,
-            }}
-          >
-            <Typography
-              variant="subtitle1"
-              sx={{
-                textAlign: "center",
-                width: "100%",
-              }}
-            >
-              Invoice
-            </Typography>
-            <InvoiceFilterMenu
-              onChange={(event) =>
-                dispatch(setInvoiceParams({ invoiceType: event.target.value }))
-              }
-              items={
-                invoiceTypeToPass === "C"
-                  ? cType.invoiceTypeFilters
-                  : sType.invoiceTypeFilters
-              }
-              value={invoiceParams.invoiceType}
-            />
-          </Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              gap: 2,
+              pb: 1,
             }}
           >
             <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
-              gap={2}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+              }}
             >
-              <Calendar
-                value={
-                  invoiceParams.dateFinalized
-                    ? dayjs(invoiceParams.dateFinalized)
-                    : dayjs()
-                }
-                onChange={(dateFinalized) =>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  textAlign: "center",
+                  width: "100%",
+                }}
+              >
+                Invoice
+              </Typography>
+              <InvoiceFilterMenu
+                onChange={(event) =>
                   dispatch(
-                    setInvoiceParams({
-                      dateFinalized: dateFinalized.format(
-                        "YYYY-MM-DDTHH:mm:ss"
-                      ),
-                    })
+                    setCTypeInvoiceParams({ invoiceType: event.target.value })
                   )
                 }
+                items={cType.invoiceTypeFilters}
+                value={cTypeInvoiceParams.invoiceType}
               />
-              <Button
-                onClick={() => {
-                  dispatch(getInvoicesThunk());
-                  handleClose();
-                }}
-                variant="contained"
-                fullWidth
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                gap: 2,
+              }}
+            >
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                gap={2}
               >
-                Apply Filter
-              </Button>
+                <Calendar
+                  value={
+                    cTypeInvoiceParams.dateFinalized
+                      ? dayjs(cTypeInvoiceParams.dateFinalized)
+                      : dayjs()
+                  }
+                  onChange={(dateFinalized) =>
+                    dispatch(
+                      setCTypeInvoiceParams({
+                        dateFinalized: dateFinalized.format(
+                          "YYYY-MM-DDTHH:mm:ss"
+                        ),
+                      })
+                    )
+                  }
+                />
+                <Button
+                  onClick={() => {
+                    dispatch(getConsigneeInvoicesThunk());
+                    handleClose();
+                  }}
+                  variant="contained"
+                  fullWidth
+                >
+                  Apply Filter
+                </Button>
+              </Box>
             </Box>
           </Box>
-        </Box>
-      </Popover>
+        </Popover>
+      )}
     </>
   );
 }

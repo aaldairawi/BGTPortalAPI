@@ -7,120 +7,78 @@ import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 
 import LoadingComponent from "../../app/components/LoadingComponent";
 
-import { cTypeInvoicesSelector } from "./ctype/cTypeInvoiceSlice";
-import { sTypeInvoicesSelector } from "./stype/sTypeInvoicSlice";
+import { cTypeInvoicesSelector } from "./consigneeInvoices/consigneeInvoiceSlice";
 
-import SearchSingleInvoice from "./SearchSingleInvoice";
-import InvoiceBatchUpload from "./ctype/InvoiceBatchUpload";
-import {
-  getCTypeInvoiceFiltersAsync,
-  getSTypeInvoiceFiltersAsync,
-} from "./invoicefilters/getInvoiceFiltersThunk";
+import ConsigneeInvoiceBatchUpload from "./consigneeInvoices/ConsigneeInvoiceBatchUpload";
+import { getCTypeInvoiceFiltersAsync } from "./invoicefilters/getInvoiceFiltersThunk";
 
-import InvoiceDetailsBackdrop from "./InvoiceDetailsBackdrop";
-import ShippingLineUpload from "./stype/ShippingLineUpload";
-import {
-  InvoiceParams,
-  InvoicesLoadedDetails,
-  FinalizedInvoiceDto,
-} from "../../app/models/invoice/invoice.types";
-import CustomPanel, { a11yProps } from "../../app/components/CustomPanel";
+import ShippingLineUpload from "./shippingLineInvoices/ShippingLineUpload";
+import ShippingLineInvoiceDetails from "./shippingLineInvoices/ShippingLineInvoiceDetails";
+
+import ConsigneeInvoiceDetailsBackdrop from "./consigneeInvoices/ConsigneeInvoiceDetailsBackdrop";
+import { a11yProps } from "../../app/components/tabUtils";
+import CustomPanel from "../../app/components/CustomPanel";
+import { UploadedInvoices } from "./dashboard/UploadedInvoices";
+import { PendingInvoices } from "./dashboard/PendingInvoices";
 
 
 const SapIntegrationPanel = () => {
   const [value, setValue] = useState(0);
   const dispatch = useAppDispatch();
 
-  const { invoiceItems, showInvoiceItemBackdrop } = useAppSelector(
-    (state) => state.invoiceItems
+  const { user } = useAppSelector((state) => state.account);
+  const hasIraqFinanceRole = user?.roles?.includes("IraqFinance");
+
+  const { consigneeInvoiceItems, showInvoiceItemBackdrop } = useAppSelector(
+    (state) => state.consigneeInvoiceItems
   );
+  const { displayShippingLineInvoiceItems, shippingLinePartnerItems } =
+    useAppSelector((state) => state.shippingLineInvoiceItems);
+
   const {
-    invoicesLoaded: cTypeInvoicesLoaded,
+    invoicesLoaded,
     cTypeInvoiceParams,
     cTypeInvoiceLoadedDetails,
-    status: cTypeLoadingStatus,
-  } = useAppSelector((state) => state.cTypeInvoices);
-
-  const {
-    invoicesLoaded: sTypeInvoicesLoaded,
-    sTypeInvoiceParams,
-    sTypeInvoiceLoadedDetails,
-    status: sTypeLoadingStatus,
-  } = useAppSelector((state) => state.sTypeInvoices);
+    status,
+  } = useAppSelector((state) => state.consigneeInvoices);
 
   const { status: uploadInvoicesStatus } = useAppSelector(
-    (state) => state.uploadInvoices
+    (state) => state.uploadConsigneeInvoices
   );
 
   const cTypeInvoices = useAppSelector(cTypeInvoicesSelector.selectAll);
-  const sTypeInvoices = useAppSelector(sTypeInvoicesSelector.selectAll);
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log(event);
-
-    setValue(newValue);
-  };
-  const { cType, sType } = useAppSelector((state) => state.invoiceFilters);
+  const { cType } = useAppSelector((state) => state.invoiceFilters);
 
   useEffect(() => {
     if (cType.status === "idle" && !cType.invoiceFiltersLoaded) {
       dispatch(getCTypeInvoiceFiltersAsync());
     }
-    if (sType.status === "idle" && !sType.invoiceFiltersLoaded) {
-      dispatch(getSTypeInvoiceFiltersAsync());
-    }
-  }, [
-    cType.invoiceFiltersLoaded,
-    sType.invoiceFiltersLoaded,
-    dispatch,
-    cType.status,
-    sType.status,
-  ]);
+  }, [cType.invoiceFiltersLoaded, dispatch, cType.status]);
 
   const loadingFilters =
     cType.status === "getCTypeInvoiceFiltersPending" ||
-    sType.status === "getSTypeInvoiceFiltersPending" ||
-    !cType.invoiceFiltersLoaded ||
-    !sType.invoiceFiltersLoaded;
+    !cType.invoiceFiltersLoaded;
 
   if (loadingFilters) {
     return <LoadingComponent message="Loading Filters" />;
   }
 
-  const fetchingCTypeinvoices =
-    cTypeLoadingStatus === "pendingGetAllCTypeInvoicesThunk";
-
-  const fetchingSTypeInvoices =
-    sTypeLoadingStatus === "pendingGetAllSTypeInvoicesThunk";
-
+  const isFetchingInvoices = status === "pending";
   const invoicesUploading = uploadInvoicesStatus === "pendingUploadInvoices";
 
-  const renderInvoiceUploadTab = (
-    invoiceTypeToPass: "C" | "S",
-    invoiceStatus: boolean,
-    invoiceParams: InvoiceParams,
-    invoiceLoadedDetails: InvoicesLoadedDetails | null,
-    invoicesLoaded: boolean,
-    invoices: FinalizedInvoiceDto[]
-  ) => (
-    <InvoiceBatchUpload
-      invoiceUploadingStatus={invoicesUploading}
-      invoiceStatus={invoiceStatus}
-      invoiceParams={invoiceParams}
-      invoiceLoadedDetails={invoiceLoadedDetails}
-      invoicesToUpload={invoices}
-      invoiceTypeToPass={invoiceTypeToPass}
-      invoicesLoaded={invoicesLoaded}
-      invoicesToDisplay={invoices}
-    />
-  );
-const tabLabels = [
-  "Consignee Invoices",
-  "Shipping Line Invoices",
-  "Single",
-  "Upload SL Invoices",
-  "Dashboard",
-];
+  // Tab labels based on roles
+  const tabLabels = [
+    "Consignee Invoices",
+    ...(!hasIraqFinanceRole
+      ? ["SL2 & SL4 Invoices", "Uploaded Invoices", "Pending Invoices"]
+      : []),
+  ];
+
+  // Calculate index for dashboard panel dynamically
+  const slUploadIndex = tabLabels.indexOf("SL2 & SL4 Invoices");
+
+  const uploadedInvoicesIndex = tabLabels.indexOf("Uploaded Invoices");
+  const pendingInvoicesIndex = tabLabels.indexOf("Pending Invoices");
 
   return (
     <>
@@ -128,45 +86,58 @@ const tabLabels = [
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs
             value={value}
-            onChange={handleChange}
+            onChange={(_, newVal) => setValue(newVal)}
             aria-label="SAP Integration Tabs Panel"
+            sx={{
+              bgcolor: "#f5f5f5",
+              px: 2,
+              pt: 1,
+              borderTopLeftRadius: 2,
+              borderTopRightRadius: 2,
+            }}
           >
-            {tabLabels.map((label, index) => (<Tab key={index} label={label} {...a11yProps(index)} />) )}
+            {tabLabels.map((label, index) => (
+              <Tab key={index} label={label} {...a11yProps(index)} />
+            ))}
           </Tabs>
         </Box>
+
         <CustomPanel value={value} index={0}>
-          {renderInvoiceUploadTab(
-            "C",
-            fetchingCTypeinvoices,
-            cTypeInvoiceParams,
-            cTypeInvoiceLoadedDetails,
-            cTypeInvoicesLoaded,
-            cTypeInvoices
-          )}
-        </CustomPanel>
-        <CustomPanel value={value} index={1}>
-          {renderInvoiceUploadTab(
-            "S",
-            fetchingSTypeInvoices,
-            sTypeInvoiceParams,
-            sTypeInvoiceLoadedDetails,
-            sTypeInvoicesLoaded,
-            sTypeInvoices
-          )}
-        </CustomPanel>
-        <CustomPanel value={value} index={2}>
-          <SearchSingleInvoice />
-        </CustomPanel>
-        <CustomPanel value={value} index={3}>
-          <ShippingLineUpload />
+          <ConsigneeInvoiceBatchUpload
+            invoiceUploadingStatus={invoicesUploading}
+            invoiceStatus={isFetchingInvoices}
+            invoiceParams={cTypeInvoiceParams}
+            invoiceLoadedDetails={cTypeInvoiceLoadedDetails}
+            invoicesToUpload={cTypeInvoices}
+            invoicesLoaded={invoicesLoaded}
+            invoicesToDisplay={cTypeInvoices}
+          />
         </CustomPanel>
 
-        <CustomPanel value={value} index={4}>
-          Dashboard
-        </CustomPanel>
+        {!hasIraqFinanceRole && (
+          <CustomPanel value={value} index={slUploadIndex}>
+            <ShippingLineUpload />
+          </CustomPanel>
+        )}
+
+        {!hasIraqFinanceRole && (
+          <CustomPanel value={value} index={uploadedInvoicesIndex}>
+            <UploadedInvoices />
+          </CustomPanel>
+        )}
+
+        {!hasIraqFinanceRole && (
+          <CustomPanel value={value} index={pendingInvoicesIndex}>
+            <PendingInvoices/>
+          </CustomPanel>
+        )}
       </Box>
-      {showInvoiceItemBackdrop && invoiceItems.length > 0 && (
-        <InvoiceDetailsBackdrop invoiceItems={invoiceItems} />
+
+      {showInvoiceItemBackdrop && consigneeInvoiceItems.length > 0 && (
+        <ConsigneeInvoiceDetailsBackdrop invoiceItems={consigneeInvoiceItems} />
+      )}
+      {displayShippingLineInvoiceItems && shippingLinePartnerItems && (
+        <ShippingLineInvoiceDetails invoiceItems={shippingLinePartnerItems} />
       )}
     </>
   );

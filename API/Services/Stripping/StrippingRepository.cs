@@ -1,11 +1,10 @@
 
 
 using API.Dtos.Stripping.Containers;
-
+using API.Dtos.Stripping.Dashboard;
 using API.Enums;
 using API.Helper;
-
-
+using API.Services.Database;
 using Microsoft.Data.SqlClient;
 
 namespace API.Services.Stripping
@@ -72,14 +71,13 @@ namespace API.Services.Stripping
             }, new SqlParameter("@dateStripped", dataRequest.DateStripped), new SqlParameter("@berth", dataRequest.Berth));
             return result;
         }
+
         public async Task ProcessRetiredContainersInDatabase(StrippedContainersDataRequest dataRequest)
         {
             List<RetiredContainersViewDto> retiredContainersFromNavis = await GetRetiredContainersFromNavis(dataRequest.DateStripped, dataRequest.Berth);
             foreach (RetiredContainersViewDto retiredContainer in retiredContainersFromNavis)
             {
-                // First check if the container exists in StrippedInAppContainers and the DateStripped is the same.
-                // If so than continue and dont save the unit.
-                // If false, than save it in StrippedInAppContainers.
+
                 bool containerAlreadySavedInApp = await DoesContainerExistInStrippedInAppDbWithTheDateStripped(retiredContainer.ContainerNumber, retiredContainer.DateStripped);
                 if (containerAlreadySavedInApp)
                 {
@@ -190,7 +188,7 @@ namespace API.Services.Stripping
         {
             return laborType.Trim() switch
             {
-                "None" => 0,
+                "None" => 8,
                 "BGT" => 1,
                 "IPA" => 2,
                 "Labor" => 3,
@@ -199,6 +197,104 @@ namespace API.Services.Stripping
             };
 
         }
+
+        public async Task<List<StrippingDashboardDto>> GetDashboardDataAsync(DateTime date)
+        {
+            var query = Stripping_SQL_Queries.GetDashboardDataByRange();
+
+            return await _database.ExecuteReaderAsync(
+                DatabaseConnectionConstants.BGTPortalN4DatabaseConnection, query,
+
+                    async reader =>
+                    {
+                        List<StrippingDashboardDto> result = [];
+
+                        while (await reader.ReadAsync())
+                        {
+                            result.Add(new StrippingDashboardDto
+                            {
+                                Berth = reader.GetString(0),
+                                LaborType = reader.GetByte(1).ToString(),
+                                Shift20 = reader.GetInt32(2),
+                                Shift40 = reader.GetInt32(3),
+                                Shift45 = reader.GetInt32(4),
+                            });
+                        }
+
+                        return result;
+                    }, new SqlParameter("@date", date));
+
+        }
+        public async Task<List<StrippingDashboardDto>> GetDashboardDataRangeAsync(DateTime fromDate, DateTime toDate)
+        {
+            var query = Stripping_SQL_Queries.GetDashboardDataByRange();
+
+            return await _database.ExecuteReaderAsync(
+                DatabaseConnectionConstants.BGTPortalN4DatabaseConnection,
+                query,
+                async reader =>
+                {
+                    List<StrippingDashboardDto> result = [];
+
+                    while (await reader.ReadAsync())
+                    {
+                        result.Add(new StrippingDashboardDto
+                        {
+                            Berth = reader.GetString(0),
+                            LaborType = reader.GetByte(1).ToString(),
+                            Shift20 = reader.GetInt32(2),
+                            Shift40 = reader.GetInt32(3),
+                            Shift45 = reader.GetInt32(4),
+                        });
+                    }
+
+                    return result;
+                },
+                new SqlParameter("@from", fromDate),
+                new SqlParameter("@to", toDate)
+            );
+        }
+
+        public async Task<List<StrippedContainerDto>> GetCsvData(
+    DateTime fromDate,
+    DateTime toDate,
+    CancellationToken ct = default)
+        {
+            var query = Stripping_SQL_Queries.GetDashboardCsvData();
+
+            return await _database.ExecuteReaderAsync(
+                DatabaseConnectionConstants.BGTPortalN4DatabaseConnection,
+                query,
+                async reader =>
+                {
+                    List<StrippedContainerDto> result = [];
+
+                    while (await reader.ReadAsync(ct))
+                    {
+                        var dto = new StrippedContainerDto
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            ContainerNumber = reader["ContainerNumber"]?.ToString() ?? "",
+                            LineOperator = reader["LineOperator"]?.ToString() ?? "",
+                            ISO = reader["ISO"]?.ToString() ?? "",
+                            Size = reader["Size"]?.ToString() ?? "",
+                            DateStripped = reader.GetDateTime(reader.GetOrdinal("DateStripped")),
+                            LaborType = (LaborType)reader.GetByte(reader.GetOrdinal("LaborType")),
+                            DriverName = reader["DriverName"]?.ToString() ?? "",
+                            Berth = reader["Berth"]?.ToString() ?? "",
+                            Final = reader.GetBoolean(reader.GetOrdinal("Final"))
+                        };
+
+                        result.Add(dto);
+                    }
+
+                    return result;
+                },
+                new SqlParameter("@from", fromDate),
+                new SqlParameter("@to", toDate)
+            );
+        }
+
 
 
     }

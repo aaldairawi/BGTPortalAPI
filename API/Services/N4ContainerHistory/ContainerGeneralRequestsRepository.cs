@@ -1,18 +1,14 @@
 
 using API.Helper;
+using API.Services.Database;
 using Microsoft.Data.SqlClient;
 
 
 namespace API.Services.N4ContainerHistory
 {
-    public class ContainerGeneralRequestsRepository : IContainerGeneralRequests
+    public class ContainerGeneralRequestsRepository(IDatabase database) : IContainerGeneralRequests
     {
-        private readonly IDatabase _database;
-        public ContainerGeneralRequestsRepository(IDatabase database)
-        {
-            _database = database ?? throw new ArgumentNullException(nameof(database));
-        }
-
+        private readonly IDatabase _database = database ?? throw new ArgumentNullException(nameof(database));
 
         private async Task<string?> GetUnitReceivedBackDateByEventNameDateAndContainerId(string eventName, DateTime dateTimeOfEvent, string containerId)
         {

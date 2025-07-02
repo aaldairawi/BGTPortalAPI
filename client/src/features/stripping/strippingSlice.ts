@@ -70,8 +70,11 @@ export const strippingSlice = createSlice({
     ) => {
       state.strippingContainersToBeUpdated.laborType = action.payload;
     },
-    resetStrippedContainers: (state) => {
+    resetStrippedContainersToBeUpdated: (state) => {
       state.strippingContainersToBeUpdated.containers = [];
+    },
+    resetLoadedContainers: (state) => {
+      state.strippedUnits = [];
     },
   },
 
@@ -81,7 +84,7 @@ export const strippingSlice = createSlice({
       console.log(action.payload);
     });
     builder.addCase(getAllStrippedUnitsThunk.pending, (state) => {
-      state.status = "pendingGetAllStrippedUnitsThunk";
+      state.status = "pending";
     });
     builder.addCase(getAllStrippedUnitsThunk.fulfilled, (state, action) => {
       state.status = "idle";
@@ -103,10 +106,13 @@ export const strippingSlice = createSlice({
       console.log(action.payload);
     });
     builder.addCase(updateRetiredUnitsThunk.pending, (state) => {
-      state.status = "pendingUpdatingContainers";
+      state.status = "pendingRetireUnits";
     });
-    builder.addCase(updateRetiredUnitsThunk.fulfilled, (state) => {
+    builder.addCase(updateRetiredUnitsThunk.fulfilled, (state,
+      action 
+    ) => {
       state.status = "idle";
+      console.log(action.payload);
     });
   },
 });
@@ -116,5 +122,6 @@ export const {
   updateStrippingFilterData,
   updateDriverNameForStrippingContainers,
   updateLaborTypeForStrippingContainers,
-  resetStrippedContainers,
+  resetStrippedContainersToBeUpdated,
+  resetLoadedContainers,
 } = strippingSlice.actions;

@@ -29,7 +29,9 @@ export const signInUserAsync = createAsyncThunk<LoggedInUser, FieldValues>(
       const loginUserDto = await Agent.AccountAPIRequests.login(data);
       if (loginUserDto) {
         localStorage.setItem("user", JSON.stringify(loginUserDto));
+      
       }
+      
       return loginUserDto;
     } catch (error: any) {
       return thunkApi.rejectWithValue(error.data);
@@ -97,6 +99,7 @@ export const accountSlice = createSlice({
       if (state.user && state.user.roles?.includes("Admin")) {
         state.isUserAnAdmin = true;
       }
+    
     },
   },
   extraReducers: (builder) => {
@@ -125,6 +128,7 @@ export const accountSlice = createSlice({
         if (state.user && state.user.roles?.includes("Admin")) {
           state.isUserAnAdmin = true;
         }
+      
       }
     );
     builder.addMatcher(

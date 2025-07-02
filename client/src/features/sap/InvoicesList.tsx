@@ -10,6 +10,10 @@ interface Props {
 const InvoicesList: React.FC<Props> = (props: Props) => {
   const { invoices } = props;
 
+  if (invoices.length <= 0) return;
+
+  const isInvoiceTypeSL: boolean = invoices[0].invoiceType.startsWith("S");
+
   return (
     <TableContainer
       component={Paper}
@@ -36,12 +40,13 @@ const InvoicesList: React.FC<Props> = (props: Props) => {
             "Date",
             "Creator",
             "Changer",
-            "Paid",
+            ...(isInvoiceTypeSL ? ["Type"] : ["Paid"]),
             "Notes",
             "Customer",
             "Currency",
             "Total",
-            "Inspect",
+            ...(!isInvoiceTypeSL ? ["Inspect"] : []),
+            ...(isInvoiceTypeSL ? ["Partner"] : []),
           ]}
         />
         <TableBody>

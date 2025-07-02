@@ -3,7 +3,7 @@ import { FinalizedInvoiceDto } from "../../app/models/invoice/invoice.types";
 import { getSingleInvoiceThunk } from "./getSingleInvoiceThunk";
 
 type SingleInvoiceState = {
-  status: "idle" | "pendingSearchSingleInvoiceThunk" | "failed" | "success";
+  status: "idle" | "pending" | "failed" | "success";
   singleInvoiceResult: FinalizedInvoiceDto | null;
   invoiceLoaded: boolean;
 };
@@ -28,12 +28,13 @@ export const singleInvoiceSlice = createSlice({
       console.log(action.payload);
     });
     builder.addCase(getSingleInvoiceThunk.pending, (state) => {
-      state.status = "pendingSearchSingleInvoiceThunk";
+      state.status = "pending";
     });
     builder.addCase(getSingleInvoiceThunk.fulfilled, (state, action) => {
       state.status = "success";
       state.invoiceLoaded = true;
       state.singleInvoiceResult = action.payload;
+      console.log(action.payload);
     });
   },
 });

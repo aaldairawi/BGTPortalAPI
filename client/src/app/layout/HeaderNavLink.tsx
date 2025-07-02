@@ -15,7 +15,6 @@ const renderLink = (path: string, text: string, key: string): JSX.Element => (
       fontSize: "14px",
       "&.active": { textDecoration: "underline" },
       "&:hover": { bgcolor: "rgba(0,0,0,0.1)" },
-    
     }}
     component={NavLink}
     to={path}
@@ -44,7 +43,7 @@ const HeaderNavLink = () => {
     navigate("/");
   };
 
-  return (
+  return ( 
     <List sx={{ display: "flex" }}>
       {user &&
         isUserAnAdmin &&

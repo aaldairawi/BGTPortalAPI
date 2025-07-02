@@ -1,17 +1,15 @@
 
 using API.Dtos.Container;
 using API.Helper;
+using API.Services.Database;
 using Microsoft.Data.SqlClient;
 
 namespace API.Services.N4ContainerHistory;
 
-public class ContainerLifeTimeMasterDataRepository : IContainerLifeTimeMasterData
+public class ContainerLifeTimeMasterDataRepository(IDatabase database) : IContainerLifeTimeMasterData
 {
-    private readonly IDatabase _database;
-    public ContainerLifeTimeMasterDataRepository(IDatabase database)
-    {
-        _database = database ?? throw new ArgumentNullException(nameof(database));
-    }
+    private readonly IDatabase _database = database ?? throw new ArgumentNullException(nameof(database));
+
     public async Task<ContainerLifeTimeMasterDataDto?> GetContainerLifeTimeMasterData(string containerId, bool getContainerImport)
     {
 

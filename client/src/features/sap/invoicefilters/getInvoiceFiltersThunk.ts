@@ -7,7 +7,7 @@ export const getCTypeInvoiceFiltersAsync = createAsyncThunk(
   "cTypeInvoiceSlice/getCTypeInvoiceFiltersAsync",
   async (_, thunkAPI) => {
     try {
-      const result = Agent.InvoicesAPIRequest.getCtypeInvoiceFilters();
+      const result = Agent.InvoiceFiltersAPIRequest.getCtypeInvoiceFilters();
       return result;
     } catch (error: any) {
       return thunkAPI.rejectWithValue({ error: error.data });
@@ -15,12 +15,11 @@ export const getCTypeInvoiceFiltersAsync = createAsyncThunk(
   }
 );
 
-
 export const getSTypeInvoiceFiltersAsync = createAsyncThunk(
   "sTypeInvoiceSlice/getSTypeInvoiceFiltersAsync",
   async (_, thunkAPI) => {
     try {
-      const result = Agent.InvoicesAPIRequest.getSTypeInvoiceFilters();
+      const result = Agent.InvoiceFiltersAPIRequest.getSTypeInvoiceFilters();
       return result;
     } catch (error: any) {
       return thunkAPI.rejectWithValue({ error: error.data });

@@ -9,12 +9,9 @@ import {
   useAppSelector,
 } from "../../../app/store/configureStore";
 
-import { deleteStrippingDriverThunk } from "./deleteStrippingDriverThunk";
-
-
 import { toast } from "react-toastify";
 import { LaborType } from "../../../app/models/stripping/stripping.types";
-
+import { deleteStrippingDriverThunk } from "../stripping-drivers/deleteStrippingDriverThunk";
 
 interface Props {
   index: number;
@@ -27,10 +24,9 @@ export function StrippingLaborType({ strippingLaborType, index }: Props) {
     (state) => state.strippingDrivers
   );
 
-
   const handleDelete = (driverId: number) => {
     console.log(driverId);
-    
+
     dispatch(deleteStrippingDriverThunk(driverId))
       .unwrap()
       .then(() => {
@@ -60,7 +56,7 @@ export function StrippingLaborType({ strippingLaborType, index }: Props) {
           variant="contained"
           color="warning"
           onClick={() => handleDelete(strippingLaborType.id)}
-          disabled={strippingDriverStatus === "deleteLaborTypePending"}
+          disabled={strippingDriverStatus === "pending"}
         >
           Delete
         </Button>

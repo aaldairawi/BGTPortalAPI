@@ -4,17 +4,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace API.Services.AppUser
 {
-    public class UserRoleHelperRepository : IUserRoleHelper
+    public class UserRoleHelperRepository(UserManager<User> userManager) : IUserRoleHelper
     {
-
-
-
-        private readonly UserManager<User> _userManager;
-
-        public UserRoleHelperRepository(UserManager<User> userManager)
-        {
-            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-        }
+        private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
 
         /// <summary>
         /// Adds a User to the role that is passed in as an argument.

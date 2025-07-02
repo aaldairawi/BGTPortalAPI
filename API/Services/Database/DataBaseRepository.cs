@@ -1,20 +1,14 @@
 
-using API.Helper;
 using Microsoft.Data.SqlClient;
 
 
 namespace API.Services.Database;
 
-public class DataBaseRepository : IDatabase
+public class DataBaseRepository(IConfiguration configuration, ILogger<DataBaseRepository> logger) : IDatabase
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<DataBaseRepository> _logger;
-    public DataBaseRepository(IConfiguration configuration, ILogger<DataBaseRepository> logger)
-    {
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    private readonly ILogger<DataBaseRepository> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-    }
     public async Task<T> ExecuteReaderAsync<T>(string database, string query,
     Func<SqlDataReader, Task<T>> reader, params SqlParameter[] parameters)
     {
@@ -59,7 +53,7 @@ public class DataBaseRepository : IDatabase
             object? result = await command.ExecuteScalarAsync();
             if (result is null || result == DBNull.Value) return default!;
             return (T)Convert.ChangeType(result, typeof(T))!;
-            
+
         }
         catch (SqlException sqlException)
         {
@@ -91,8 +85,8 @@ public class DataBaseRepository : IDatabase
         }
         catch (SqlException sqlException)
         {
-            WriteLine( $"An SqlException {sqlException.Message}");
-    
+            WriteLine($"An SqlException {sqlException.Message}");
+
             throw;
         }
         catch (Exception exception)
@@ -102,6 +96,6 @@ public class DataBaseRepository : IDatabase
             throw;
         }
     }
-    
+
 
 }

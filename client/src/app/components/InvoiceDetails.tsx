@@ -1,6 +1,6 @@
-import { Box,  Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
-import { formatInvoiceTotal } from "../helper/invoice";
+
 
 import {
   InvoiceParams,
@@ -10,15 +10,9 @@ import {
 type Props = {
   invoiceLoadedDetails: InvoicesLoadedDetailsType | null;
   invoiceParams: InvoiceParams;
-  
 };
 
-export function InvoiceDetails({
-  invoiceLoadedDetails,
-  
-}: Props) {
-
-
+export function InvoiceDetails({ invoiceLoadedDetails }: Props) {
   if (!invoiceLoadedDetails) return null;
 
   return (
@@ -50,10 +44,7 @@ export function InvoiceDetails({
             : "Invoice"}
         </Typography>
         <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-          Total:{" "}
-          {formatInvoiceTotal(
-            parseFloat(invoiceLoadedDetails.invoicesLoadedTotalAmount)
-          )}
+          Total: {invoiceLoadedDetails.invoicesLoadedTotalAmount}
         </Typography>
       </Box>
     </Box>

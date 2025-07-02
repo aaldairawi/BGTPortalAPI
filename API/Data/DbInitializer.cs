@@ -33,7 +33,7 @@ namespace API.Data
                     Email = "rneel@bgt.ictis.com",
                     RegisteredDate = DateTime.UtcNow,
                 };
-                await userManager.CreateAsync(rohit, "Admin@3135");
+                await userManager.CreateAsync(rohit, "Rneel@3135");
                 await userManager.AddToRolesAsync(rohit, ["Admin"]);
 
                 var migs = new User
@@ -46,24 +46,57 @@ namespace API.Data
                 await userManager.AddToRolesAsync(migs, ["Admin"]);
 
 
-
-                var user3 = new User
+                var yash = new User
                 {
                     UserName = "yagnihotri",
                     Email = "yagnihotri@bgt.ictsi.com",
                     RegisteredDate = DateTime.UtcNow,
                 };
-                await userManager.CreateAsync(user3, "Argo@3135");
-                await userManager.AddToRolesAsync(user3, ["DubaiFinance"]);
+                await userManager.CreateAsync(yash, "Argo@3135");
+                await userManager.AddToRolesAsync(yash, ["DubaiFinance"]);
 
-                var user6 = new User
+                var strippingaccount
+                 = new User
+                 {
+                     UserName = "strippingaccount",
+                     Email = "strippingaccount@bgt.ictsi.com",
+                     RegisteredDate = DateTime.UtcNow,
+                 };
+
+                await userManager.CreateAsync(strippingaccount, "Strip@3135");
+                await userManager.AddToRolesAsync(strippingaccount, ["Operations"]);
+                var ceo = new User
                 {
-                    UserName = "strippingmember",
-                    Email = "strippingmember@bgt.ictsi.com",
+                    UserName = "romeo",
+                    Email = "rsalvador@bgt.ictsi.com",
                     RegisteredDate = DateTime.UtcNow,
                 };
-                await userManager.CreateAsync(user6, "Argo@3135");
-                await userManager.AddToRolesAsync(user6, ["Operations"]);
+
+                await userManager.CreateAsync(ceo, "Romeo@3135");
+                await userManager.AddToRolesAsync(ceo, ["Admin"]);
+
+
+                var mqassim = new User
+                {
+                    UserName = "mqassim",
+                    Email = "mqassim@bgt.ictsi.com",
+                    RegisteredDate = DateTime.UtcNow,
+                };
+
+                await userManager.CreateAsync(mqassim, "Masan@3135");
+                await userManager.AddToRolesAsync(mqassim, ["Operations"]);
+
+                var jamil = new User
+                {
+                    UserName = "jamil",
+                    Email = "jamil@bgt.ictsi.com",
+                    RegisteredDate = DateTime.UtcNow,
+                };
+
+                await userManager.CreateAsync(jamil, "Jasan@3135");
+                await userManager.AddToRolesAsync(jamil, ["Operations"]);
+
+
                 WriteLine("Database seeded succesfully.");
 
             }

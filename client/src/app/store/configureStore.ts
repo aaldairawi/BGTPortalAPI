@@ -4,31 +4,52 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { usersSlice } from "../../features/admin/users/usersSlice";
 import { accountSlice } from "../../features/account/accountSlice";
 import { rolesSlice } from "../../features/admin/roles/rolesSlice";
-import { n4ContainerSlice } from "../../features/navisunitapi/n4ContainerSlice";
-import { cTypeInvoiceSlice } from "../../features/sap/ctype/cTypeInvoiceSlice";
-import { sTypeInvoiceSlice } from "../../features/sap/stype/sTypeInvoicSlice";
+import { unitLifeTimeSlice } from "../../features/navisunitapi/unitLifeTime/unitLifeTimeSlice";
+import { consigneeInvoiceSlice } from "../../features/sap/consigneeInvoices/consigneeInvoiceSlice";
+import { shippingLineInvoicesSlice } from "../../features/sap/shippingLineInvoices/shippingLineInvoicesSlice";
 import { singleInvoiceSlice } from "../../features/sap/singleInvoiceSlice";
-import { uploadInvoicesSlice } from "../../features/sap/uploadInvoicesSlice";
+import { uploadConsigneeInvoicesSlice } from "../../features/sap/consigneeInvoices/uploadConsigneeInvoicesSlice";
 import { strippingSlice } from "../../features/stripping/strippingSlice";
 import { strippingDriversSlice } from "../../features/stripping/stripping-drivers/strippingDriversSlice";
 import { invoiceFiltersSlice } from "../../features/sap/invoicefilters/invoiceFiltersSlice";
-import { finalizedInvoiceItemsSlice } from "../../features/sap/finalizedInvoiceItemsSlice";
+import { consigneeInvoicesFinalizedInvoiceItemsSlice } from "../../features/sap/consigneeInvoices/consigneeInvoicesFinalizedInvoiceItemsSlice";
 import { strippingLaborTypeSlice } from "../../features/stripping/stripping-labor-types/strippingLaborTypeSlice";
+import { strippingDashboardSlice } from "../../features/stripping/dashboard/strippingDashboardSlice";
+import { shippingLineInvoiceItemsSlice } from "../../features/sap/shippingLineInvoices/shippingLineInvoiceItemsSlice";
+import { shippingLineInvoiceCsvSlice } from "../../features/sap/shippingLineInvoices/shippingLineInvoicesCsvSlice";
+
+import { uploadSlInvoicesPreviewSlice } from "../../features/sap/shippingLineInvoices/uploadSlInvoicesPreviewSlice";
+import { unitCurrentStatusSlice } from "../../features/navisunitapi/unitCurrentStatus/unitCurrentStatusSlice";
+import { uploadedDashboardInvoicesSlice } from "../../features/sap/dashboard/uploadedInvoicesSlice";
+import { pendingDashboardInvoicesSlice } from "../../features/sap/dashboard/pendingInvoicesSlice";
+import { vesselScheduleSlice } from "../../features/navisunitapi/vesselSchedule/vesselScheduleSlice";
 
 const appReducer = combineReducers({
   account: accountSlice.reducer,
   roles: rolesSlice.reducer,
   users: usersSlice.reducer,
-  n4Containers: n4ContainerSlice.reducer,
-  cTypeInvoices: cTypeInvoiceSlice.reducer,
-  sTypeInvoices: sTypeInvoiceSlice.reducer,
+
+  unitCurrentStatus: unitCurrentStatusSlice.reducer,
+  unitLifeTime: unitLifeTimeSlice.reducer,
+  consigneeInvoices: consigneeInvoiceSlice.reducer,
+  shippingLineInvoices: shippingLineInvoicesSlice.reducer,
   singleInvoice: singleInvoiceSlice.reducer,
-  uploadInvoices: uploadInvoicesSlice.reducer,
+  uploadConsigneeInvoices: uploadConsigneeInvoicesSlice.reducer,
+  uploadSlToPreview: uploadSlInvoicesPreviewSlice.reducer,
+
   stripping: strippingSlice.reducer,
   strippingDrivers: strippingDriversSlice.reducer,
   strippingLabor: strippingLaborTypeSlice.reducer,
+  strippingDashboard: strippingDashboardSlice.reducer,
   invoiceFilters: invoiceFiltersSlice.reducer,
-  invoiceItems: finalizedInvoiceItemsSlice.reducer,
+  consigneeInvoiceItems: consigneeInvoicesFinalizedInvoiceItemsSlice.reducer,
+  shippingLineInvoiceItems: shippingLineInvoiceItemsSlice.reducer,
+  shippingLineInvoiceCsv: shippingLineInvoiceCsvSlice.reducer,
+  // Invoices Dashboard
+  uploadedInvoicesDashboard: uploadedDashboardInvoicesSlice.reducer,
+  pendingInvoicesDashboard: pendingDashboardInvoicesSlice.reducer,
+  // Vessel Schedule
+  vesselSchedule: vesselScheduleSlice.reducer,
 });
 
 export type AppState = ReturnType<typeof appReducer>;

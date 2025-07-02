@@ -29,6 +29,13 @@ const AdminPanel = () => {
     <Box sx={{ width: "100%" }}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs
+        sx={{
+              bgcolor: "#f5f5f5", // Light warm gray
+              px: 2,
+              pt: 1,
+              borderTopLeftRadius: 2,
+              borderTopRightRadius: 2,
+            }}
           value={value}
           onChange={handleChange}
           aria-label="basic tabs example"

@@ -7,10 +7,13 @@ import { updateStrippingFilterData } from "./strippingSlice";
 
 import { getAllStrippedUnitsThunk } from "./getAllStrippedUnitsThunk";
 import dayjs from "dayjs";
+import { LoadingButton } from "@mui/lab";
 
 const FilterStrippingUnits = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const { strippingFilterData } = useAppSelector((state) => state.stripping);
+  const { strippingFilterData, status } = useAppSelector(
+    (state) => state.stripping
+  );
 
   const dispatch = useAppDispatch();
 
@@ -26,70 +29,79 @@ const FilterStrippingUnits = () => {
   const open = Boolean(anchorEl);
   return (
     <>
-      <Button
+      <LoadingButton
+        loading={status === "pending"}
         onClick={(event) => handleClick(event)}
         sx={{ cursor: "pointer" }}
         variant="contained"
       >
         Filter Batch
-      </Button>
-      <Popover
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        open={open}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-      >
-        <Box>
-          <Select
-            onChange={(event) =>
-              dispatch(
-                updateStrippingFilterData({
-                  berth: event.target.value,
-                })
-              )
-            }
-            value={strippingFilterData.berth}
-            sx={{ textAlign: "center" }}
-          >
-            {["B27", "B20"].map((berthValue) => (
-              <MenuItem value={berthValue} key={berthValue}>
-                {berthValue}
-              </MenuItem>
-            ))}
-          </Select>
-        </Box>
+      </LoadingButton>
+      {open && (
+        <Popover
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          open={open}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        >
+          <Box>
+            <Select
+              onChange={(event) =>
+                dispatch(
+                  updateStrippingFilterData({
+                    berth: event.target.value,
+                  })
+                )
+              }
+              value={strippingFilterData.berth}
+              sx={{ textAlign: "center" }}
+            >
+              {["B27", "B20"].map((berthValue) => (
+                <MenuItem value={berthValue} key={berthValue}>
+                  {berthValue}
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
 
-        <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-          <Calendar
-            value={
-              strippingFilterData.dateStripped
-                ? dayjs(strippingFilterData.dateStripped)
-                : dayjs()
-            }
-            onChange={(dateFinalized) =>
-              dispatch(
-                updateStrippingFilterData({
-                  dateStripped: dateFinalized.format("YYYY-MM-DD"),
-                })
-              )
-            }
-          />
-          <Button
-            onClick={() =>
-              dispatch(
-                getAllStrippedUnitsThunk({
-                  dateStripped: strippingFilterData.dateStripped,
-                  berth: strippingFilterData.berth,
-                })
-              )
-            }
-            variant="contained"
-            fullWidth
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            gap={2}
           >
-            Apply Filter
-          </Button>
-        </Box>
-      </Popover>
+            <Calendar
+              value={
+                strippingFilterData.dateStripped
+                  ? dayjs(strippingFilterData.dateStripped)
+                  : dayjs()
+              }
+              onChange={(dateFinalized) =>
+                dispatch(
+                  updateStrippingFilterData({
+                    dateStripped: dateFinalized.format("YYYY-MM-DD"),
+                  })
+                )
+              }
+            />
+            <Button
+              onClick={() => {
+                dispatch(
+                  getAllStrippedUnitsThunk({
+                    dateStripped: strippingFilterData.dateStripped,
+                    berth: strippingFilterData.berth,
+                  })
+                );
+                handleClose();
+              }}
+              variant="contained"
+              fullWidth
+            >
+              Apply Filter
+            </Button>
+          </Box>
+        </Popover>
+      )}
     </>
   );
 };

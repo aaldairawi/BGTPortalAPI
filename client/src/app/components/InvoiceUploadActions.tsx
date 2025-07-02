@@ -1,18 +1,14 @@
 import { Box, Button } from "@mui/material";
-import { useEffect, useRef } from "react";
-import { useAppSelector, useAppDispatch } from "../store/configureStore";
-
-import { uploadInovicesToPreviewCSVThunk } from "../../features/sap/uploadInovicesToPreviewCSVThunk";
-
+import { useAppDispatch } from "../store/configureStore";
+import { uploadConsigneeInvoicesToPreviewCSVThunk } from "../../features/sap/consigneeInvoices/uploadConsigneeInvoicesThunk";
 import { LoadingButton } from "@mui/lab";
 import { toast } from "react-toastify";
-import { resetUploadState } from "../../features/sap/uploadInvoicesSlice";
 import {
   FinalizedInvoiceDto,
   InvoiceParams,
 } from "../models/invoice/invoice.types";
-import { resetCTypeInvoices } from "../../features/sap/ctype/cTypeInvoiceSlice";
-import { resetSTypeInvoices } from "../../features/sap/stype/sTypeInvoicSlice";
+import { resetCTypeInvoices } from "../../features/sap/consigneeInvoices/consigneeInvoiceSlice";
+import { resetSTypeInvoices } from "../../features/sap/shippingLineInvoices/shippingLineInvoicesSlice";
 
 type Props = {
   invoiceParams: InvoiceParams;
@@ -25,39 +21,26 @@ export default function InvoiceUploadActions({
   invoicesToUpload,
   invoicesUploadingStatus,
 }: Props) {
-  const { invoicesUploadedSuccessfully } = useAppSelector(
-    (state) => state.uploadInvoices
-  );
-
-  const invoiceFinalNumbers: string[] = invoicesToUpload.map(
-    (element) => element.final
-  );
-
   const dispatch = useAppDispatch();
-  const hasTriedUpload = useRef(false);
-
-  useEffect(() => {
-    if (!hasTriedUpload.current) return;
-
-    if (invoicesUploadedSuccessfully) {
-      toast.success("Invoices uploaded successfully", { autoClose: 600 });
-      dispatch(resetUploadState());
-    }
-    dispatch(resetUploadState());
-  }, [invoicesUploadedSuccessfully, dispatch]);
 
   const handlePreviewCSVClick = async () => {
-    hasTriedUpload.current = true;
-    console.log(invoiceFinalNumbers);
+    const invoiceFinalNumbers = invoicesToUpload.map((e) => e.final);
 
     const result = await dispatch(
-      uploadInovicesToPreviewCSVThunk({
+      uploadConsigneeInvoicesToPreviewCSVThunk({
         invoices: invoiceFinalNumbers,
         invoiceType: invoiceParams.invoiceType,
       })
     );
-    if (uploadInovicesToPreviewCSVThunk.fulfilled.match(result)) {
-      console.log("Upload complete");
+
+    if (result.meta.requestStatus === "fulfilled") {
+      toast.success("CSV preview generated successfully!", { autoClose: 2000 });
+      console.log("Result payload:", result.payload);
+    } else {
+
+      if ("error" in result) {
+        console.error("Upload error:", result.error);
+      }
     }
   };
 
@@ -77,17 +60,10 @@ export default function InvoiceUploadActions({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-
         width: "40rem",
       }}
     >
-      <LoadingButton
-        disabled={false}
-        loading={false}
-        variant="contained"
-        color="primary"
-        onClick={() => console.log("Uploading to sap...")}
-      >
+      <LoadingButton loading={false} variant="contained" color="primary">
         Upload To SAP
       </LoadingButton>
       <LoadingButton

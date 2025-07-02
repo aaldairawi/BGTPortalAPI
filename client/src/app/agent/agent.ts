@@ -4,21 +4,25 @@ import router from "../router/Routes";
 
 import { store } from "../store/configureStore";
 
-import { UsersAPIRequests } from "./usersAPIRequests";
+import { UsersAPIRequests } from "../requests/usersAPIRequests";
 
-import { AccountAPIRequests } from "./accountAPIRequests";
+import { AccountAPIRequests } from "../requests/accountAPIRequests";
 
-import { RolesAPIRequests } from "./rolesAPIRequests";
+import { RolesAPIRequests } from "../requests/rolesAPIRequests";
 
-import { InvoicesAPIRequest } from "./invoicesAPIRequests";
+import { ConsigneeInvoiceAPIRequests } from "../requests/consigneeInvoiceAPIRequests";
+import { ShippingLineInvoiceAPIRequests } from "../requests/shippingInvoiceAPIRequests";
+import { NavisUnitApi } from "../requests/n4ContainerAPIRequests";
 
-import { NavisUnitApi } from "./n4ContainerAPIRequests";
+import { UploadInvoicesAPIRequests } from "../requests/uploadInvoicesAPIRequests";
 
-import { UploadInovicesAPIRequests } from "./uploadInvoicesAPIRequests";
+import { StrippingUnitsAPI } from "../requests/strippingUnitsAPIRequests";
+import { InvoiceFiltersAPIRequest } from "../requests/invoiceFiltersAPIRequests";
+import { SingleInvoicesAPIRequest } from "../requests/singleInvoicesAPIRequest";
+import { SapDashboardAPIRequests } from "../requests/sapDashboardAPIRequests";
+import { VesselScheduleAPIRequests } from "../requests/vesselScheduleAPIRequests";
 
-import { StrippingUnitsAPI } from "./strippingUnitsAPIRequests";
-
-const sleep = () => new Promise((resolve) => setTimeout(resolve, 10));
+const sleep = () => new Promise((resolve) => setTimeout(resolve, 1));
 
 axios.defaults.baseURL = "http://localhost:5000/api/v1/";
 
@@ -44,7 +48,7 @@ axios.interceptors.response.use(
 
     switch (status) {
       case 400:
-        if (data) {
+        if (data?.errors) {
           const modelStateErrors: string[] = [];
           for (const key in data.errors) {
             if (data.errors[key]) {
@@ -53,7 +57,14 @@ axios.interceptors.response.use(
           }
           throw modelStateErrors.flat();
         }
-        toast.error(data.title);
+
+        if (typeof data.message === "string") {
+          toast.error(data.message, { autoClose: 3000 });
+          break;
+        }
+
+        // Fallback
+        toast.error("Bad request");
         break;
       case 404:
         toast.error(data.title, { autoClose: 1200 });
@@ -62,15 +73,16 @@ axios.interceptors.response.use(
         toast.error(data.title);
         break;
       case 403:
-        toast.error("Your roles forbid you to access this area.", {
+        toast.error("Your roles  forbid you to access this area.", {
           autoClose: 1500,
         });
         break;
       case 500:
-        router.navigate("v1/server-error", { state: { error: data } });
+        router.navigate("/v1/server-error", { state: { error: data } });
         toast.error("Server error", { autoClose: 1000 });
         break;
       default:
+        toast.error("Unexpected error occured");
         break;
     }
   }
@@ -82,6 +94,9 @@ export const requests = {
   post: (url: string, body: object) => axios.post(url, body).then(responseBody),
   put: (url: string, body: object) => axios.put(url, body).then(responseBody),
   delete: (url: string) => axios.delete(url).then(responseBody),
+
+  getBlob: (url: string, params?: { from: string; to: string }) =>
+    axios.get(url, { params, responseType: "blob" }),
 };
 
 /*Test errors object to  validate error handling*/
@@ -98,10 +113,15 @@ const Agent = {
   UsersAPIRequests,
   RolesAPIRequests,
   NavisUnitApi,
-  InvoicesAPIRequest,
+  ConsigneeInvoiceAPIRequests,
+  ShippingLineInvoiceAPIRequests,
   TestErrors,
-  UploadInovicesAPIRequests,
+  UploadInovicesAPIRequests: UploadInvoicesAPIRequests,
   StrippingUnitsAPI,
+  InvoiceFiltersAPIRequest,
+  SingleInvoicesAPIRequest,
+  SapDashboardAPIRequests,
+  VesselScheduleAPIRequests,
 };
 
 export default Agent;

@@ -12,33 +12,14 @@ Roles
     "DefaultConnection": "Data Source=172.22.10.200;Initial Catalog=BGT_Portal_N4;user=awafa;password=a7561;Integrated Security=False;Connect Timeout=30;Encrypt=False;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False"    
   }
 
-Properties for the C Type and S Type 
-
-Description 
-QTY
-Total
-Gl_Code,
-Draft Number,
-Final Number,
-Notes
-Customer Name,
-Created,
-Finalized Date,
-Equipment_Id,
-Event Type 
 
 
-S Type
-Description
-Tariff IDS
-QTY
-Rate
-Rate_Billed
-Total
-Gl_Code
-Draft_Nbr
-Final_Nbr
-Notes
-Customer Name
-Created 
-Finalized
+// SL Invoice Logic.
+
+// User enters a SL invoice final number => entry has to have 'THC' included in the final invoice number.
+
+// Search button clicked, => thunk is triggered to get the SL Invoice.
+  => getSLInvoiceByFinalInvoiceNumber(string finalInvoiceNumber);
+     => Whats returned here ?  => the InvoiceDto.
+    // Whats returned here ? 
+      2 Sets of invoice items 

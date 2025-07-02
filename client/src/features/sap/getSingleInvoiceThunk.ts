@@ -8,13 +8,11 @@ export const getSingleInvoiceThunk = createAsyncThunk<
   FinalizedInvoiceDto,
   string
 >(
-  "singleInvoiceSlice/getOneFinalizedInvoiceByFinalIdAsync",
+  "singleInvoiceSlice/getSingleInvoiceThunk",
   async (invoiceFinalId, thunkAPI) => {
     try {
-      console.log(invoiceFinalId);
-
       const result =
-        await Agent.InvoicesAPIRequest.getOneFinalizedInvoiceByFinalId(
+        await Agent.SingleInvoicesAPIRequest.getOneFinalizedInvoiceByFinalId(
           invoiceFinalId
         );
       return result;

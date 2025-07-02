@@ -1,29 +1,21 @@
 /* eslint-disable no-empty */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  InvoiceItemUnion,
-  GetInvoiceItemsParams,
-} from "../../app/models/invoice/invoice.types";
+
 
 import Agent from "../../app/agent/agent";
+import { ConsigneeInvoiceItemDto } from "../../app/models/invoice/invoice.types";
 
-export const getFinalizedInvoiceItemsThunk = createAsyncThunk<
-  InvoiceItemUnion[],
-  GetInvoiceItemsParams
+export const getConsigneeInvoiceItemsThunk = createAsyncThunk<
+  ConsigneeInvoiceItemDto[],
+  string
 >(
-  "finalizedInvoiceItemsSlice/getFinalizedInvoiceItemsThunk",
-  async ({ invoiceGkey, invoiceType }, thunkAPI) => {
+  "consigneeInvoiceSlice/getConsigneeInvoiceItemsThunk",
+  async (invoiceGkey, thunkAPI) => {
     try {
-      if (invoiceType.startsWith("C")) {
-        return await Agent.InvoicesAPIRequest.getFinalizedInvoiceItems(
-          invoiceGkey
-        );
-      } else {
-        return await Agent.InvoicesAPIRequest.getSLFinalizedInvoiceItems(
-          parseInt(invoiceGkey)
-        );
-      }
+      return await Agent.ConsigneeInvoiceAPIRequests.getFinalizedInvoiceItems(
+        invoiceGkey
+      );
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
         error?.response?.data ?? "An error occured"
@@ -31,3 +23,5 @@ export const getFinalizedInvoiceItemsThunk = createAsyncThunk<
     }
   }
 );
+
+

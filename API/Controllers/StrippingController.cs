@@ -1,6 +1,3 @@
-
-
-using API.Dtos.Stripping;
 using API.Dtos.Stripping.Containers;
 using API.Dtos.Stripping.StrippingDriver;
 using API.Dtos.Stripping.StrippingLabor;
@@ -8,9 +5,11 @@ using API.Services.Stripping;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace API.Controllers
 {
     [Authorize(Roles = "Admin,Operations")]
+
 
     public class StrippingController : BaseApiController
     {
@@ -35,11 +34,11 @@ namespace API.Controllers
         }
 
 
+
+
         [HttpGet("get-stripping-drivers")]
         public async Task<ActionResult<List<StrippingDriverDto>>> GetAllDrivers()
         {
-            WriteLine("Getting all drivers");
-
             var result = await _strippingHelper.GetAllStrippingDrivers();
             return Ok(result);
         }
@@ -75,6 +74,7 @@ namespace API.Controllers
             return Ok(result);
 
         }
+
         [HttpPost("create-stripping-labor")]
         public async Task<ActionResult<StrippingLaborTypeDto>> CreateStrippingLaborType([FromBody] CreateStrippingLaborTypeDto dto)
         {
@@ -107,12 +107,6 @@ namespace API.Controllers
 
             }
 
-            // var response = new UpdateRetiredContainersResult(
-            //     Success: result,
-            //     UpdatedCount: result ? dto.Containers.Count : 0,
-            //     FailedContainers: result ? [] : [.. dto.Containers.Select(c => c)]
-            // );
-            WriteLine(result);
             return Ok(result);
         }
     }

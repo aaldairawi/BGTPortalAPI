@@ -47,21 +47,25 @@ const Login = () => {
     formState: { isSubmitting, errors, isValid },
   } = useForm({ mode: "onTouched" });
   const apiversion = "/v1";
+
   useEffect(() => {
     if (!user) return;
 
-    if (
-      (user && user?.roles?.includes("DubaiFinance")) ||
-      (user && user?.roles?.includes("IraqFinance"))
-    ) {
+    const roles = user.roles || [];
+    console.log(roles);
+
+    if (roles.includes("DubaiFinance") || roles.includes("IraqFinance")) {
+      console.log("User has Dubai Finance");
       navigate(`${apiversion}/sap-integration`);
-    }
+    } else if (roles.includes("Admin")) {
+      console.log("User has Admin");
 
-    if (user && user?.roles?.includes("Admin")) {
       navigate(`${apiversion}/admin`);
-    }
+    } else if (roles.includes("Operations")) {
+      navigate(`${apiversion}/stripping-units`);
+    } else if (roles.includes("Guest") && roles.length === 1) {
+      console.log("YES 1 ROLE ONLY");
 
-    if (user && user?.roles?.includes("Guest") && user?.roles?.length === 1) {
       navigate(`${apiversion}/default-member-page`);
     }
   }, [user, navigate]);
@@ -106,7 +110,7 @@ const Login = () => {
             autoComplete="username"
             {...register("username", {
               required: "Username is required",
-              minLength: { value: 8, message: "username is required" },
+              minLength: { value: 3, message: "username is required" },
             })}
             error={!!errors.username}
           />

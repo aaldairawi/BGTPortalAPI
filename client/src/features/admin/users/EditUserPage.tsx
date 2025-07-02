@@ -22,8 +22,6 @@ export function EditUserPage() {
     (state) => state.users
   );
 
-  console.log(existingUserAppInfo);
-
   const dispatch = useAppDispatch();
 
   useEffect(() => {

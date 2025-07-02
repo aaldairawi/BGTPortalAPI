@@ -2,57 +2,19 @@ import * as React from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
-import UnitCurrentStatus from "./UnitCurrentStatus";
-import UnitLifeTime from "./UnitLifeTime";
-import { useAppDispatch } from "../../app/store/configureStore";
-import {
-  resetImportExportLifeTime,
-  resetUnitCurrentStatus,
-} from "./n4ContainerSlice";
+import UnitCurrentStatus from "./unitCurrentStatus/UnitCurrentStatus";
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-const NavisApiCustomPanel = (props: TabPanelProps) => {
-  const { children, value, index, ...other } = props;
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-};
-
-const a11yProps = (index: number) => {
-  return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
-  };
-};
+import { a11yProps } from "../../app/components/tabUtils";
+import CustomPanel from "../../app/components/CustomPanel";
+import UnitLifeTime from "./unitLifeTime/UnitLifeTime";
+import VesselSchedule from "./vesselSchedule/VesselSchedule";
 
 const NavisContainerAPIPanel = () => {
   const [value, setValue] = React.useState(0);
-  const dispatch = useAppDispatch();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log(event);
     setValue(newValue);
-  };
-
-  const onHandleResetCurrentUnitStatus = () => {
-    dispatch(resetUnitCurrentStatus());
-  };
-
-  const onHandleResetUnitImportExport = () => {
-    dispatch(resetImportExportLifeTime());
   };
 
   return (
@@ -61,27 +23,30 @@ const NavisContainerAPIPanel = () => {
         <Tabs
           value={value}
           onChange={handleChange}
-          aria-label="basic tabs example"
+          aria-label="Navis Container API Tabs"
+          sx={{
+            bgcolor: "#f5f5f5",
+            px: 2,
+            pt: 1,
+            borderTopLeftRadius: 2,
+            borderTopRightRadius: 2,
+          }}
         >
-          <Tab
-            label="Current Status"
-            {...a11yProps(0)}
-            onClick={onHandleResetCurrentUnitStatus}
-          />
-          
-          <Tab
-            label="Unit Lifetime"
-            {...a11yProps(1)}
-            onClick={onHandleResetUnitImportExport}
-          />
+          <Tab label="Current Status" {...a11yProps(0)} />
+
+          <Tab label="Unit Lifetime" {...a11yProps(1)} />
+          <Tab label="Vessel Schedule" {...a11yProps(2)} />
         </Tabs>
       </Box>
-      <NavisApiCustomPanel value={value} index={0}>
+      <CustomPanel value={value} index={0}>
         <UnitCurrentStatus />
-      </NavisApiCustomPanel>
-      <NavisApiCustomPanel value={value} index={1}>
+      </CustomPanel>
+      <CustomPanel value={value} index={1}>
         <UnitLifeTime />
-      </NavisApiCustomPanel>
+      </CustomPanel>
+      <CustomPanel value={value} index={2}>
+        <VesselSchedule />
+      </CustomPanel>
     </Box>
   );
 };

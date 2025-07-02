@@ -1,4 +1,4 @@
-using API.Enums;
+
 
 namespace API.Dtos.InvoiceUpload;
 
@@ -15,6 +15,7 @@ public class InvoiceBillingMetaDataDto
 
     public string? ProfitCenter { get; set; }
     public string? CustomerSapCode { get; set; }
+    public string ? CustomerGkey {get; set;} 
     public string ProfitCenterText() => Berth?.Trim().ToUpper() == "B27" ? "profit_cent_27" : "profit_cent_20";
     public void TrimFields()
     {

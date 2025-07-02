@@ -59,7 +59,6 @@ export const strippingDriversSlice = createSlice({
     });
     builder.addCase(createStrippingDriverThunk.fulfilled, (state, action) => {
       state.strippingDriverStatus = "success";
-      console.log(action.payload);
 
       driversAdapter.addOne(state, action.payload);
     });

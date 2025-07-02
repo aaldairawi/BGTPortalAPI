@@ -1,34 +1,25 @@
 
-namespace API.Dtos.InvoiceUpload
+namespace API.Dtos.InvoiceUpload;
+public class CsvHeaderLineDto(
+    string invoiceFinalNumber,
+    DateTime invoiceFinalizedDate,
+    string customerSapCode,
+    string invoiceTotalAmount,
+    string customerName,
+    string profitCenter,
+    string currency,
+    string notes,
+    decimal? exchangeRate = null
+    )
 {
-    public class CsvHeaderLineDto
-    {
-        public string InvoiceFinalNumber { get; init; }
-        public DateTime InvoiceFinalizedDate { get; init; }
-        public string CustomerSapCode { get; init; }
-        public string InvoiceTotalAmount { get; init; }
-        public string CustomerName { get; init; }
-        public string ProfitCenter { get; init; }
-        public string InvoiceCurrency {get; set;}
-        public string InvoiceNotes {get; set;}    
+    public string InvoiceFinalNumber { get; init; } = invoiceFinalNumber;
+    public DateTime InvoiceFinalizedDate { get; init; } = invoiceFinalizedDate;
+    public string CustomerSapCode { get; init; } = customerSapCode;
+    public string InvoiceTotalAmount { get; init; } = invoiceTotalAmount;
+    public string CustomerName { get; init; } = customerName;
+    public string ProfitCenter { get; init; } = profitCenter;
+    public string InvoiceCurrency { get; set; } = currency;
+    public string InvoiceNotes { get; set; } = notes;
 
-
-        public CsvHeaderLineDto(string invoiceFinalNumber, DateTime invoiceFinalizedDate, string customerSapCode,
-        string invoiceTotalAmount, string customerName, string profitCenter, string currency, string notes)
-        {
-            InvoiceFinalNumber = invoiceFinalNumber;
-            InvoiceFinalizedDate = invoiceFinalizedDate;
-            CustomerSapCode = customerSapCode;
-            InvoiceTotalAmount = invoiceTotalAmount;
-            CustomerName = customerName;
-            ProfitCenter = profitCenter;
-            InvoiceCurrency = currency;
-            InvoiceNotes = notes;
-        
-
-        }
-    }
+    public decimal? ExchangeRate { get; set; } = exchangeRate;
 }
-
-
-

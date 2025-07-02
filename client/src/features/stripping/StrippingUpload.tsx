@@ -2,84 +2,81 @@ import { Box, Typography } from "@mui/material";
 import FilterStrippingUnits from "./FilterStrippingUnits";
 import { useAppSelector } from "../../app/store/configureStore";
 import { StrippedUnitsList } from "./StrippedUnitsList";
-import LoadingComponent from "../../app/components/LoadingComponent";
-
 import { StrippingUploadAction } from "./StrippingUploadAction";
 import { StrippingDetails } from "./StrippingDetails";
 
 const StrippingUpload = () => {
-  const { status, strippedUnits, strippingUnitsLoaded } = useAppSelector(
+  const { strippedUnits, strippingUnitsLoaded } = useAppSelector(
     (state) => state.stripping
   );
 
-  if (status === "pendingGetAllStrippedUnitsThunk") {
-    return <LoadingComponent message="Loading Units" />;
-  }
-
-  // Get the count of stripped containers in app.
   const strippedContainersIn4 = strippedUnits.filter(
-    (element) => element.final == true
+    (element) => element.final === true
   );
 
+  const hasResults = strippingUnitsLoaded && strippedUnits.length > 0;
+
   return (
-    <>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          gap: 2,
-          pb: 1,
-        }}
-      >
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 2, // smaller gap for tighter layout
+        px: 2,
+      }}
+    >
+      {/* Filter Sidebar */}
+      <Box sx={{ minWidth: "180px", flexShrink: 0 }}>
         <FilterStrippingUnits />
       </Box>
-      {strippingUnitsLoaded && strippedUnits.length > 0 && (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 2,
-            width: "90rem",
-            ml: "auto",
-            mr: "auto",
-          }}
-        >
-          <Box
+
+      {/* Main Content */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          flexBasis: 0, // allow it to stretch
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        {hasResults ? (
+          <>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <StrippingDetails
+                strippingContainersLoadedDetails={{
+                  retiredContainersLength: strippedUnits.length,
+                  strippedContainersLength: strippedContainersIn4.length,
+                }}
+              />
+              <StrippingUploadAction />
+            </Box>
+
+            <Box sx={{ width: "100%" }}>
+              <StrippedUnitsList strippedContainerList={strippedUnits} />
+            </Box>
+          </>
+        ) : (
+          <Typography
+            variant="h5"
             sx={{
-              display: "flex",
-              gap: 2,
-              width: "100%",
-              justifyContent: "space-evenly",
-              alignSelf: "center",
+              mt: 10,
+              width: "80%",
+              textAlign: "center",
             }}
           >
-            <StrippingDetails
-              strippingContainersLoadedDetails={{
-                retiredContainersLength: strippedUnits.length,
-                strippedContainersLength: strippedContainersIn4.length,
-              }}
-            />
-            <StrippingUploadAction />
-          </Box>
-          <StrippedUnitsList strippedContainerList={strippedUnits} />
-        </Box>
-      )}
-      {strippedUnits.length <= 0 && (
-        <Typography
-          variant="h5"
-          sx={{
-            mt: 10,
-            width: "100%",
-            textAlign: "center",
-          }}
-        >
-          No container loaded yet...
-        </Typography>
-      )}
-    </>
+            No containers loaded yet...
+          </Typography>
+        )}
+      </Box>
+    </Box>
   );
 };
 

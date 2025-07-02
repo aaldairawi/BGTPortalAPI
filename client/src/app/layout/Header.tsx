@@ -14,7 +14,7 @@ const Header = () => {
           display: "flex",
           justifyContent: "space-between",
           pb: 1,
-          bgcolor: "white",
+          bgcolor: "#f5f5f5",
         }}
       >
         <Box
@@ -44,7 +44,7 @@ const Header = () => {
         {!user && (
           <Box>
             <Typography variant="h5" color="info">
-              V 1.0
+              V 1.5
             </Typography>
           </Box>
         )}

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    // [ApiVersion("1.0")]
+    
     public class AccountController : BaseApiController
     {
         private readonly TokenService _tokenService;

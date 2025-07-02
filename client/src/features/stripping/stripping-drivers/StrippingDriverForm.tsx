@@ -34,6 +34,10 @@ const StrippingDriverForm = () => {
       console.log("No user logged in for the creator value");
       return;
     }
+    if (driverName.trim().length <= 0) {
+      alert("Please provide a valid driver name");
+      return;
+    }
     try {
       await dispatch(
         createStrippingDriverThunk({
@@ -42,7 +46,7 @@ const StrippingDriverForm = () => {
         })
       ).unwrap();
       toast.success(`Driver "${driverName}" created successfully!`, {
-        autoClose: 300,
+        autoClose: 2000,
       });
 
       setDriverName("");
@@ -63,34 +67,36 @@ const StrippingDriverForm = () => {
       >
         Add Driver
       </Button>
-      <Popover
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        open={open}
-        sx={{ mt: 3 }}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            p: 2,
-            gap: 2,
-          }}
+      {open && (
+        <Popover
+          anchorEl={anchorEl}
+          onClose={handleClose}
+          open={open}
+          sx={{ mt: 3 }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
         >
-          <TextField
-            placeholder="Driver Name"
-            variant="outlined"
-            value={driverName}
-            onChange={onHandleDriverName}
-          />
-          <Button onClick={handleSubmit} variant="contained" fullWidth>
-            Create
-          </Button>
-        </Box>
-      </Popover>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              p: 2,
+              gap: 2,
+            }}
+          >
+            <TextField
+              placeholder="Driver Name"
+              variant="outlined"
+              value={driverName}
+              onChange={onHandleDriverName}
+            />
+            <Button onClick={handleSubmit} variant="contained" fullWidth>
+              Create
+            </Button>
+          </Box>
+        </Popover>
+      )}
     </>
   );
 };

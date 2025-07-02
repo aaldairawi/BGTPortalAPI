@@ -2,19 +2,16 @@
 using API.Dtos.Container;
 
 using API.Helper;
+using API.Services.Database;
 using Microsoft.Data.SqlClient;
 
 
 namespace API.Services.N4ContainerHistory
 {
-    public class ContainerCurrentStatusRepository : IContainerCurrentStatus
+    public class ContainerCurrentStatusRepository(IDatabase databse) : IContainerCurrentStatus
     {
 
-        private readonly IDatabase _database;
-        public ContainerCurrentStatusRepository(IDatabase databse)
-        {
-            _database = databse ?? throw new ArgumentNullException(nameof(databse));
-        }
+        private readonly IDatabase _database = databse ?? throw new ArgumentNullException(nameof(databse));
 
         public async Task<ContainerCurrentStatusDto?> GetContainerCurrentStatusResult(string containerNumber)
         {

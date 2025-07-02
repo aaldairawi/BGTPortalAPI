@@ -6,5 +6,5 @@ namespace API.Enums;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum LaborType : byte
 {
-    NONE, BGT, LABOR, IPA
+    BGT = 1, IPA = 2, Labor = 3, Flat = 4, NONE = 8
 }

@@ -1,23 +1,19 @@
 export interface FinalizedInvoiceDto {
-  id: number;
-  invoiceType: "C" | "S";
   invoiceGkey: number;
+  id: string;
   final: string;
-  finalizedDate: string;
   status: string;
+  finalizedDate: string;
   creator: string;
   changer: string;
   paid: boolean;
   notes: string;
   customer: string;
   currency: string;
-  total: string;
+  total: number;
+  invoiceType: string;
 }
 
-export type GetInvoiceItemsParams = {
-  invoiceGkey: string;
-  invoiceType: "C" | "S";
-};
 export interface InvoiceParams {
   invoiceType: string;
   dateFinalized: string;
@@ -37,7 +33,7 @@ interface BaseInvoiceItemDto {
 }
 
 // C Type extends base.
-export interface InvoiceItemDto extends BaseInvoiceItemDto {
+export interface ConsigneeInvoiceItemDto extends BaseInvoiceItemDto {
   invoiceItemGkey: string;
   containerId: string;
   eventTypeId: string;
@@ -54,7 +50,7 @@ export interface SLInvoiceItemDto extends BaseInvoiceItemDto {
 }
 
 // Discriminated Union.
-export type InvoiceItemUnion = InvoiceItemDto | SLInvoiceItemDto;
+export type InvoiceItemUnion = ConsigneeInvoiceItemDto | SLInvoiceItemDto;
 
 export interface InvoicesLoadedDetails {
   invoicesLoadedLength: number;
@@ -62,7 +58,26 @@ export interface InvoicesLoadedDetails {
   invoicesLoadedTotalAmount: string;
 }
 
+export interface SLParentAndPartnerInvoiceItemsDto {
+  parentInvoiceItems: SLInvoiceItemDto[];
+  partnerInvoiceItems: SLInvoiceItemDto[];
+}
+
 export interface UploadInvoicesDTO {
   invoices: string[];
   invoiceType: string;
+}
+
+
+export interface UploadShippingLineInvoicesDTO {
+  invoiceNumber: string;
+  invoiceType: string;
+  berth: string;
+}
+export interface UploadSl4InvoiceDto {
+  parentInvoiceNumber: string;
+  partnerInvoiceNumber: string;
+  invoiceType: string;
+  berth: string;
+
 }

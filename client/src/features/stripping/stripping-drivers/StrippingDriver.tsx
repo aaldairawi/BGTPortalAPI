@@ -19,15 +19,13 @@ export function StrippingDriver({ strippingDriver, index }: Props) {
   );
 
   const handleDelete = () => {
-    console.log("Deleting driver id " + strippingDriver.id);
-
     dispatch(deleteStrippingDriverThunk(strippingDriver.id))
       .unwrap()
       .then(() => {
-        toast.success("Driver deleted successfully!", { autoClose: 300 });
+        toast.success("Driver deleted successfully!", { autoClose: 2000 });
       })
       .catch((error) => {
-        toast.error("Failed to delete driver.", { autoClose: 300 });
+        toast.error("Failed to delete driver.", { autoClose: 2000 });
         console.error(error);
       });
   };
